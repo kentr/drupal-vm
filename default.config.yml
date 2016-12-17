@@ -251,6 +251,9 @@ php_max_input_vars: "4000"
 
 php_log_errors: "On"
 php_error_log: "/var/log/php_errors.log"
+
+#php_date_timezone: "America/Los_Angeles"
+
 # Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
 # libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
