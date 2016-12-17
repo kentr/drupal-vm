@@ -5,6 +5,7 @@
 /.idea/
 /.project/
 /.bundle/
+/.settings/
 
 # Ansible files.
 *.retry
