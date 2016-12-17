@@ -272,6 +272,7 @@ composer_global_packages:
 pre_provision_scripts: []
 post_provision_scripts: []
   # - "../examples/scripts/configure-solr.sh"
+pre_provision_tasks_dir: "../scripts/pre-provision/tasks/*.yml"
 post_provision_tasks_dir: "../scripts/post-provision/tasks/*.yml"
 
 # MySQL Configuration.
