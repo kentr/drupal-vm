@@ -237,16 +237,20 @@ firewall_log_dropped_packets: false
 # PHP Configuration. Currently-supported versions: 5.6, 7.0.
 # To use 5.6, see: http://docs.drupalvm.com/en/latest/other/php-56/
 php_version: "7.0"
-php_memory_limit: "192M"
+php_memory_limit: "256M"
 php_display_errors: "On"
 php_display_startup_errors: "On"
 php_realpath_cache_size: "1024K"
 php_sendmail_path: "/opt/mailhog/mhsendmail"
 php_opcache_enabled_in_ini: true
 php_opcache_memory_consumption: "192"
-php_opcache_max_accelerated_files: 4096
+php_opcache_max_accelerated_files: 10000
+php_opcache_fast_shutdown: "On"
+php_opcache_interned_strings_buffer: 16
 php_max_input_vars: "4000"
 
+php_log_errors: "On"
+php_error_log: "/var/log/php_errors.log"
 # Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
 # libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
