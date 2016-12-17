@@ -204,7 +204,7 @@ installed_extras:
   # - ruby
   # - selenium
   # - solr
-  - varnish
+  # - varnish
   # - xdebug
   # - xhprof
 
