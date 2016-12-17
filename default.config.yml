@@ -217,7 +217,7 @@ extra_packages:
 extra_security_enabled: false
 
 drush_version: "8.x"
-drush_keep_updated: true
+drush_keep_updated: false
 drush_composer_cli_options: "--prefer-dist --no-interaction"
 
 firewall_allowed_tcp_ports:
