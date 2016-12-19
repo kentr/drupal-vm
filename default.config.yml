@@ -204,19 +204,20 @@ installed_extras:
   # - ruby
   # - selenium
   # - solr
-  - varnish
+  # - varnish
   # - xdebug
   # - xhprof
 
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
   - sqlite
+  - aptitude
 
 # You can configure almost anything else on the server in the rest of this file.
 extra_security_enabled: false
 
 drush_version: "8.x"
-drush_keep_updated: true
+drush_keep_updated: false
 drush_composer_cli_options: "--prefer-dist --no-interaction"
 
 firewall_allowed_tcp_ports:
@@ -236,15 +237,22 @@ firewall_log_dropped_packets: false
 # PHP Configuration. Currently-supported versions: 5.6, 7.0.
 # To use 5.6, see: http://docs.drupalvm.com/en/latest/other/php-56/
 php_version: "7.0"
-php_memory_limit: "192M"
+php_memory_limit: "256M"
 php_display_errors: "On"
 php_display_startup_errors: "On"
 php_realpath_cache_size: "1024K"
 php_sendmail_path: "/opt/mailhog/mhsendmail"
 php_opcache_enabled_in_ini: true
 php_opcache_memory_consumption: "192"
-php_opcache_max_accelerated_files: 4096
+php_opcache_max_accelerated_files: 10000
+php_opcache_fast_shutdown: "On"
+php_opcache_interned_strings_buffer: 16
 php_max_input_vars: "4000"
+
+php_log_errors: "On"
+php_error_log: "/var/log/php_errors.log"
+
+#php_date_timezone: "America/Los_Angeles"
 
 # Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
@@ -264,6 +272,8 @@ composer_global_packages:
 pre_provision_scripts: []
 post_provision_scripts: []
   # - "../examples/scripts/configure-solr.sh"
+pre_provision_tasks_dir: "../scripts/pre-provision/tasks/*.yml"
+post_provision_tasks_dir: "../scripts/post-provision/tasks/*.yml"
 
 # MySQL Configuration.
 mysql_root_password: root
@@ -314,4 +324,4 @@ selenium_version: 2.53.0
 # Other configuration.
 dashboard_install_dir: /var/www/dashboard
 known_hosts_path: ~/.ssh/known_hosts
-#ssh_home: "{{ drupal_core_path }}"
+ssh_home: "{{ drupal_core_path }}"
