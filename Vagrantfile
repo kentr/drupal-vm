@@ -129,6 +129,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config_dir: host_config_dir,
         drupalvm_env: drupalvm_env
       }
+      ansible.host_vars = {
+        vconfig['vagrant_machine_name'] => {
+          ansible_ssh_host: vconfig['vagrant_hostname'],
+          ansible_ssh_port: 22
+        }
+      }
     end
   else
     config.vm.provision 'ansible_local' do |ansible|
