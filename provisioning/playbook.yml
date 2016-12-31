@@ -90,7 +90,7 @@
     - { role: geerlingguy.drush, when: '"drush" in installed_extras' }
     - { role: geerlingguy.memcached, when: '"memcached" in installed_extras' }
     - { role: geerlingguy.php-memcached, when: '"memcached" in installed_extras' }
-    - role: geerlingguy.php-xdebug
+    - role: kentr.php-xdebug
       workspace: "/root/php{{ php_version }}"
       when: '"xdebug" in installed_extras'
     - role: geerlingguy.php-xhprof
