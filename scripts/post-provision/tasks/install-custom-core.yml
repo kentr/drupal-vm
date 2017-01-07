@@ -8,31 +8,57 @@
     recurse: no
     mode: 0775
   become: no
+  when: custom_core_install_path is defined
 
-- name: Custom core - Ensure root .ssh directory exists.
+- name: Custom core - Ensure .ssh directory exists.
   file:
     path: /root/.ssh
     state: directory
     recurse: yes
     mode: 0600
   become: yes
+  when: >
+    custom_core_repo_private_key is defined
+    or custom_core_repo_public_key is defined
 
 - name: Custom core - copy public key to Drupal server.
   copy:
     src: "{{ custom_core_repo_public_key }}"
     dest: /root/.ssh/id_rsa.pub
     mode: 0644
+  when: custom_core_repo_public_key is defined
 
 - name: Custom core - copy private key to Drupal server.
   copy:
     src: "{{ custom_core_repo_private_key }}"
     dest: /root/.ssh/id_rsa
     mode: 0600
+  when: custom_core_repo_private_key is defined
 
-- name: Custom core - clone repo
+- name: Custom core - clone repo.
   git:
     repo: "{{ custom_core_repo_url }}"
     dest: "{{ custom_core_install_path }}"
     key_file: /root/.ssh/id_rsa
     accept_hostkey: true
   become: yes
+  when: custom_core_repo_url is defined
+
+- name: Custom core - add settings.local.php.
+  template:
+    # Src is relative to provisioning directory.
+    src: "../scripts/post-provision/templates/settings.local.php.j2"
+    dest: "{{ drupal_core_path }}/sites/default/settings.local.php"
+    mode: 0600
+  when: custom_core_add_settings_local_php|default(True)
+
+# # ansible drupalvm -e @default.config.yml -e @config.yml -m composer -a "working_dir={{ custom_core_install_path }} command=install optimize_autoloader=True"
+# # @todo: detect composer.json
+# - name: Custom core - composer install.
+#   composer:
+#     working_dir: "{{ custom_core_install_path }}"
+#     command: install
+#     optimize_autoloader: True
+#   creates: "{{drupal_core_path}}/autoload.php"
+#   # Run as normal user for security and to leverage vagrant-cachier.
+#   becmore: no
