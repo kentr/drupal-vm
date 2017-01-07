@@ -6,6 +6,8 @@
 #  - drupal_database_import_filename: Base filename for dump file.
 #  - drupal_database_import_directory: Path to directory containing dump file.
 #    Either absolute or relative to the directory containing the primary playbook.
+#
+# @todo: improve file path handling: combine filename / path.
 
 # Check whether database dump file is declared.
 - name: Define do_db_import.
@@ -28,4 +30,4 @@
     name: "{{ drupal_db_name }}"
     state: import
     target: "{{ db_copy_result.dest }}"
-  when: do_db_import and db_copy_result.state == "file"
+  when: do_db_import and db_copy_result is defined and db_copy_result.state == "file"
