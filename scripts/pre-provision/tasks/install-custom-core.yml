@@ -1,0 +1,38 @@
+---
+
+- name: Custom core - Ensure custom_core_install_path directory exists.
+  file:
+    path: "{{ custom_core_install_path }}"
+    state: directory
+    # Don't recursively set permissions.  May cause dirty repo.
+    recurse: no
+    mode: 0775
+  become: no
+
+- name: Custom core - Ensure root .ssh directory exists.
+  file:
+    path: /root/.ssh
+    state: directory
+    recurse: yes
+    mode: 0600
+  become: yes
+
+- name: Custom core - copy public key to Drupal server.
+  copy:
+    src: "{{ custom_core_repo_public_key }}"
+    dest: /root/.ssh/id_rsa.pub
+    mode: 0644
+
+- name: Custom core - copy private key to Drupal server.
+  copy:
+    src: "{{ custom_core_repo_private_key }}"
+    dest: /root/.ssh/id_rsa
+    mode: 0600
+
+- name: Custom core - clone repo
+  git:
+    repo: "{{ custom_core_repo_url }}"
+    dest: "{{ custom_core_install_path }}"
+    key_file: /root/.ssh/id_rsa
+    accept_hostkey: true
+  become: yes
