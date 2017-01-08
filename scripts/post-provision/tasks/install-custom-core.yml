@@ -46,7 +46,7 @@
 
 - name: Ensure private files directory.
   file:
-    path: "{{ drupal_core_path }}/{{ drupal_file_private_path }}"
+    path: "{{ drupal_file_private_path }}"
     state: directory
   when: drupal_file_private_path is defined
 
@@ -54,12 +54,12 @@
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/private_files_htaccess.j2"
-    dest: "{{ drupal_core_path }}/{{ drupal_file_private_path }}/.htaccess"
+    dest: "{{ drupal_file_private_path }}/.htaccess"
     force: No
 
 - name: Ensure config sync directory.
   file:
-    path: "{{ drupal_core_path }}/{{ drupal_config_sync_directory }}"
+    path: "{{ drupal_config_sync_directory }}"
     state: directory
   when: drupal_major_version == "8" and drupal_config_sync_directory is defined
 
