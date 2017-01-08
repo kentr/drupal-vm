@@ -35,6 +35,10 @@
     - name: Run configured pre-provision shell scripts.
       script: "{{ item }}"
       with_items: "{{ pre_provision_scripts|default([]) }}"
+      tags:
+        - pre-provision
+        - pre-provision-scripts
+        - custom
 
     - name: Run configured pre-provision ansible task files.
       include: "{{ outer_item }}"
@@ -42,6 +46,10 @@
         loop_var: outer_item
       with_fileglob:
         - "{{ pre_provision_tasks_dir|default(omit) }}"
+      tags:
+        - pre-provision
+        - pre-provision-tasks
+        - custom
 
     - name: Set the PHP webserver daemon correctly when nginx is in use.
       set_fact:
@@ -82,7 +90,7 @@
     - { role: geerlingguy.drush, when: '"drush" in installed_extras' }
     - { role: geerlingguy.memcached, when: '"memcached" in installed_extras' }
     - { role: geerlingguy.php-memcached, when: '"memcached" in installed_extras' }
-    - role: geerlingguy.php-xdebug
+    - role: kentr.php-xdebug
       workspace: "/root/php{{ php_version }}"
       when: '"xdebug" in installed_extras'
     - role: geerlingguy.php-xhprof
@@ -166,6 +174,10 @@
     - name: Run configured post-provision shell scripts.
       script: "{{ item }}"
       with_items: "{{ post_provision_scripts|default([]) }}"
+      tags:
+        - post-provision
+        - post-provision-scripts
+        - custom
 
     - name: Run configured post-provision ansible task files.
       include: "{{ outer_item }}"
@@ -173,3 +185,7 @@
         loop_var: outer_item
       with_fileglob:
         - "{{ post_provision_tasks_dir|default(omit) }}"
+      tags:
+        - post-provision
+        - post-provision-tasks
+        - custom

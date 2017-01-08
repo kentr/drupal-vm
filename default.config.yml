@@ -207,7 +207,7 @@ installed_extras:
   # - selenium
   # - solr
   # - upload-progress
-  # - varnish
+  - varnish
   # - xdebug
   # - xhprof
 
@@ -329,3 +329,32 @@ selenium_version: 2.53.0
 dashboard_install_dir: /var/www/dashboard
 known_hosts_path: ~/.ssh/known_hosts
 ssh_home: "{{ drupal_core_path }}"
+
+################################################################################
+# Experimental
+################################################################################
+
+
+# Database import
+
+# Source file for database.  Will be copied to the node and imported into
+# the database specified for the Drupal site.
+# Name of database import source file.
+
+# drupal_database_import_filename: "db.sql.gz"
+
+# Directory where the database source file resides.
+# Path should be relative to the provisioning directory.
+
+# drupal_database_import_directory: "../path/to/dump-dir"
+
+# Add settings.local.php with database details and other config values.
+# Will replace existing file.
+
+# custom_core_add_settings_local_php: True
+
+# Config values to put in settings.local.php.
+
+# drupal_install_profile: "standard"
+# drupal_file_private_path: "sites/default/files/private"
+# drupal_config_sync_directory: "sites/default/config"
