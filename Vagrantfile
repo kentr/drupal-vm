@@ -198,8 +198,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.cache.scope = :box
     config.cache.auto_detect = false
     config.cache.enable :apt
-    # Cache the composer directory.
-    config.cache.enable :generic, cache_dir: '/home/vagrant/.composer/cache'
+    config.cache.enable :generic, {
+      # Composer cache bin.
+      "composer" => { cache_dir: '/home/vagrant/.composer/cache' },
+      # PHP downloads / source files cache bin.
+      "php#{vconfig['php_version']}-workspace" => { cache_dir: "/root/php#{vconfig['php_version']}" },
+    }
     config.cache.synced_folder_opts = {
       type: vconfig.include?('vagrant_synced_folder_default_type') ? vconfig['vagrant_synced_folder_default_type'] : 'nfs'
     }
