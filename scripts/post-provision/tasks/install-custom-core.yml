@@ -61,7 +61,7 @@
   file:
     path: "{{ drupal_core_path }}/{{ drupal_config_sync_directory }}"
     state: directory
-  when: drupal_config_sync_directory is defined
+  when: drupal_major_version == "8" and drupal_config_sync_directory is defined
 
 - name: Custom core - add settings.php if it doesn't exist.
   template:
