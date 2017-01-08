@@ -142,9 +142,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config_dir: host_config_dir,
         drupalvm_env: drupalvm_env
       }
+      # See https://www.vagrantup.com/docs/provisioning/ansible_common.html
       ansible.host_vars = {
         "#{vconfig['vagrant_machine_name']}" => {
-          "host_key_checking" => "False",
+          "ansible_ssh_extra_args" => "'-o StrictHostKeyChecking=no'",
         }
       }
       ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
