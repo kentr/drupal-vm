@@ -63,10 +63,19 @@
     state: directory
   when: drupal_config_sync_directory is defined
 
+- name: Custom core - add settings.php if it doesn't exist.
+  template:
+    # Src is relative to provisioning directory.
+    src: "../scripts/post-provision/templates/default.settings.php.d{{ drupal_major_version }}.j2"
+    dest: "{{ drupal_core_path }}/sites/default/settings.php"
+    mode: 0600
+    force: no
+  when: custom_core_add_settings_local_php|default(True)
+
 - name: Custom core - add settings.local.php.
   template:
     # Src is relative to provisioning directory.
-    src: "../scripts/post-provision/templates/settings.local.php.j2"
+    src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/sites/default/settings.local.php"
     mode: 0600
   when: custom_core_add_settings_local_php|default(True)
