@@ -44,6 +44,25 @@
   become: yes
   when: custom_core_repo_url is defined
 
+- name: Ensure private files directory.
+  file:
+    path: "{{ drupal_core_path }}/{{ drupal_file_private_path }}"
+    state: directory
+  when: drupal_file_private_path is defined
+
+- name: Ensure private files .htaccess.
+  template:
+    # Src is relative to provisioning directory.
+    src: "../scripts/post-provision/templates/private_files_htaccess.j2"
+    dest: "{{ drupal_core_path }}/{{ drupal_file_private_path }}/.htaccess"
+    force: No
+
+- name: Ensure config sync directory.
+  file:
+    path: "{{ drupal_core_path }}/{{ drupal_config_sync_directory }}"
+    state: directory
+  when: drupal_config_sync_directory is defined
+
 - name: Custom core - add settings.local.php.
   template:
     # Src is relative to provisioning directory.

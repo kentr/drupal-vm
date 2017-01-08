@@ -177,3 +177,18 @@ $databases['default']['default'] = array (
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
 );
+
+// Default file_private_path, if not set.
+if (empty($settings['file_private_path'])) {
+  $settings['file_private_path'] = "{{ drupal_file_private_path | default('sites/default/files/private') }}";
+}
+
+// Default install_profile, if not set.
+if (empty($settings['install_profile'])) {
+  $settings['install_profile'] = "{{ drupal_install_profile | default('standard') }}";
+}
+
+// Default config sync directory, if not set.
+if (empty($config_directories['sync'])) {
+  $config_directories['sync'] = "{{ drupal_config_sync_directory | default('sites/default/config') }}";
+}
