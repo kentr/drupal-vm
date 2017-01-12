@@ -27,3 +27,6 @@ Vagrantfile.local
 
 # Some roles include 'config.yml' files.
 !provisioning/roles/**/config.yml
+
+/node_modules/
+/bower_components/
