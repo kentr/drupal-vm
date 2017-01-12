@@ -1,0 +1,34 @@
+---
+
+browserSyncProxy: 'http://ed7.loc'
+
+drushAlias: '@ed7.loc'
+
+bowerDir: ./bower_components
+
+themeDir: ./drupal/web/sites/all/themes/radix_sub
+
+css:
+  file: radix_sub.style.scss
+  src:
+    - 'scss/**/*.scss'
+  dest: assets/css
+  includePaths: 
+    - ./bower_components/bootstrap-sass/assets/stylesheets
+    - ./bower_components/font-awesome/scss
+
+js:
+  file: radix_sub.script.js
+  src:
+    - 'assets/js/**/*.js'
+  dest: assets/js
+
+images:
+  src:
+    - 'assets/images/**/*'
+  dest: assets/images/
+  
+fonts:
+  src:
+    - './bower_components/font-awesome/fonts/**.*'
+  dest: ./assets/fonts/
