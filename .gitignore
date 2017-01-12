@@ -4,6 +4,7 @@
 # Editor and language files.
 /.idea/
 /.project
+.buildpath
 /.bundle/
 /.settings/
 
