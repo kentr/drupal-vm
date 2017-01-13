@@ -38,7 +38,7 @@ gulp.task('css', function() {
       }}))
     .pipe(sourcemaps.init())
     .pipe(sass({
-      outputStyle: 'compressed,
+      outputStyle: config.css.outputStyle,
       errLogToConsole: true,
       includePaths: config.css.includePaths
     }))

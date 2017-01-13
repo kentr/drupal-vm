@@ -13,6 +13,7 @@ css:
   src:
     - 'scss/**/*.scss'
   dest: assets/css
+  outputStyle: 'compressed'
   includePaths: 
     - ./bower_components/bootstrap-sass/assets/stylesheets
     - ./bower_components/font-awesome/scss
