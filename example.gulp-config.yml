@@ -1,35 +1,60 @@
 ---
 
-browserSyncProxy: 'http://ed7.loc'
+# URL of backend dev server to be proxied by browser sync.
+browserSyncProxy: 'http://example.dev'
 
-drushAlias: '@ed7.loc'
+# Alias to use for drush ops, such as cache clearing.
+drushAlias: '@example.dev'
 
-bowerDir: ./bower_components
-
-themeDir: ./drupal/web/sites/all/themes/radix_sub
+# Theme directory. Relative to gulpfile.js.
+themeDir: ./path/to/theme_dir
 
 css:
-  file: radix_sub.style.scss
+
+  # Name of CSS output file.
+  file: my_theme.style.scss
+  
+  # Sass source glob.  Relative to theme directory.
   src:
     - 'scss/**/*.scss'
+    
+  # Sass CSS destination directory.  Relative to theme directory.
   dest: assets/css
+  
+  # Sass output style.  'compressed' is recommended for production site.
   outputStyle: 'compressed'
+  
+  # Include paths for directories with extra SCSS files.  Relative to gulpfile.js.
   includePaths: 
-    - ./bower_components/bootstrap-sass/assets/stylesheets
-    - ./bower_components/font-awesome/scss
+    - ./path/to/bootstrap-sass/assets/stylesheets
+    - ./path/to/font-awesome/scss
 
 js:
-  file: radix_sub.script.js
+
+  # Name of JS output file.
+  file: my_theme.script.js
+  
+  # JS source glob.  Relative to theme directory.
   src:
     - 'assets/js/**/*.js'
+    
+  # JS destination directory.  Relative to theme directory.
   dest: assets/js
 
 images:
+
+  # Images source glob.  Relative to theme directory.
   src:
     - 'assets/images/**/*'
+    
+  # Images destination directory.  Relative to theme directory.
   dest: assets/images/
   
 fonts:
+
+  # Fonts source glob.  Relative to theme directory.
   src:
-    - './bower_components/font-awesome/fonts/**.*'
+    - './path/to/font-awesome/fonts/**.*'
+    
+  # Fonts destination directory.  Relative to theme directory.
   dest: ./assets/fonts/
