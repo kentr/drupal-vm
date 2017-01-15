@@ -1,0 +1,60 @@
+---
+
+# URL of backend dev server to be proxied by browser sync.
+browserSyncProxy: 'http://example.dev'
+
+# Alias to use for drush ops, such as cache clearing.
+drushAlias: '@example.dev'
+
+# Theme directory. Relative to gulpfile.js.
+themeDir: ./path/to/theme_dir
+
+css:
+
+  # Name of CSS output file.
+  file: my_theme.style.scss
+  
+  # Sass source glob.  Relative to theme directory.
+  src:
+    - 'scss/**/*.scss'
+    
+  # Sass CSS destination directory.  Relative to theme directory.
+  dest: assets/css
+  
+  # Sass output style.  'compressed' is recommended for production site.
+  outputStyle: 'compressed'
+  
+  # Include paths for directories with extra SCSS files.  Relative to gulpfile.js.
+  includePaths: 
+    - ./path/to/bootstrap-sass/assets/stylesheets
+    - ./path/to/font-awesome/scss
+
+js:
+
+  # Name of JS output file.
+  file: my_theme.script.js
+  
+  # JS source glob.  Relative to theme directory.
+  src:
+    - 'assets/js/**/*.js'
+    
+  # JS destination directory.  Relative to theme directory.
+  dest: assets/js
+
+images:
+
+  # Images source glob.  Relative to theme directory.
+  src:
+    - 'assets/images/**/*'
+    
+  # Images destination directory.  Relative to theme directory.
+  dest: assets/images/
+  
+fonts:
+
+  # Fonts source glob.  Relative to theme directory.
+  src:
+    - './path/to/font-awesome/fonts/**.*'
+    
+  # Fonts destination directory.  Relative to theme directory.
+  dest: ./assets/fonts/
