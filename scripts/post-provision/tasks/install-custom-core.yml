@@ -62,6 +62,7 @@
     src: "../scripts/post-provision/templates/private_files_htaccess.j2"
     dest: "{{ drupal_file_private_path }}/.htaccess"
     force: No
+  when: drupal_file_private_path is defined
 
 - name: Ensure config sync directory.
   file:
