@@ -1,0 +1,24 @@
+<?php
+
+// Local development configuration.
+if (!defined('PANTHEON_ENVIRONMENT')) {
+
+  // Enable full error reporting.
+  error_reporting(E_ALL);
+  ini_set('display_errors', TRUE);
+  ini_set('display_startup_errors', TRUE);
+  $conf['error_level'] = 2;
+
+  // Theme debug mode
+  $conf['theme_debug'] = TRUE;
+  
+  // Database.
+  $databases['default']['default'] = array(
+    'driver' => 'mysql',
+    'database' => '{{ drupal_db_name }}',
+    'username' => '{{ drupal_db_user }}',
+    'password' => '{{ drupal_db_password }}',
+    'host' => 'localhost',
+    'prefix' => '',
+  );
+}

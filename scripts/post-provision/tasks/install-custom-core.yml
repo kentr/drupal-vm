@@ -43,10 +43,16 @@
     accept_hostkey: true
   become: yes
   when: custom_core_repo_url is defined
+  
+- name: Custom core - ensure sites/default directory exists and is writable.
+  file:
+    path: "{{ drupal_core_path }}/sites/default"
+    mode: "ug+w"
+    state: directory
 
 - name: Ensure private files directory.
   file:
-    path: "{{ drupal_core_path }}/{{ drupal_file_private_path }}"
+    path: "{{ drupal_file_private_path }}"
     state: directory
   when: drupal_file_private_path is defined
 
@@ -54,19 +60,30 @@
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/private_files_htaccess.j2"
-    dest: "{{ drupal_core_path }}/{{ drupal_file_private_path }}/.htaccess"
+    dest: "{{ drupal_file_private_path }}/.htaccess"
     force: No
+  when: drupal_file_private_path is defined
 
 - name: Ensure config sync directory.
   file:
-    path: "{{ drupal_core_path }}/{{ drupal_config_sync_directory }}"
+    path: "{{ drupal_config_sync_directory }}"
     state: directory
-  when: drupal_config_sync_directory is defined
+  when: drupal_major_version == "8" and drupal_config_sync_directory is defined
+
+# Pantheon D7 sites don't have settings.php, so we add it for local dev.
+- name: Custom core - add settings.php if it doesn't exist.
+  template:
+    # Src is relative to provisioning directory.
+    src: "../scripts/post-provision/templates/default.settings.php.d{{ drupal_major_version }}.j2"
+    dest: "{{ drupal_core_path }}/sites/default/settings.php"
+    mode: 0600
+    force: no
+  when: custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
   template:
     # Src is relative to provisioning directory.
-    src: "../scripts/post-provision/templates/settings.local.php.j2"
+    src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/sites/default/settings.local.php"
     mode: 0600
   when: custom_core_add_settings_local_php|default(True)
