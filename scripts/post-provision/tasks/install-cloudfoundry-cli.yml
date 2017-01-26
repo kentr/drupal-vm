@@ -1,0 +1,32 @@
+---
+
+# Installs CloudFoundry CLI tool on Debian.
+# See http://docs.cloudfoundry.org/cf-cli/install-go-cli.html
+
+# wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
+- name: Install CF CLI - download apt key.
+  apt_key:
+    url: "https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key"
+    state: present
+  when: ansible_os_family == 'Debian' and "cf_cli" in installed_extras
+
+# echo "deb http://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
+- name: Install CF CLI - add apt source.
+  shell: echo "deb http://packages.cloudfoundry.org/debian stable main" > /etc/apt/sources.list.d/cloudfoundry-cli.list
+  args:
+    creates: /etc/apt/sources.list.d/cloudfoundry-cli.list
+  when: ansible_os_family == 'Debian' and "cf_cli" in installed_extras
+
+# sudo apt-get update
+# - name: Update apt cache (Debian).
+#   apt: update_cache=yes cache_valid_time=86400
+#   when: ansible_os_family == 'Debian' and "cf_cli" in installed_extras
+
+# sudo apt-get install cf-cli
+- name: Install CF CLI - install.
+  apt:
+    name: cf-cli
+    state: present
+    update_cache: yes
+    cache_valid_time: 86400
+  when: ansible_os_family == 'Debian' and "cf_cli" in installed_extras
