@@ -193,6 +193,8 @@ postgresql_users:
 installed_extras:
   - adminer
   # - blackfire
+  # CloudFoundry CLI tool.  Debian only.
+  # - cf_cli
   - drupalconsole
   - drush
   # - elasticsearch
