@@ -197,6 +197,7 @@ installed_extras:
   # - cf_cli
   - drupalconsole
   - drush
+  # - drush_bde_env
   # - elasticsearch
   # - java
   - mailhog
