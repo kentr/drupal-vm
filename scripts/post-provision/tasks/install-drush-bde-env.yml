@@ -1,0 +1,10 @@
+---
+# Install drush-bde-env.
+# See https://github.com/pfrenssen/drush-bde-env
+
+- name: Install drush-bde-env.
+  git:
+    repo: https://github.com/pfrenssen/drush-bde-env.git
+    dest: "/home/{{ vagrant_user }}/.drush/drush-bde-env"
+    depth: 1
+  when: '"drush" in installed_extras and "drush_bde_env" in installed_extras'
