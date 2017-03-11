@@ -43,7 +43,7 @@
     accept_hostkey: true
   become: yes
   when: custom_core_repo_url is defined
-  
+
 - name: Custom core - ensure sites/default directory exists and is writable.
   file:
     path: "{{ drupal_core_path }}/sites/default"
@@ -54,7 +54,7 @@
   file:
     path: "{{ drupal_file_private_path }}"
     state: directory
-  when: drupal_file_private_path is defined
+  when: drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
 - name: Ensure private files .htaccess.
   template:
@@ -62,7 +62,7 @@
     src: "../scripts/post-provision/templates/private_files_htaccess.j2"
     dest: "{{ drupal_file_private_path }}/.htaccess"
     force: No
-  when: drupal_file_private_path is defined
+  when: drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
 - name: Ensure config sync directory.
   file:
