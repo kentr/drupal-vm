@@ -11,7 +11,10 @@ if (!defined('PANTHEON_ENVIRONMENT')) {
 
   // Theme debug mode
   $conf['theme_debug'] = TRUE;
-  
+
+  $conf['file_public_path'] = '{{ drupal_file_public_path }}';
+  $conf['file_private_path'] = '{{ drupal_file_private_path }}';
+
   // Database.
   $databases['default']['default'] = array(
     'driver' => 'mysql',
