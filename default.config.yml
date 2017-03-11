@@ -11,6 +11,17 @@ vagrant_hostname: drupalvm.dev
 vagrant_machine_name: drupalvm
 vagrant_ip: 192.168.88.88
 
+# Primary directory that is synced onto the Vagrant machine.
+# This should usually be equivalent to the directory on the host that contains
+# the Drupal-VM code and your project.
+# On production shared webservers, this is usually your user's home directory.
+base_synced_dir: "/home/{{ vagrant_machine_name }}"
+
+# Root directory for the web app project.
+# This is where the code and everything else in the project's repo will go.
+# If you change this, you should also change the corresponding synced folder below.
+project_root_dir: "{{ base_synced_dir }}/drupal"
+
 # Allow Drupal VM to be accessed via a public network interface on your host.
 # Vagrant boxes are insecure by default, so be careful. You've been warned!
 # See: https://docs.vagrantup.com/v2/networking/public_network.html
@@ -23,8 +34,10 @@ vagrant_synced_folders:
   # The first synced folder will be used for the default Drupal installation, if
   # any of the build_* settings are 'true'. By default the folder is set to
   # the drupal-vm folder.
+  # If you change the `destination`, you probably also want to change `base_synced_dir`
+  # above.
   - local_path: .
-    destination: /var/www/drupalvm
+    destination: "{{ base_synced_dir }}"
     type: nfs
     create: true
 
@@ -55,7 +68,8 @@ drush_make_options: "--no-gitinfofile"
 # composer based site deployment strategy.
 build_composer: false
 drupal_composer_path: "{{ config_dir }}/drupal.composer.json"
-drupal_composer_install_dir: "/var/www/drupalvm/drupal"
+# You probably don't want to change this.
+drupal_composer_install_dir: "{{ project_root_dir }}"
 drupal_composer_dependencies:
   - "drupal/devel:1.x-dev"
 
@@ -70,6 +84,7 @@ drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction
 install_site: true
 
 # Required Drupal settings.
+# The location of the actual Drupal site code.
 drupal_core_path: "{{ drupal_composer_install_dir }}/web"
 drupal_db_user: drupal
 drupal_db_password: drupal
