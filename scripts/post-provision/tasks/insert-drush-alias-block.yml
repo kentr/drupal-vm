@@ -2,6 +2,15 @@
 
 # Inserts a block for a local Vagrant-based Drush alias.
 
+- name: Ensure local Drush alias file exists.
+  delegate_to: 127.0.0.1
+  become: no
+  template:
+    # Don't overwrite existing file.
+    force: no
+    dest: "~/.drush/{{ drush_alias_file_prefix }}.aliases.drushrc.php"
+    src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.aliases.drushrc.php.j2"
+
 - name: Insert local Drush alias declaration.
   delegate_to: 127.0.0.1
   become: no
@@ -19,5 +28,18 @@
         'remote-host' => '{{ vagrant_hostname }}',
         'remote-user' => '{{ vagrant_user }}',
         'ssh-options' => '-o PasswordAuthentication=no -i ' . drush_server_home() . '/.vagrant.d/insecure_private_key',
+        'source-command-specific' => array (
+          'sql-sync' => array (
+            'structure-tables-key' => 'common',
+          ),
+        ),
+        'command-specific' => array (
+          'sql-dump' => array (
+            'structure-tables-key' => 'common',
+          ),
+          'archive-dump' => array (
+            'structure-tables-key' => 'common',
+          ),
+        ),
       );
   when: insert_local_drush_alias | default(false)
