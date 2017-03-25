@@ -15,10 +15,10 @@ base_synced_dir: "/home/{{ vagrant_machine_name }}"
 # Root directory for the web app project.
 # This is where the code and everything else in the project's repo will go.
 # If you change this, you should also change the corresponding synced folder below.
-project_root_dir: "{{ base_synced_dir }}/{{ vagrant_machine_name }}_LOCAL"
+web_app_project_root: "{{ base_synced_dir }}/LOCAL_{{ vagrant_machine_name }}"
 
 # The location of the actual Drupal site code.
-drupal_core_path: "{{ project_root_dir }}/public_html"
+drupal_core_path: "{{ web_app_project_root }}/public_html"
 drupal_file_private_path: ""
 
 # Public / private files directories.  If your Drupal root directory is different from
@@ -42,7 +42,7 @@ vagrant_synced_folders:
     create: true
 
 # You probably don't want to change this.
-drupal_composer_install_dir: "{{ project_root_dir }}"
+drupal_composer_install_dir: "{{ web_app_project_root }}"
 
 # Custom Drush alias tasks to insert just the local declaration into an existing
 # alias file.

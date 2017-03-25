@@ -1,48 +1,50 @@
 ---
 
-- name: Custom core - Ensure custom_core_install_path directory exists.
+# Tasks for installing pre-existing web app project onto VM.
+
+- name: Custom core - Ensure web_app_project_root directory exists.
   file:
-    path: "{{ custom_core_install_path }}"
+    path: "{{ web_app_project_root }}"
     state: directory
     # Don't recursively set permissions.  May cause dirty repo.
     recurse: no
     mode: 0775
   become: no
-  when: custom_core_install_path is defined
+  when: web_app_project_root is defined
 
-- name: Custom core - Ensure .ssh directory exists.
-  file:
-    path: /root/.ssh
-    state: directory
-    recurse: yes
-    mode: 0600
-  become: yes
-  when: >
-    custom_core_repo_private_key is defined
-    or custom_core_repo_public_key is defined
+#- name: Custom core - Ensure .ssh directory exists.
+#  file:
+#    path: /root/.ssh
+#    state: directory
+#    recurse: yes
+#    mode: 0600
+#  become: yes
+#  when: >
+#    custom_core_repo_private_key is defined
+#    or custom_core_repo_public_key is defined
+#
+#- name: Custom core - copy public key to Drupal server.
+#  copy:
+#    src: "{{ custom_core_repo_public_key }}"
+#    dest: /root/.ssh/id_rsa.pub
+#    mode: 0644
+#  when: custom_core_repo_public_key is defined
+#
+#- name: Custom core - copy private key to Drupal server.
+#  copy:
+#    src: "{{ custom_core_repo_private_key }}"
+#    dest: /root/.ssh/id_rsa
+#    mode: 0600
+#  when: custom_core_repo_private_key is defined
 
-- name: Custom core - copy public key to Drupal server.
-  copy:
-    src: "{{ custom_core_repo_public_key }}"
-    dest: /root/.ssh/id_rsa.pub
-    mode: 0644
-  when: custom_core_repo_public_key is defined
-
-- name: Custom core - copy private key to Drupal server.
-  copy:
-    src: "{{ custom_core_repo_private_key }}"
-    dest: /root/.ssh/id_rsa
-    mode: 0600
-  when: custom_core_repo_private_key is defined
-
-- name: Custom core - clone repo.
-  git:
-    repo: "{{ custom_core_repo_url }}"
-    dest: "{{ custom_core_install_path }}"
-    key_file: /root/.ssh/id_rsa
-    accept_hostkey: true
-  become: yes
-  when: custom_core_repo_url is defined
+#- name: Custom core - clone repo.
+#  git:
+#    repo: "{{ web_app_repo_url }}"
+#    dest: "{{ web_app_project_root }}"
+#    key_file: /root/.ssh/id_rsa
+#    accept_hostkey: true
+#  become: yes
+#  when: web_app_repo_url is defined
 
 - name: Custom core - ensure sites/default directory exists and is writable.
   file:
@@ -75,7 +77,7 @@
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/default.settings.php.d{{ drupal_major_version }}.j2"
-    dest: "{{ drupal_core_path }}/sites/default/settings.php"
+    dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.php"
     mode: 0600
     force: no
   when: custom_core_add_settings_local_php|default(True)
@@ -88,11 +90,11 @@
     mode: 0600
   when: custom_core_add_settings_local_php|default(True)
 
-# # ansible drupalvm -e @default.config.yml -e @config.yml -m composer -a "working_dir={{ custom_core_install_path }} command=install optimize_autoloader=True"
+# # ansible drupalvm -e @default.config.yml -e @config.yml -m composer -a "working_dir={{ web_app_project_root }} command=install optimize_autoloader=True"
 # # @todo: detect composer.json
 # - name: Custom core - composer install.
 #   composer:
-#     working_dir: "{{ custom_core_install_path }}"
+#     working_dir: "{{ web_app_project_root }}"
 #     command: install
 #     optimize_autoloader: True
 #   creates: "{{drupal_core_path}}/autoload.php"
