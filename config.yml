@@ -104,6 +104,7 @@ installed_extras:
   # - cf_cli
   # - drupalconsole
   - drush
+  # - drush_bde_env
   # - elasticsearch
   # - java
   - mailhog
@@ -128,22 +129,12 @@ installed_extras:
 # Source file for database.  Will be copied to the node and imported into
 # the database specified for the Drupal site.
 # Name of database import source file.
-# drupal_database_import_filename: "dev.d{{ drupal_major_version }}.sql.gz"
-# drupal_database_import_filename: "ukh20170117a.sql"
+# drupal_database_import_filename: "prod.d{{ drupal_major_version }}.latest.sql.gz"
 # Directory where the database source file resides.
 # Path should be relative to the provisioning directory.
-# drupal_database_import_directory: "../backup/dev/db"
-#
-# Add settings.local.php with database details.
-# Will replace existing file.
-custom_core_add_settings_local_php: True
-#
-# drupal_install_profile: "standard"
-# drupal_file_private_path: "{{ drupal_core_path }}/sites/default/files/private"
-# drupal_config_sync_directory: "{{ drupal_core_path }}/sites/default/config"
+# drupal_database_import_directory: "../backup/prod/db"
 
-################################################################################
-
-
-
-php_date_timezone: "America/Los_Angeles"
+drush_bde_env_options: "--base-url=https://{{vagrant_hostname}} --site-root={{ drupal_core_path }}"
+behat_binary_dir: "{{ drupal_composer_install_dir }}/bin"
+behat_config_file: "{{ drupal_core_path }}/sites/default/behat-tests/behat.yml"
+behat_cmd: "behat -c {{ behat_config_file }}"
