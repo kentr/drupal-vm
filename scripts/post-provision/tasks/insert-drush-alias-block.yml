@@ -40,6 +40,10 @@
           'archive-dump' => array (
             'structure-tables-key' => 'common',
           ),
+          'rsync' => array (
+            'mode' => 'Pavu',
+            'exclude-paths' => '*.wmv:*.mp4:*.pdf',
+          ),
         ),
       );
   when: insert_local_drush_alias | default(false)
