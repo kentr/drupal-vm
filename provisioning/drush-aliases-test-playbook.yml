@@ -1,0 +1,34 @@
+---
+- hosts: all
+  become: yes
+
+  vars_files:
+    - vars/main.yml
+    - ../default.config.yml
+
+  pre_tasks:
+    - name: Include OS-specific variables.
+      include_vars: "{{ ansible_os_family }}.yml"
+
+    - name: Define config_dir.
+      set_fact:
+        config_dir: "{{ playbook_dir }}/.."
+      when: config_dir is not defined
+      tags: ['always']
+
+    # config.yml is imported first b/c the PHP version switching wasn't working
+    # with all items in one list.
+    - include_vars: "{{ item }}"
+      with_fileglob:
+        - "{{ config_dir }}/config.yml"
+      tags: ['always']
+
+    - include_vars: "{{ item }}"
+      with_fileglob:
+        - "{{ config_dir }}/config.php{{ php_version }}.yml"
+        - "{{ config_dir }}/local.config.yml"
+        - "{{ config_dir }}/{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
+      tags: ['always']
+
+  tasks:
+    - include: ../scripts/post-provision/tasks/insert-drush-alias-block.yml
