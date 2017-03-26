@@ -10,14 +10,25 @@ vagrant_machine_name: client_server_username
 # This should usually be equivalent to the directory on the host that contains
 # the Drupal-VM code and your project.
 # On production shared webservers, this is usually your user's home directory.
+
+# On normal hosts, this would be something like this:
+# "{{ ansible_user_home }}"
+# Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
+# do a workaround:
 base_synced_dir: "/home/{{ vagrant_machine_name }}"
 
 # Root directory for the web app project.
 # This is where the code and everything else in the project's repo will go.
 # If you change this, you should also change the corresponding synced folder below.
+
+# On normal hosts, this would be something like this:
+# "{{ base_synced_dir }}/LOCAL_{{ ansible_user_id }}"
+# Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
+# do a workaround:
 web_app_project_root: "{{ base_synced_dir }}/LOCAL_{{ vagrant_machine_name }}"
 
 # The location of the actual Drupal site code.
+# It may be the same as web_app_project_root, depending on how your project is set up.
 drupal_core_path: "{{ web_app_project_root }}/public_html"
 drupal_file_private_path: ""
 
