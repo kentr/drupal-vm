@@ -24,4 +24,14 @@ if (!defined('PANTHEON_ENVIRONMENT')) {
     'host' => 'localhost',
     'prefix' => '',
   );
+
+  if (extension_loaded("apc") && (ini_get("apc.enabled") || ini_get("apc.enable_cli")) ) {
+    $cache_def_file = '{{ drupal_modules_contrib_path }}/apc/drupal_apc_cache.inc';
+    if (file_exists($cache_def_file)) {
+      $conf['cache_backends'][] = $cache_def_file;
+      $conf['cache_class_cache'] = 'DrupalAPCCache';
+      $conf['cache_class_cache_bootstrap'] = 'DrupalAPCCache';
+      //$conf['apc_show_debug'] = TRUE;  // Remove the slashes to use debug mode.
+    }
+  }
 }

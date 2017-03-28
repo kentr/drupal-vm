@@ -38,6 +38,9 @@ drupal_file_private_path: ""
 # These should match what is in your Drush alias file, if you have set a value there.
 drupal_file_public_path: 'sites/default/files'
 
+# Directory where contrib modules live, relative to site root.
+drupal_modules_contrib_path: "sites/all/modules"
+
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
 # http://docs.drupalvm.com/en/latest/extras/syncing-folders/ for more info.

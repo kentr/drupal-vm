@@ -6,6 +6,7 @@
 php_install_recommends: no
 php_packages:
   - php5.6
+  # See note about php_apc_enable_cli below.
   - php5.6-apcu
   - php5.6-mcrypt
   - php5.6-cli
@@ -36,3 +37,6 @@ php_redis_package: php5.6-redis
 
 # If you install `memcached`:
 php_memcached_package: php5.6-memcached
+
+# Enable APCu for CLI so that drush can enable the apc module and clear caches.
+php_apc_enable_cli: 1
