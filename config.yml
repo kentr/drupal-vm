@@ -158,3 +158,16 @@ custom_core_add_settings_local_php: True
 
 
 php_date_timezone: "America/Los_Angeles"
+
+# install_wordpress: True
+# wp_version: latest
+# wp_domain: wp.loc
+# wp_install_dir: "{{ web_app_project_root }}/wordpress_html"
+# wp_db_name: "wordpress"
+# wp_db_user: "wordpress"
+# wp_db_password: "wordpress"
+# wp_db_charset: "utf8mb4"
+# wp_db_collate: "utf8mb4_general_ci"
+
+# wp_table_prefix: "wp_"
+# wp_debug: true

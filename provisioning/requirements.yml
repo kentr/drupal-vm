@@ -79,3 +79,5 @@
   version: 3.4.1
 - src: geerlingguy.varnish
   version: 1.8.1
+- src: darthwade.wordpress
+  version: 1.0
