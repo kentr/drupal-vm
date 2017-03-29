@@ -33,6 +33,11 @@
             'structure-tables-key' => 'common',
           ),
         ),
+        'target-command-specific' => array(
+          'sql-sync'  => array(
+            'enable'  => array('devel', 'apc'),
+          ),
+        ),
         'command-specific' => array (
           'sql-dump' => array (
             'structure-tables-key' => 'common',
