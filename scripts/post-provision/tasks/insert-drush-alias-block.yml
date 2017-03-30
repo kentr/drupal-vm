@@ -33,6 +33,11 @@
             'structure-tables-key' => 'common',
           ),
         ),
+        'target-command-specific' => array(
+          'sql-sync'  => array(
+            'enable'  => array('devel', 'apc'),
+          ),
+        ),
         'command-specific' => array (
           'sql-dump' => array (
             'structure-tables-key' => 'common',
@@ -47,3 +52,14 @@
         ),
       );
   when: insert_local_drush_alias | default(false)
+
+# Add Drush post-sync hook to enable modules.
+# See http://api.drush.ws/api/drush/examples!sync_enable.drush.inc/master.
+- name: Add sync_enable.drush.inc.
+  delegate_to: 127.0.0.1
+  become: no
+  template:
+    # Don't overwrite existing file.
+    force: no
+    dest: "~/.drush/sync_enable.drush.inc"
+    src: "{{ playbook_dir }}/../scripts/post-provision/templates/sync_enable.drush.inc.j2"

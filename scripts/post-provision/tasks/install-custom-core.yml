@@ -12,40 +12,6 @@
   become: no
   when: web_app_project_root is defined
 
-#- name: Custom core - Ensure .ssh directory exists.
-#  file:
-#    path: /root/.ssh
-#    state: directory
-#    recurse: yes
-#    mode: 0600
-#  become: yes
-#  when: >
-#    custom_core_repo_private_key is defined
-#    or custom_core_repo_public_key is defined
-#
-#- name: Custom core - copy public key to Drupal server.
-#  copy:
-#    src: "{{ custom_core_repo_public_key }}"
-#    dest: /root/.ssh/id_rsa.pub
-#    mode: 0644
-#  when: custom_core_repo_public_key is defined
-#
-#- name: Custom core - copy private key to Drupal server.
-#  copy:
-#    src: "{{ custom_core_repo_private_key }}"
-#    dest: /root/.ssh/id_rsa
-#    mode: 0600
-#  when: custom_core_repo_private_key is defined
-
-#- name: Custom core - clone repo.
-#  git:
-#    repo: "{{ web_app_repo_url }}"
-#    dest: "{{ web_app_project_root }}"
-#    key_file: /root/.ssh/id_rsa
-#    accept_hostkey: true
-#  become: yes
-#  when: web_app_repo_url is defined
-
 - name: Custom core - ensure sites/default directory exists and is writable.
   file:
     path: "{{ drupal_core_path }}/sites/default"

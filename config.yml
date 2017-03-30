@@ -10,14 +10,25 @@ vagrant_machine_name: client_server_username
 # This should usually be equivalent to the directory on the host that contains
 # the Drupal-VM code and your project.
 # On production shared webservers, this is usually your user's home directory.
+
+# On normal hosts, this would be something like this:
+# "{{ ansible_user_home }}"
+# Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
+# do a workaround:
 base_synced_dir: "/home/{{ vagrant_machine_name }}"
 
 # Root directory for the web app project.
 # This is where the code and everything else in the project's repo will go.
 # If you change this, you should also change the corresponding synced folder below.
+
+# On normal hosts, this would be something like this:
+# "{{ base_synced_dir }}/LOCAL_{{ ansible_user_id }}"
+# Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
+# do a workaround:
 web_app_project_root: "{{ base_synced_dir }}/LOCAL_{{ vagrant_machine_name }}"
 
 # The location of the actual Drupal site code.
+# It may be the same as web_app_project_root, depending on how your project is set up.
 drupal_core_path: "{{ web_app_project_root }}/public_html"
 drupal_file_private_path: ""
 
@@ -26,6 +37,9 @@ drupal_file_private_path: ""
 # values in the prod database.
 # These should match what is in your Drush alias file, if you have set a value there.
 drupal_file_public_path: 'sites/default/files'
+
+# Directory where contrib modules live, relative to site root.
+drupal_modules_contrib_path: "sites/all/modules"
 
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
@@ -138,3 +152,21 @@ drush_bde_env_options: "--base-url=https://{{vagrant_hostname}} --site-root={{ d
 behat_binary_dir: "{{ drupal_composer_install_dir }}/bin"
 behat_config_file: "{{ drupal_core_path }}/sites/default/behat-tests/behat.yml"
 behat_cmd: "behat -c {{ behat_config_file }}"
+################################################################################
+
+
+
+php_date_timezone: "America/Los_Angeles"
+
+# install_wordpress: True
+# wp_version: latest
+# wp_domain: wp.loc
+# wp_install_dir: "{{ web_app_project_root }}/wordpress_html"
+# wp_db_name: "wordpress"
+# wp_db_user: "wordpress"
+# wp_db_password: "wordpress"
+# wp_db_charset: "utf8mb4"
+# wp_db_collate: "utf8mb4_general_ci"
+
+# wp_table_prefix: "wp_"
+# wp_debug: true
