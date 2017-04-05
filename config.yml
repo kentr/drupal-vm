@@ -143,7 +143,6 @@ installed_extras:
 # the database specified for the Drupal site.
 # Name of database import source file.
 # drupal_database_import_filename: "dev.d{{ drupal_major_version }}.sql.gz"
-# drupal_database_import_filename: "ukh20170117a.sql"
 # Directory where the database source file resides.
 # Path should be relative to the provisioning directory.
 # drupal_database_import_directory: "../backup/dev/db"
