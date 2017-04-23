@@ -47,7 +47,7 @@
           ),
           'rsync' => array (
             'mode' => 'Pavu',
-            'exclude-paths' => '*.wmv:*.mp4:*.pdf',
+            'exclude-paths' => '*.wmv:*.mp4:*.pdf:*.doc*:*.ppt*',
           ),
         ),
       );
