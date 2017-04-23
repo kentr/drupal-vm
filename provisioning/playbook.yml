@@ -68,23 +68,6 @@
     - include: tasks/php.yml
       tags: ['php']
 
-    # PHP version-specific directory may already be a link created by vagrant-cachier.
-    - name: Check if PHP version-specific workspace directory is already set up.
-      stat:
-        path: "/root/php{{ php_version }}"
-      register: php_workspace_directory
-      ignore_errors: true
-
-    # If it's not already set up, create it.
-    - name: Ensure PHP version-specific workspace directory exists.
-      file:
-        path: "/root/php{{ php_version }}"
-        state: directory
-        mode: 0775
-      when: >
-        not php_workspace_directory.stat.exists
-        or (php_workspace_directory.stat.exists and not php_workspace_directory.stat.islnk)
-
   roles:
     # Essential roles.
     - { role: geerlingguy.repo-remi, when: ansible_os_family == 'RedHat', tags: ['webserver, php'] }
