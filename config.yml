@@ -30,6 +30,7 @@ web_app_project_root: "{{ base_synced_dir }}/LOCAL_{{ vagrant_machine_name }}"
 # The location of the actual Drupal site code.
 # It may be the same as web_app_project_root, depending on how your project is set up.
 drupal_core_path: "{{ web_app_project_root }}/public_html"
+drupal_core_owner: "{{ drupalvm_user }}"
 drupal_file_private_path: ""
 
 # Public / private files directories.  If your Drupal root directory is different from
@@ -58,6 +59,10 @@ vagrant_synced_folders:
 # You probably don't want to change this.
 drupal_composer_install_dir: "{{ web_app_project_root }}"
 
+drush_version: "8.x"
+drush_keep_updated: false
+drush_composer_cli_options: "--prefer-dist --no-interaction"
+
 # Custom Drush alias tasks to insert just the local declaration into an existing
 # alias file.
 insert_local_drush_alias: true
@@ -80,19 +85,19 @@ drupal_major_version: 7
 # Install & configure basic site into database. Does not install code.
 # Set this to 'false' if you don't need to install drupal (using the drupal_*
 # settings below), but instead copy down a database (e.g. using drush sql-sync).
-install_site: false
+drupal_install_site: false
 
 # Set this to 'false' if you are using a different site deployment strategy and
 # would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
-build_makefile: false
+drupal_build_makefile: false
 
-# Set 'build_makefile' to 'false' and this to 'true' if you are using a
+# Set 'drupal_build_makefile' to 'false' and this to 'true' if you are using a
 # composer based site deployment strategy.
-build_composer: false
+drupal_build_composer: false
 
-# Set this to 'true' and 'build_makefile', 'build_composer' to 'false' if you
+# Set this to 'true' and 'drupal_build_makefile', 'drupal_build_composer' to 'false' if you
 # are using Composer's create-project as a site deployment strategy.
-build_composer_project: false
+drupal_build_composer_project: false
 
 apache_vhosts_ssl:
   - servername: "{{ drupal_domain }}"
@@ -102,6 +107,9 @@ apache_vhosts_ssl:
     extra_parameters: |
           ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ drupal_core_path }}"
 
+# If a file named "config.php{{ php_version }}.yml" exists in the config
+# directory, it will be included automatically and override the variables in
+# this file.
 # Configs for PHP 5.6 are in config.php5.6.yml
 php_version: "5.6"
 
