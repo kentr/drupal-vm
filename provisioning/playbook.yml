@@ -136,7 +136,7 @@
     # Roles for security and stability on production.
     - { role: geerlingguy.security, when: extra_security_enabled }
 
-    - { role: darthwade.wordpress, when: install_wordpress | default(False) }
+    - { role: kentr.wordpress, when: install_wordpress | default(False) }
 
   tasks:
     - include: tasks/sshd.yml

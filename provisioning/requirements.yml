@@ -85,5 +85,7 @@
   version: 3.5.5
 - src: geerlingguy.varnish
   version: 1.9.0
-- src: darthwade.wordpress
-  version: 1.0
+- src: https://github.com/kentr/wordpress.ansible.role.git
+  scm: git
+  version: patch-1
+  name: kentr.wordpress
