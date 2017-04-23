@@ -1,12 +1,15 @@
 ---
-dependencies: []
+dependencies:
+  - geerlingguy.git
+  - geerlingguy.php
+  - geerlingguy.composer
 
 galaxy_info:
   author: geerlingguy
   description: Drush - command line shell for Drupal
   company: "Midwestern Mac, LLC"
   license: "license (BSD, MIT)"
-  min_ansible_version: 2.0
+  min_ansible_version: 1.8
   platforms:
     - name: EL
       versions:
@@ -41,6 +44,3 @@ galaxy_info:
   galaxy_tags:
     - development
     - web
-    - drush
-    - drupal
-    - command

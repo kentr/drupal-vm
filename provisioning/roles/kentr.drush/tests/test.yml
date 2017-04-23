@@ -18,4 +18,6 @@
     - role: geerlingguy.repo-remi
       when: ansible_os_family == 'RedHat'
     - geerlingguy.php
+    - geerlingguy.composer
+    - geerlingguy.git
     - role_under_test
