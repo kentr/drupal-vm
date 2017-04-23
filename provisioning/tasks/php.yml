@@ -11,9 +11,19 @@
     xhprof_download_folder_name: xhprof-master
   when: php_version == '5.6'
 
+# PHP version-specific directory may already be a link created by vagrant-cachier.
+- name: Check if PHP version-specific workspace directory is already set up.
+  stat:
+    path: "/root/php{{ php_version }}"
+  register: php_workspace_directory
+  ignore_errors: true
+
 - name: Ensure PHP version -specific workspace directory exists.
   file:
     path: "/root/php{{ php_version }}"
     state: directory
     mode: 0775
   tags: ['php']
+  when: >
+    not php_workspace_directory.stat.exists
+    or (php_workspace_directory.stat.exists and not php_workspace_directory.stat.islnk)
