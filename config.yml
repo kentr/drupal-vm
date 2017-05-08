@@ -181,3 +181,5 @@ php_date_timezone: "America/Los_Angeles"
 
 # wp_table_prefix: "wp_"
 # wp_debug: true
+
+workspace: /tmp/vagrant-cache/generic
