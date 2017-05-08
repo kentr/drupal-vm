@@ -30,4 +30,6 @@ Vagrantfile.local
 /node_modules/
 /bower_components/
 
+# Misc
 /drushrc.php
+/LOCAL_*/
