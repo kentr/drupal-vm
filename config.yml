@@ -20,16 +20,23 @@ base_synced_dir: "/home/{{ vagrant_machine_name }}"
 # Root directory for the web app project.
 # This is where the code and everything else in the project's repo will go.
 # If you change this, you should also change the corresponding synced folder below.
-
+#
 # On normal hosts, this would be something like this:
 # "{{ base_synced_dir }}/LOCAL_{{ ansible_user_id }}"
 # Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
 # do a workaround:
-web_app_project_root: "{{ base_synced_dir }}/LOCAL_{{ vagrant_machine_name }}"
+# Name of app project directory within Drupal-VM project.
+web_app_project_dir: "LOCAL_{{ vagrant_machine_name }}"
+# Full absolute path to project root in target machine (VM).
+web_app_project_root: "{{ base_synced_dir }}/{{ web_app_project_dir }}"
+
+# Directory containing actual web files, relative to project root.
+# For Drupal Composer projects, this would be "web".
+web_app_web_dir: "public_html"
 
 # The location of the actual Drupal site code.
 # It may be the same as web_app_project_root, depending on how your project is set up.
-drupal_core_path: "{{ web_app_project_root }}/public_html"
+drupal_core_path: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
 drupal_core_owner: "{{ drupalvm_user }}"
 drupal_file_private_path: ""
 
@@ -76,6 +83,9 @@ drush_alias_file_prefix: "{{ vagrant_machine_name }}"
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
 # clobbers an existing file. So, it's disabled.
 configure_drush_aliases: false
+
+# Create project drushrc.php with various Drush shell aliases.
+drush_insert_project_shell_aliases: true
 
 # Though site is not installed, this is used within the Pantheon project
 # to form the database import file name.

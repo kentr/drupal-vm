@@ -29,3 +29,5 @@ Vagrantfile.local
 
 /node_modules/
 /bower_components/
+
+/drushrc.php
