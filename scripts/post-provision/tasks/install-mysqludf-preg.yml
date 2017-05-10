@@ -1,0 +1,12 @@
+---
+
+- name: Clone mysqludf_preg repo.
+  git:  {depth=1 update=Yes repo=https://github.com/mysqludf/lib_mysqludf_preg.git dest=/tmp/vagrant-cache/generic/lib_mysqludf_preg }
+
+- name: Ensure libmysqlclient-dev is installed.
+  package:
+    name: libmysqlclient-dev
+    state: present
+
+- name: Build and install mysqludf_preg
+  command: ./configure && make install && make installdb
