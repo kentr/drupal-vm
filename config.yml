@@ -151,6 +151,21 @@ installed_extras:
   - xdebug
   # - xhprof
 
+
+# XDebug configuration. XDebug is disabled by default for better performance.
+php_xdebug_default_enable: 0
+php_xdebug_coverage_enable: 0
+php_xdebug_cli_enable: 0
+php_xdebug_remote_enable: 0
+php_xdebug_remote_connect_back: 1
+php_xdebug_remote_autostart: 0
+php_xdebug_remote_host: 10.0.2.2
+# Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
+php_xdebug_idekey: ECLIPSE_DBGP
+
+# Enable APCu for CLI so that drush can enable the apc module and clear caches.
+php_apc_enable_cli: 1
+
 ################################################################################
 # Core already installed in project directory
 ################################################################################
