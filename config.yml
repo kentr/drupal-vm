@@ -38,13 +38,16 @@ web_app_web_dir: "public_html"
 # It may be the same as web_app_project_root, depending on how your project is set up.
 drupal_core_path: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
 drupal_core_owner: "{{ drupalvm_user }}"
-drupal_file_private_path: ""
+
+# Directory under "sites/" that holds settings.php, etc.
+config_site_directory: "default"
 
 # Public / private files directories.  If your Drupal root directory is different from
 # that on prod, then you'll want to set this to match your local site to override the
 # values in the prod database.
 # These should match what is in your Drush alias file, if you have set a value there.
-drupal_file_public_path: 'sites/default/files'
+drupal_file_public_path: "sites/{{ config_site_directory }}/files"
+drupal_file_private_path: ""
 
 # Directory where contrib modules live, relative to site root.
 drupal_modules_contrib_path: "sites/all/modules"
