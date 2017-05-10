@@ -215,6 +215,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "composer" => { cache_dir: '/home/vagrant/.composer/cache' },
       # PHP downloads / source files cache bin.
       "php#{vconfig['php_version']}-workspace" => { cache_dir: "/root/php#{vconfig['php_version']}" },
+      # Vagrant user generic cache bin.
+      "generic" => { cache_dir: '/home/vagrant/.cache' },
     }
     config.cache.synced_folder_opts = {
       type: vconfig['vagrant_synced_folder_default_type']
