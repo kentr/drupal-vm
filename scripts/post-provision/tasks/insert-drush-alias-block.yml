@@ -46,8 +46,8 @@
             'structure-tables-key' => 'common',
           ),
           'rsync' => array (
-            'mode' => 'Pavu',
-            'exclude-paths' => '*.wmv:*.mp4:*.pdf:*.doc*:*.ppt*',
+            'mode' => '{{ drush_rsync_mode }}',
+            'exclude-paths' => '{{ drush_rsync_excludes }}',
           ),
         ),
       );

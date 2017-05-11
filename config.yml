@@ -83,6 +83,11 @@ insert_local_drush_alias: true
 #  - @my_project.whatever
 drush_alias_file_prefix: "{{ vagrant_machine_name }}"
 
+# Defaults for Drush rsync command.
+drush_rsync_mode: 'Pavu'
+drush_rsync_excludes: '*.wmv:*.mp4:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'
+
+
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
 # clobbers an existing file. So, it's disabled.
 configure_drush_aliases: false
