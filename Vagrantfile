@@ -46,7 +46,8 @@ vconfig = YAML.load_file("#{host_drupalvm_dir}/default.config.yml")
 # Use optional config.yml and local.config.yml for configuration overrides.
 ['config.yml', 'local.config.yml', "#{drupalvm_env}.config.yml"].each do |config_file|
   if File.exist?("#{host_config_dir}/#{config_file}")
-    vconfig.merge!(YAML.load_file("#{host_config_dir}/#{config_file}"))
+    optional_config = YAML.load_file("#{host_config_dir}/#{config_file}")
+    vconfig.merge!(optional_config) if optional_config
   end
 end
 
@@ -63,6 +64,19 @@ Vagrant.require_version ">= #{vconfig['drupalvm_vagrant_version_min']}"
 ansible_bin = which('ansible-playbook')
 ansible_version = Gem::Version.new(get_ansible_version(ansible_bin)) if ansible_bin
 ansible_version_min = Gem::Version.new(vconfig['drupalvm_ansible_version_min'])
+
+provisioner = ansible_bin && !vconfig['force_ansible_local'] ? :ansible : :ansible_local
+if provisioner == :ansible
+  playbook = "#{host_drupalvm_dir}/provisioning/playbook.yml"
+  config_dir = host_config_dir
+else
+  playbook = "#{guest_drupalvm_dir}/provisioning/playbook.yml"
+  config_dir = guest_config_dir
+end
+
+if provisioner == :ansible && ansible_version < ansible_version_min
+  raise Vagrant::Errors::VagrantError.new, "You must update Ansible to at least #{ansible_version_min} to use this version of Drupal VM."
+end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Networking configuration.
@@ -85,6 +99,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Vagrant box.
   config.vm.box = vconfig['vagrant_box']
+
+  if vconfig.include?('vagrant_post_up_message')
+    config.vm.post_up_message = vconfig['vagrant_post_up_message']
+  else
+    config.vm.post_up_message = 'Your Drupal VM Vagrant box is ready to use!'\
+      "\n* Visit the dashboard for an overview of your site: http://dashboard.#{vconfig['vagrant_hostname']} (or http://#{vconfig['vagrant_ip']})"\
+      "\n* You can SSH into your machine with `vagrant ssh`."\
+      "\n* Find out more in the Drupal VM documentation at http://docs.drupalvm.com"
+  end
 
   # If a hostsfile manager plugin is installed, add all server names as aliases.
   aliases = []
@@ -114,7 +137,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Synced folders.
   vconfig['vagrant_synced_folders'].each do |synced_folder|
     options = {
-      type: synced_folder['type'],
+      type: synced_folder.include?('type') ? synced_folder['type'] : vconfig['vagrant_synced_folder_default_type'],
       rsync__auto: 'true',
       rsync__exclude: synced_folder['excluded_paths'],
       rsync__args: ['--verbose', '--archive', '--delete', '-z', '--chmod=ugo=rwX'],
@@ -123,23 +146,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       mount_options: synced_folder.include?('mount_options') ? synced_folder['mount_options'] : []
     }
     if synced_folder.include?('options_override')
-      options = options.merge(synced_folder['options_override'])
+      synced_folder['options_override'].each do |key, value|
+        options[key.to_sym] = value
+      end
     end
     config.vm.synced_folder synced_folder['local_path'], synced_folder['destination'], options
   end
 
   # Allow override of the default synced folder type.
-  config.vm.synced_folder host_project_dir, '/vagrant', type: vconfig.include?('vagrant_synced_folder_default_type') ? vconfig['vagrant_synced_folder_default_type'] : 'nfs'
+  config.vm.synced_folder host_project_dir, '/vagrant', type: vconfig['vagrant_synced_folder_default_type']
 
-  # Provisioning. Use ansible if it's installed, ansible_local if not or if forced.
-  if ansible_bin && !vconfig['force_ansible_local']
-    if ansible_version < ansible_version_min
-      raise "You must update Ansible to at least #{ansible_version_min} to use this version of Drupal VM."
-    end
-    config.vm.provision 'ansible' do |ansible|
-      ansible.playbook = "#{host_drupalvm_dir}/provisioning/playbook.yml"
+  config.vm.provision provisioner do |ansible|
+    ansible.playbook = playbook
       ansible.extra_vars = {
-        config_dir: host_config_dir,
+      config_dir: config_dir,
         drupalvm_env: drupalvm_env
       }
       # See https://www.vagrantup.com/docs/provisioning/ansible_common.html
@@ -149,16 +169,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         }
       }
       ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
-    end
-  else
-    config.vm.provision 'ansible_local' do |ansible|
-      ansible.playbook = "#{guest_drupalvm_dir}/provisioning/playbook.yml"
-      ansible.extra_vars = {
-        config_dir: guest_config_dir,
-        drupalvm_env: drupalvm_env
-      }
-      ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
-    end
+    ansible.tags = ENV['DRUPALVM_ANSIBLE_TAGS']
   end
 
   # VMware Fusion.
@@ -166,7 +177,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # HGFS kernel module currently doesn't load correctly for native shares.
     override.vm.synced_folder host_project_dir, '/vagrant', type: 'nfs'
 
-    v.gui = false
+    v.gui = vconfig['vagrant_gui']
     v.vmx['memsize'] = vconfig['vagrant_memory']
     v.vmx['numvcpus'] = vconfig['vagrant_cpus']
   end
@@ -179,6 +190,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.cpus = vconfig['vagrant_cpus']
     v.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
     v.customize ['modifyvm', :id, '--ioapic', 'on']
+    v.gui = vconfig['vagrant_gui']
   end
 
   # Parallels.
@@ -203,12 +215,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "composer" => { cache_dir: '/home/vagrant/.composer/cache' },
       # PHP downloads / source files cache bin.
       "php#{vconfig['php_version']}-workspace" => { cache_dir: "/root/php#{vconfig['php_version']}" },
+      # Vagrant user generic cache bin.
+      "generic" => { cache_dir: '/home/vagrant/.cache' },
     }
     config.cache.synced_folder_opts = {
-      type: vconfig.include?('vagrant_synced_folder_default_type') ? vconfig['vagrant_synced_folder_default_type'] : 'nfs'
+      type: vconfig['vagrant_synced_folder_default_type']
     }
   end
 
   # Allow an untracked Vagrantfile to modify the configurations
-  eval File.read "#{host_config_dir}/Vagrantfile.local" if File.exist?("#{host_config_dir}/Vagrantfile.local")
+  [host_config_dir, host_project_dir].uniq.each do |dir|
+    eval File.read "#{dir}/Vagrantfile.local" if File.exist?("#{dir}/Vagrantfile.local")
+  end
 end

@@ -20,23 +20,34 @@ base_synced_dir: "/home/{{ vagrant_machine_name }}"
 # Root directory for the web app project.
 # This is where the code and everything else in the project's repo will go.
 # If you change this, you should also change the corresponding synced folder below.
-
+#
 # On normal hosts, this would be something like this:
 # "{{ base_synced_dir }}/LOCAL_{{ ansible_user_id }}"
 # Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
 # do a workaround:
-web_app_project_root: "{{ base_synced_dir }}/LOCAL_{{ vagrant_machine_name }}"
+# Name of app project directory within Drupal-VM project.
+web_app_project_dir: "LOCAL_{{ vagrant_machine_name }}"
+# Full absolute path to project root in target machine (VM).
+web_app_project_root: "{{ base_synced_dir }}/{{ web_app_project_dir }}"
+
+# Directory containing actual web files, relative to project root.
+# For Drupal Composer projects, this would be "web".
+web_app_web_dir: "public_html"
 
 # The location of the actual Drupal site code.
 # It may be the same as web_app_project_root, depending on how your project is set up.
-drupal_core_path: "{{ web_app_project_root }}/public_html"
-drupal_file_private_path: ""
+drupal_core_path: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
+drupal_core_owner: "{{ drupalvm_user }}"
+
+# Directory under "sites/" that holds settings.php, etc.
+config_site_directory: "default"
 
 # Public / private files directories.  If your Drupal root directory is different from
 # that on prod, then you'll want to set this to match your local site to override the
 # values in the prod database.
 # These should match what is in your Drush alias file, if you have set a value there.
-drupal_file_public_path: 'sites/default/files'
+drupal_file_public_path: "sites/{{ config_site_directory }}/files"
+drupal_file_private_path: ""
 
 # Directory where contrib modules live, relative to site root.
 drupal_modules_contrib_path: "sites/all/modules"
@@ -58,6 +69,10 @@ vagrant_synced_folders:
 # You probably don't want to change this.
 drupal_composer_install_dir: "{{ web_app_project_root }}"
 
+drush_version: "8.x"
+drush_keep_updated: false
+drush_composer_cli_options: "--prefer-dist --no-interaction"
+
 # Custom Drush alias tasks to insert just the local declaration into an existing
 # alias file.
 insert_local_drush_alias: true
@@ -68,9 +83,17 @@ insert_local_drush_alias: true
 #  - @my_project.whatever
 drush_alias_file_prefix: "{{ vagrant_machine_name }}"
 
+# Defaults for Drush rsync command.
+drush_rsync_mode: 'Pavu'
+drush_rsync_excludes: '*.wmv:*.mp4:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'
+
+
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
 # clobbers an existing file. So, it's disabled.
 configure_drush_aliases: false
+
+# Create project drushrc.php with various Drush shell aliases.
+drush_insert_project_shell_aliases: true
 
 # Though site is not installed, this is used within the Pantheon project
 # to form the database import file name.
@@ -80,19 +103,19 @@ drupal_major_version: 7
 # Install & configure basic site into database. Does not install code.
 # Set this to 'false' if you don't need to install drupal (using the drupal_*
 # settings below), but instead copy down a database (e.g. using drush sql-sync).
-install_site: false
+drupal_install_site: false
 
 # Set this to 'false' if you are using a different site deployment strategy and
 # would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
-build_makefile: false
+drupal_build_makefile: false
 
-# Set 'build_makefile' to 'false' and this to 'true' if you are using a
+# Set 'drupal_build_makefile' to 'false' and this to 'true' if you are using a
 # composer based site deployment strategy.
-build_composer: false
+drupal_build_composer: false
 
-# Set this to 'true' and 'build_makefile', 'build_composer' to 'false' if you
+# Set this to 'true' and 'drupal_build_makefile', 'drupal_build_composer' to 'false' if you
 # are using Composer's create-project as a site deployment strategy.
-build_composer_project: false
+drupal_build_composer_project: false
 
 apache_vhosts_ssl:
   - servername: "{{ drupal_domain }}"
@@ -102,6 +125,9 @@ apache_vhosts_ssl:
     extra_parameters: |
           ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ drupal_core_path }}"
 
+# If a file named "config.php{{ php_version }}.yml" exists in the config
+# directory, it will be included automatically and override the variables in
+# this file.
 # Configs for PHP 5.6 are in config.php5.6.yml
 php_version: "5.6"
 
@@ -133,6 +159,21 @@ installed_extras:
   # - varnish
   - xdebug
   # - xhprof
+
+
+# XDebug configuration. XDebug is disabled by default for better performance.
+php_xdebug_default_enable: 0
+php_xdebug_coverage_enable: 0
+php_xdebug_cli_enable: 0
+php_xdebug_remote_enable: 0
+php_xdebug_remote_connect_back: 1
+php_xdebug_remote_autostart: 0
+php_xdebug_remote_host: 10.0.2.2
+# Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
+php_xdebug_idekey: ECLIPSE_DBGP
+
+# Enable APCu for CLI so that drush can enable the apc module and clear caches.
+php_apc_enable_cli: 1
 
 ################################################################################
 # Core already installed in project directory
@@ -170,3 +211,5 @@ php_date_timezone: "America/Los_Angeles"
 
 # wp_table_prefix: "wp_"
 # wp_debug: true
+
+workspace: /tmp/vagrant-cache/generic

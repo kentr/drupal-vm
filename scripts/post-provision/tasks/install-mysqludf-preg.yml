@@ -1,0 +1,30 @@
+---
+
+- name: Clone mysqludf_preg repo.
+  git:
+    depth: 1
+    update: Yes
+    repo: https://github.com/mysqludf/lib_mysqludf_preg.git
+    dest: "{{ workspace }}/lib_mysqludf_preg"
+
+- name: Ensure libmysqlclient-dev is installed.
+  package:
+    name: libmysqlclient-dev
+    state: present
+
+- name: Configure mysqludf_preg.
+  command: ./configure
+  args:
+    chdir: "{{ workspace }}/lib_mysqludf_preg"
+    creates: Makefile
+
+- name: Make install mysqludf_preg.
+  command: make install
+  args:
+    chdir: "{{ workspace }}/lib_mysqludf_preg"
+    creates: /usr/lib/mysql/plugin/lib_mysqludf_preg.so
+
+- name: Make installdb mysqludf_preg.
+  command: make installdb
+  args:
+    chdir: "{{ workspace }}/lib_mysqludf_preg"

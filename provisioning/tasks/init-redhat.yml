@@ -1,19 +1,16 @@
 ---
-- name: Get software for Python-based control.
+- name: Install required dependencies.
   yum: "name={{ item }} state=installed"
   with_items:
-    - "curl"
-    - "python-pycurl"
-    - "@development"
-    - "unzip"
+    - curl
+    - python-pycurl
+    - unzip
+    - make
+    - gcc
 
 - name: Enable remi repo for MySQL.
   set_fact: mysql_enablerepo="remi"
   when: mysql_enablerepo is not defined or mysql_enablerepo == ""
-
-- name: Enable remi repo for PHP 5.5.
-  set_fact: php_enablerepo="remi,remi-php55"
-  when: php_version == "5.5"
 
 - name: Enable remi repo for PHP 5.6.
   set_fact: php_enablerepo="remi,remi-php56"
@@ -23,7 +20,7 @@
   set_fact: php_enablerepo="remi,remi-php70"
   when: php_version == "7.0"
 
-- name: Enable remi repo for PHP 7.1
+- name: Enable remi repo for PHP 7.1.
   set_fact: php_enablerepo="remi,remi-php71"
   when: php_version == "7.1"
 

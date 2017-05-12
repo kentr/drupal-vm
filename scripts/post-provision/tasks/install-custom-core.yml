@@ -9,7 +9,7 @@
     # Don't recursively set permissions.  May cause dirty repo.
     recurse: no
     mode: 0775
-  become: no
+  become: yes
   when: web_app_project_root is defined
 
 - name: Custom core - ensure sites/default directory exists and is writable.

@@ -1,0 +1,56 @@
+---
+# Inserts project-based Drush shell aliases.
+
+- name: Ensure web project drushrc.php file exists.
+  delegate_to: 127.0.0.1
+  become: no
+  template:
+    # Don't overwrite existing file.
+    force: no
+    dest: "{{ playbook_dir }}/../{{ web_app_project_dir }}/drushrc.php"
+    src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.drushrc.php.j2"
+
+- name: Insert project shell-aliases.
+  delegate_to: 127.0.0.1
+  become: no
+  blockinfile:
+    dest: "{{ playbook_dir }}/../{{ web_app_project_dir }}/drushrc.php"
+    marker: "// {mark} ANSIBLE MANAGED BLOCK: project shell aliases"
+    state: present
+    # content: "{{ lookup('template', '{{ playbook_dir }}/../scripts/post-provision/templates/drush.shell-aliases.php.j2') }}"
+    content: |
+      $local_files_dir = __DIR__ . '/{{ web_app_web_dir }}/{{ drupal_file_public_path }}/';
+      $options['shell-aliases'] = array(
+        'pull-data' => '!drush sql-sync @{{ drush_alias_file_prefix }}.prod @{{ drush_alias_file_prefix }}.loc; \
+                        drush rsync @{{ drush_alias_file_prefix }}.prod:%files/ ' . $local_files_dir . '; \
+                        chmod -R 777 ' . $local_files_dir . '; \
+                        drush @{{ drush_alias_file_prefix }}.loc cc all',
+      );
+  when: drush_insert_project_shell_aliases | default(false)
+
+- name: Ensure container project drushrc.php file exists.
+  delegate_to: 127.0.0.1
+  become: no
+  template:
+    # Don't overwrite existing file.
+    force: no
+    dest: "{{ playbook_dir }}/../drushrc.php"
+    src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.drushrc.php.j2"
+
+- name: Insert web project drushrc.php include.
+  delegate_to: 127.0.0.1
+  become: no
+  blockinfile:
+    dest: "{{ playbook_dir }}/../drushrc.php"
+    marker: "// {mark} ANSIBLE MANAGED BLOCK: project drushrc.php include"
+    state: present
+    content: |
+      /**
+       * If there is a project drushrc.php file, then include it
+       */
+      $local_settings = __DIR__ . "/{{ web_app_project_dir }}/drushrc.php";
+      if (file_exists($local_settings)) {
+        include $local_settings;
+      }
+
+  when: drush_insert_project_shell_aliases | default(false)
