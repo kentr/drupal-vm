@@ -7,4 +7,38 @@
     repo: https://github.com/pfrenssen/drush-bde-env.git
     dest: "/home/{{ vagrant_user }}/.drush/drush-bde-env"
     depth: 1
+  become: no
   when: '"drush" in installed_extras and "drush_bde_env" in installed_extras'
+
+- name: Clear drush cache.
+  command: drush -r {{ drupal_core_path }} cc drush
+  become: no
+  when: '"drush" in installed_extras and "drush_bde_env" in installed_extras'
+
+- name: Set drush-bde-env value.
+  command: "drush -r {{ drupal_core_path }} beg {{drush_bde_env_options}}"
+  become: no
+  register: drush_bde_env
+  when: '"drush" in installed_extras and "drush_bde_env" in installed_extras'
+
+- name: Set BEHAT_PARAMS in .bashrc.
+  lineinfile:
+    dest: "/home/{{ drupalvm_user }}/.bashrc"
+    state: present
+    create: yes
+    regexp: "^export BEHAT_PARAMS"
+    line: "{{ drush_bde_env.stdout }}"
+  become: no
+  when: '"drush" in installed_extras and "drush_bde_env" in installed_extras'
+
+# alias behat='
+- name: Set behat command path.
+  lineinfile:
+    dest: "/home/{{ drupalvm_user }}/.bashrc"
+    state: present
+    create: yes
+    regexp: "^export PATH={{ behat_binary_dir }}:"
+    line: "export PATH={{ behat_binary_dir }}:$PATH"
+  become: no
+  when: '"drush" in installed_extras and "drush_bde_env" in installed_extras'
+
