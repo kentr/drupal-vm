@@ -1,0 +1,59 @@
+---
+
+- name: Debug
+  debug:
+    var: wraith_testing_framework | default(False)
+
+- name: Install Wraith repo SSH key.
+  copy:
+    backup: Yes
+    mode: 0400
+    src: "{{ wraith_testing_framework.ssh_key }}"
+    dest: ~/.ssh/wraith-deploy
+  become: no
+  when: wraith_testing_framework.ssh_key is defined
+
+#- name: Clone wraith project directory
+#  git:
+#    repo: "{{ wraith_testing_framework.repo }}"
+#    dest: "{{ wraith_testing_framework.install_dir }}"
+#    accept_hostkey: True
+#    ssh_opts: "{{ '-i /home/vagrant/.ssh/wraith-deploy' if wraith_testing_framework.ssh_key is defined else omit }}"
+#  become: no
+#  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.repo is defined
+
+- name: Create blank Wraith configs 1.
+  command: "cp {{ wraith_testing_framework.install_dir }}/configs/example.smoke.{{ item }}.yml {{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item }}.yml"
+  args:
+    creates: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item }}.yml"
+  with_items:
+    # "common" is mandatory.
+    - "common"
+    - "local"
+  when: wraith_testing_framework.install | default(False)
+
+#- name: Modify Wraith configs.
+#  blockinfile:
+#    marker:
+#    content: "test"
+#  with_subelements:
+#    - instances
+#    - env
+#  when: wraith_testing_framework.install | default(False)
+
+- name: Modify Wraith configs 2.
+  lineinfile:
+    dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.local.yml"
+    regexp: "  {{ item.env }}: "
+    line: '  {{ item.env }}: "{{ item.uri }}"'
+    state: present
+  with_items:
+    - "{{ instances }}"
+  when: wraith_testing_framework.install | default(False)
+
+- name: Modify Wraith configs 3.
+  shell: 'echo {{ item.env }}: "{{ item.uri }}"'
+  with_items:
+    - "{{ instances }}"
+  register: uris
+  when: wraith_testing_framework.install | default(False)

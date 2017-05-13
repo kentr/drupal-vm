@@ -213,3 +213,59 @@ php_date_timezone: "America/Los_Angeles"
 # wp_debug: true
 
 workspace: /tmp/vagrant-cache/generic
+
+# Setup vars for Wraith testing scripts.
+# Assumes Wraith is already installed on system.
+# See https://bbc-news.github.io/wraith/
+# You must have access to the project repo.
+wraith_testing_framework:
+  install: false
+  repo: repo_url
+  install_dir: "{{ web_app_project_root }}"
+
+# Setup vars for Wraith testing scripts.
+# Assumes Wraith is already installed on system.
+# See https://bbc-news.github.io/wraith/
+# You must have access to the project repo.
+wraith_testing_framework:
+  install: False
+  # Git URL for wraith testing system.
+  repo: repo_url
+  # Absolute path in target node for the wraith testing directory.
+  install_dir: "{{ web_app_project_root }}/wraith"
+  # Absolute path on host node to SSH private key required
+  # for access to repo define above.
+  # Will be copied to target node and renamed as needed.
+  #
+  # If included, Ansible will use this in the "ssh_opts" parameter to the Ansible git module,
+  # specifying the SSH identity file.
+  #
+  # If omitted, Ansible will attempt to access the repo using the standard Git
+  # mechanism, which will use the Ansible user's SSH config for any SSH-based repo.
+  #
+  # As this private key will be copied to another machine, it is highly
+  # advisable to _not_ use your standard personal private key.
+  # Instead, create a deploy key for this and have it added to the repo.
+  ssh_key: ~/.ssh/generic-deploy-key
+
+
+# Instance definitions used for setting up the Wraith configs and anything else.
+instances:
+  - name: "{{ vagrant_hostname }}"
+    env: local
+    uri: "http://{{ vagrant_hostname }}"
+    type: drupal
+    major_version: "{{ drupal_major_version }}"
+    # one of "local", "dev", "stage", "prod"
+    root: "{{ drupal_core_path }}"
+    drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
+
+  - name: example.com
+    env: prod
+    uri: http://example.com
+    type: drupal
+    major_version: "{{ drupal_major_version }}"
+    # one of "local", "dev", "stage", "prod"
+    # Absolute path to web root for the environment.
+    root: /home/user/public_html
+    drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
