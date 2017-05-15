@@ -257,6 +257,7 @@ instances:
     uri: "http://{{ vagrant_hostname }}"
     type: drupal
     major_version: "{{ drupal_major_version }}"
+    # Absolute path to web root for the environment.
     root: "{{ drupal_core_path }}"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
 
