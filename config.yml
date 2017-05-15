@@ -252,20 +252,20 @@ wraith_testing_framework:
 # Instance definitions used for setting up the Wraith configs and anything else.
 instances:
   - name: "{{ vagrant_hostname }}"
+    # one of "local", "dev", "stage", "prod"
     env: local
     uri: "http://{{ vagrant_hostname }}"
     type: drupal
     major_version: "{{ drupal_major_version }}"
-    # one of "local", "dev", "stage", "prod"
     root: "{{ drupal_core_path }}"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
 
   - name: example.com
+    # one of "local", "dev", "stage", "prod"
     env: prod
     uri: http://example.com
     type: drupal
     major_version: "{{ drupal_major_version }}"
-    # one of "local", "dev", "stage", "prod"
     # Absolute path to web root for the environment.
     root: /home/user/public_html
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
