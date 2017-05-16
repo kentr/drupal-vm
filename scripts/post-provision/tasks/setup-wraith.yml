@@ -1,8 +1,20 @@
 ---
 
-- name: Debug
-  debug:
-    var: wraith_testing_framework | default(False)
+# Set up Wraith smoke testing for various environments.
+# Expects a variable named "instances" containing list of objects.  Example:
+#
+# instances:
+#   - name: "{{ vagrant_hostname }}"
+#     # one of "local", "dev", "stage", "prod"
+#     env: local
+#     uri: "http://{{ vagrant_hostname }}"
+#
+#   - name: example.com
+#     # one of "local", "dev", "stage", "prod"
+#     env: prod
+#     uri: http://example.com
+#
+# See config.yml for more information.
 
 - name: Install Wraith repo SSH key.
   copy:
@@ -11,49 +23,61 @@
     src: "{{ wraith_testing_framework.ssh_key }}"
     dest: ~/.ssh/wraith-deploy
   become: no
-  when: wraith_testing_framework.ssh_key is defined
+  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.ssh_key is defined
 
-#- name: Clone wraith project directory
-#  git:
-#    repo: "{{ wraith_testing_framework.repo }}"
-#    dest: "{{ wraith_testing_framework.install_dir }}"
-#    accept_hostkey: True
-#    ssh_opts: "{{ '-i /home/vagrant/.ssh/wraith-deploy' if wraith_testing_framework.ssh_key is defined else omit }}"
-#  become: no
-#  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.repo is defined
+- name: Clone wraith project directory
+  git:
+    repo: "{{ wraith_testing_framework.repo }}"
+    dest: "{{ wraith_testing_framework.install_dir }}"
+    accept_hostkey: True
+    ssh_opts: "{{ '-i /home/vagrant/.ssh/wraith-deploy' if wraith_testing_framework.ssh_key is defined else omit }}"
+  become: no
+  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.repo is defined
 
-- name: Create blank Wraith configs 1.
-  command: "cp {{ wraith_testing_framework.install_dir }}/configs/example.smoke.{{ item }}.yml {{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item }}.yml"
+- name: Create blank Wraith shared config.
+  command: "cp example.smoke.common.yml smoke.common.yml"
   args:
-    creates: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item }}.yml"
-  with_items:
-    # "common" is mandatory.
-    - "common"
-    - "local"
+    chdir: "{{ wraith_testing_framework.install_dir }}/configs"
+    creates: "smoke.common.yml"
   when: wraith_testing_framework.install | default(False)
 
-#- name: Modify Wraith configs.
-#  blockinfile:
-#    marker:
-#    content: "test"
-#  with_subelements:
-#    - instances
-#    - env
-#  when: wraith_testing_framework.install | default(False)
+- name: Create blank Wraith environment configs.
+  command: "cp example.smoke.{{ item.env }}.yml smoke.{{ item.env }}.yml"
+  args:
+    chdir: "{{ wraith_testing_framework.install_dir }}/configs"
+    creates: "smoke.{{ item.env }}.yml"
+  with_items:
+    - "{{ instances }}"
+  when: wraith_testing_framework.install | default(False)
 
-- name: Modify Wraith configs 2.
+- name: Get prod URI.
+  command: echo "{{ instances | selectattr('env', 'equalto', 'prod') | map(attribute='uri') | join }}"
+  register: prod_uri
+
+# Replace the URI for prod environment.
+# Searches config files for lines starting with "  prod: " or "  base: ".
+- name: Change Wraith environment config URLs (prod).
   lineinfile:
-    dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.local.yml"
-    regexp: "  {{ item.env }}: "
-    line: '  {{ item.env }}: "{{ item.uri }}"'
+    dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
+    regexp: "^  (base|prod): "
+    backrefs: yes
+    line: '  \1: "{{ prod_uri.stdout }}"'
     state: present
   with_items:
     - "{{ instances }}"
   when: wraith_testing_framework.install | default(False)
 
-- name: Modify Wraith configs 3.
-  shell: 'echo {{ item.env }}: "{{ item.uri }}"'
+# Replace the URI for non-prod environments.
+# Searches config files for lines starting with "  {{ item.env }}: ".
+- name: Change Wraith environment config URLs (other).
+  lineinfile:
+    dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
+    regexp: "^  {{ item.env }}: "
+    line: '  {{ item.env }}: "{{ item.uri }}"'
+    state: present
   with_items:
-    - "{{ instances }}"
-  register: uris
+    # Skip "prod" instance so that it doesn't add a line starting with "  prod:..."
+    # in smoke.prod.yml
+    - "{{ instances | rejectattr('env', 'equalto', 'prod') | list }}"
   when: wraith_testing_framework.install | default(False)
+
