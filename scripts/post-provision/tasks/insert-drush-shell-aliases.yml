@@ -10,7 +10,7 @@
     dest: "{{ playbook_dir }}/../{{ web_app_project_dir }}/drushrc.php"
     src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.drushrc.php.j2"
 
-- name: Insert project shell-aliases.
+- name: Insert project "pull-data" shell-alias.
   delegate_to: 127.0.0.1
   become: no
   blockinfile:
@@ -24,7 +24,7 @@
         'pull-data' => '!drush sql-sync @{{ drush_alias_file_prefix }}.prod @{{ drush_alias_file_prefix }}.loc; \
                         drush rsync @{{ drush_alias_file_prefix }}.prod:%files/ ' . $local_files_dir . '; \
                         chmod -R 777 ' . $local_files_dir . '; \
-                        drush @{{ drush_alias_file_prefix }}.loc cc all',
+                        drush @{{ drush_alias_file_prefix }}.loc {{ "cc all" if drupal_major_version == 7 else "cr" }}',
       );
   when: drush_insert_project_shell_aliases | default(false)
 
