@@ -248,6 +248,17 @@ wraith_testing_framework:
   # Instead, create a deploy key for this and have it added to the repo.
   ssh_key: ~/.ssh/generic-deploy-key
 
+  # SSH remote host to which results will be copied.
+  # You must have rsync access to this host.
+  rsync_dest_host: "{{ drush_alias_file_prefix }}"
+
+  # Remote directory to which results will be copied.
+  # Directory must already exist on the target machine, and you must have write
+  # access to it.
+  # Can be relative to the SSH user, or absolute.
+  # A trailing slash will be added automatically, so that only the directory contents
+  # are copied.
+  rsync_dest_dir: path/to/vr-shots
 
 # Instance definitions used for setting up the Wraith configs and anything else.
 instances:

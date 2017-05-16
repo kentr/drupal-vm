@@ -53,7 +53,7 @@
 - name: Get prod URI.
   command: echo "{{ instances | selectattr('env', 'equalto', 'prod') | map(attribute='uri') | join }}"
   register: prod_uri
-
+#
 # Replace the URI for prod environment.
 # Searches config files for lines starting with "  prod: " or "  base: ".
 - name: Change Wraith environment config URLs (prod).
@@ -66,7 +66,7 @@
   with_items:
     - "{{ instances }}"
   when: wraith_testing_framework.install | default(False)
-
+#
 # Replace the URI for non-prod environments.
 # Searches config files for lines starting with "  {{ item.env }}: ".
 - name: Change Wraith environment config URLs (other).
@@ -81,3 +81,25 @@
     - "{{ instances | rejectattr('env', 'equalto', 'prod') | list }}"
   when: wraith_testing_framework.install | default(False)
 
+- name: Create Wraith script config.
+  command: "cp example.config.sh config.sh"
+  args:
+    chdir: "{{ wraith_testing_framework.install_dir }}/scripts"
+    creates: "config.sh"
+  when: wraith_testing_framework.install | default(False)
+
+- name: Set WRAITH_RSYNC_DEST_HOST.
+  lineinfile:
+    dest: "{{ wraith_testing_framework.install_dir }}/scripts/config.sh"
+    regexp: "^export WRAITH_RSYNC_DEST_HOST="
+    line: "export WRAITH_RSYNC_DEST_HOST={{ wraith_testing_framework.rsync_dest_host }}"
+    state: present
+  when: wraith_testing_framework.install | default(False)
+
+- name: Set WRAITH_RSYNC_DEST_DIR.
+  lineinfile:
+    dest: "{{ wraith_testing_framework.install_dir }}/scripts/config.sh"
+    regexp: "^export WRAITH_RSYNC_DEST_DIR="
+    line: "export WRAITH_RSYNC_DEST_DIR={{ wraith_testing_framework.rsync_dest_dir }}/"
+    state: present
+  when: wraith_testing_framework.install | default(False)
