@@ -268,5 +268,5 @@ instances:
     type: drupal
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
-    root: /home/user/public_html
+    root: "/home/{{ vagrant_machine_name }}/public_html"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
