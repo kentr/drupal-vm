@@ -85,7 +85,7 @@ If you're using NFS synced folders the mounted directories will use the same num
 
 First install the plugin with `vagrant plugin install vagrant-bindfs`, then specify `use_bindfs: true` for the entry in `vagrant_synced_folders`.
 
-If you want to customize the `vagrant-bindfs`options, add a `Vagrantfile.local` with the following:
+If you want to customize the `vagrant-bindfs` options, add a `Vagrantfile.local` similar to the following:
 
 ```rb
 vconfig['vagrant_synced_folders'].each do |synced_folder|
