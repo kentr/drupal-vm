@@ -83,12 +83,24 @@ Vagrant.configure('2') do |config|
       rsync__args: ['--verbose', '--archive', '--delete', '-z', '--copy-links', '--chmod=ugo=rwX'],
       id: synced_folder['id'],
       create: synced_folder.fetch('create', false),
-      mount_options: synced_folder.fetch('mount_options', [])
+      mount_options: synced_folder.fetch('mount_options', []),
+      use_bindfs: synced_folder.fetch('use_bindfs', false)
     }
     synced_folder.fetch('options_override', {}).each do |key, value|
-      options[key.to_sym] = value
+        options[key.to_sym] = value
+      end
+
+    # Use vagrant-bindfs plugin if present.
+    # See https://github.com/gael-ian/vagrant-bindfs
+    if options[:type] == 'nfs' && options[:use_bindfs] && Vagrant.has_plugin?("vagrant-bindfs")
+      # Declare shared folder with Vagrant syntax
+      config.vm.synced_folder synced_folder.fetch('local_path'), "/vagrant-nfs", options
+
+      # Use vagrant-bindfs to re-mount folder
+      config.bindfs.bind_folder "/vagrant-nfs", synced_folder.fetch('destination')
+    else
+      config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
     end
-    config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
   end
 
   # Allow override of the default synced folder type.

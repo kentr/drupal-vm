@@ -83,7 +83,9 @@ See [this issue](https://github.com/geerlingguy/drupal-vm/issues/66) for more de
 
 If you're using NFS synced folders the mounted directories will use the same numeric permissions on the guest VM as on the host OS. If you're on OSX for instance, your files within the VM would be owned by 501:20. To correct these permissions you can use the [`vagrant-bindfs` plugin](https://github.com/gael-ian/vagrant-bindfs) to mount your NFS folders to a temporary location and then re-mount them to the actual destination with the correct ownership.
 
-First install the plugin with `vagrant plugin install vagrant-bindfs` and then add a `Vagrantfile.local` with the following:
+First install the plugin with `vagrant plugin install vagrant-bindfs`, then specify `use_bindfs: true` for the entry in `vagrant_synced_folders`.
+
+If you want to customize the `vagrant-bindfs`options, add a `Vagrantfile.local` with the following:
 
 ```rb
 vconfig['vagrant_synced_folders'].each do |synced_folder|
