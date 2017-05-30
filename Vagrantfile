@@ -87,8 +87,7 @@ Vagrant.configure('2') do |config|
       use_bindfs: synced_folder.fetch('use_bindfs', false)
     }
     synced_folder.fetch('options_override', {}).each do |key, value|
-        options[key.to_sym] = value
-      end
+      options[key.to_sym] = value
     end
 
     # Use vagrant-bindfs plugin if present.
