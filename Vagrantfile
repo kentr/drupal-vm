@@ -93,11 +93,20 @@ Vagrant.configure('2') do |config|
     # Use vagrant-bindfs plugin if present.
     # See https://github.com/gael-ian/vagrant-bindfs
     if options[:type] == 'nfs' && options[:use_bindfs] && Vagrant.has_plugin?("vagrant-bindfs")
-      # Declare shared folder with Vagrant syntax
-      config.vm.synced_folder synced_folder.fetch('local_path'), "/vagrant-nfs", options
-
-      # Use vagrant-bindfs to re-mount folder
-      config.bindfs.bind_folder "/vagrant-nfs", synced_folder.fetch('destination')
+      guest_path = synced_folder['destination']
+      host_path = File.expand_path(synced_folder['local_path'])
+      config.vm.synced_folder synced_folder['local_path'], "/var/nfs#{host_path}", options
+      config.bindfs.bind_folder "/var/nfs#{host_path}", guest_path,
+        # These users will see themselves as the owners of all files. PHP `chmod()`
+        # is only allowed by the owner of the files, so `www-data` must see itself as
+        # the owner.
+        # See http://php.net/manual/en/function.chmod.php#refsect1-function.chmod-notes.
+        m: 'vagrant,www-data',
+        g: 'www-data',
+        perms: 'u=rwX:g=rwD',
+        o: 'nonempty'
+      config.nfs.map_uid = Process.uid
+      config.nfs.map_gid = Process.gid
     else
       config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
     end
