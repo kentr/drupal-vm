@@ -150,7 +150,24 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         options[key.to_sym] = value
       end
     end
-    config.vm.synced_folder synced_folder['local_path'], synced_folder['destination'], options
+
+    # Use vagrant-bindfs plugin if present.
+    # See https://github.com/gael-ian/vagrant-bindfs
+    if options[:type] == 'nfs' && options[:use_bindfs] && Vagrant.has_plugin?("vagrant-bindfs")
+      # Declare shared folder with Vagrant syntax
+      # config.vm.synced_folder synced_folder.fetch('local_path'), "/vagrant-nfs", options
+
+      # Use vagrant-bindfs to re-mount folder
+      # config.bindfs.bind_folder "/vagrant-nfs", synced_folder.fetch('destination')
+
+      guest_path = synced_folder['destination']
+      host_path = File.expand_path(synced_folder['local_path'])
+      config.vm.synced_folder synced_folder['local_path'], "/var/nfs#{host_path}", options
+      # @todo Add bindfs options?
+      config.bindfs.bind_folder "/var/nfs#{host_path}", guest_path
+    else
+      config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
+    end
   end
 
   # Allow override of the default synced folder type.
