@@ -41,6 +41,10 @@ vagrant_synced_folders:
     destination: "{{ base_synced_dir }}"
     type: nfs
     create: true
+    # Whether or not to mount the folder with vagrant-bindfs plugin for nfs mounts.
+    # vagrant-bindfs plugin must be installed separately.  Uses plugin default options.
+    # See https://github.com/gael-ian/vagrant-bindfs
+    use_bindfs: false
 
 # Memory and CPU to use for this VM.
 vagrant_memory: 2048

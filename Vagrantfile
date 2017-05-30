@@ -83,7 +83,8 @@ Vagrant.configure('2') do |config|
       rsync__args: ['--verbose', '--archive', '--delete', '-z', '--copy-links', '--chmod=ugo=rwX'],
       id: synced_folder['id'],
       create: synced_folder.fetch('create', false),
-      mount_options: synced_folder.fetch('mount_options', [])
+      mount_options: synced_folder.fetch('mount_options', []),
+      use_bindfs: synced_folder.fetch('use_bindfs', false)
     }
     synced_folder.fetch('options_override', {}).each do |key, value|
         options[key.to_sym] = value
