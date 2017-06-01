@@ -172,6 +172,10 @@ php_xdebug_remote_host: 10.0.2.2
 # Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
 php_xdebug_idekey: ECLIPSE_DBGP
 
+# Composer requires lots of memory.
+# See https://github.com/geerlingguy/drupal-vm/issues/547
+php_memory_limit: 1792M
+
 # Enable APCu for CLI so that drush can enable the apc module and clear caches.
 php_apc_enable_cli: 1
 
