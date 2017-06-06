@@ -1,6 +1,13 @@
 ---
 # Inserts project-based Drush shell aliases.
 
+- name: Ensure web_app_project_dir exists.
+  delegate_to: 127.0.0.1
+  become: no
+  file:
+    path: "{{ playbook_dir }}/../{{ web_app_project_dir }}"
+    state: directory
+
 - name: Ensure web project drushrc.php file exists.
   delegate_to: 127.0.0.1
   become: no
