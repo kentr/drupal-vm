@@ -5,6 +5,15 @@
 # Prerequisites:
 #   - Server is already set up to run Drupal
 #   - Drupal code exists.
+#
+# Usage:
+#   `ansible-playbook provisioning/run-updates.yml`
+#
+# Extra Variables:
+#   - drupal_update_security_only: Boolean. Default = False. If True, only
+#     security updates will be applied.
+#   - drupal_update_projects: Space-separated list of projects to update,
+#     as for `drush pm-updatestatus`.  Default = '' (update all projects).
 
 - hosts: all
   become: No
@@ -67,13 +76,13 @@
   - name: Create `updates` Git branch if necessary.
     command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
 
-  - name: Find security updates.
-    command: "{{ drush_path }} pm-updatestatus --security-only --pipe"
+  - name: Find updates.
+    command: "{{ drush_path }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
     args:
       chdir: "{{ drupal_core_path }}"
     register: updates_available
 
-  - name: Download security updates.
+  - name: Download updates.
     composer:
       command: "update"
       arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
