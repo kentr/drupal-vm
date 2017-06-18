@@ -16,21 +16,11 @@
 #
 # See config.yml for more information.
 
-- name: Install Wraith repo SSH key.
-  copy:
-    backup: Yes
-    mode: 0400
-    src: "{{ wraith_testing_framework.ssh_key }}"
-    dest: ~/.ssh/wraith-deploy
-  become: no
-  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.ssh_key is defined
-
 - name: Clone wraith project directory
   git:
     repo: "{{ wraith_testing_framework.repo }}"
     dest: "{{ wraith_testing_framework.install_dir }}"
     accept_hostkey: True
-    ssh_opts: "{{ '-i /home/vagrant/.ssh/wraith-deploy' if wraith_testing_framework.ssh_key is defined else omit }}"
   become: no
   when: wraith_testing_framework.install | default(False) and wraith_testing_framework.repo is defined
 

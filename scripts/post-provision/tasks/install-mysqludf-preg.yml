@@ -6,11 +6,18 @@
     update: Yes
     repo: https://github.com/mysqludf/lib_mysqludf_preg.git
     dest: "{{ workspace }}/lib_mysqludf_preg"
+    force: Yes
 
 - name: Ensure libmysqlclient-dev is installed.
   package:
     name: libmysqlclient-dev
     state: present
+
+# See http://stackoverflow.com/questions/3096989/libtool-version-mismatch-error
+- name: Fix libtool version mismatch.
+  command: autoreconf --force --install
+  args:
+    chdir: "{{ workspace }}/lib_mysqludf_preg"
 
 - name: Configure mysqludf_preg.
   command: ./configure

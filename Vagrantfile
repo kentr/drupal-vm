@@ -83,12 +83,33 @@ Vagrant.configure('2') do |config|
       rsync__args: ['--verbose', '--archive', '--delete', '-z', '--copy-links', '--chmod=ugo=rwX'],
       id: synced_folder['id'],
       create: synced_folder.fetch('create', false),
-      mount_options: synced_folder.fetch('mount_options', [])
+      mount_options: synced_folder.fetch('mount_options', []),
+      use_bindfs: synced_folder.fetch('use_bindfs', false)
     }
     synced_folder.fetch('options_override', {}).each do |key, value|
-        options[key.to_sym] = value
-      end
-    config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
+      options[key.to_sym] = value
+    end
+
+    # Use vagrant-bindfs plugin if present.
+    # See https://github.com/gael-ian/vagrant-bindfs
+    if options[:type] == 'nfs' && options[:use_bindfs] && Vagrant.has_plugin?("vagrant-bindfs")
+      guest_path = synced_folder['destination']
+      host_path = File.expand_path(synced_folder['local_path'])
+      config.vm.synced_folder synced_folder['local_path'], "/var/nfs#{host_path}", options
+      config.bindfs.bind_folder "/var/nfs#{host_path}", guest_path,
+        # These users will see themselves as the owners of all files. PHP `chmod()`
+        # is only allowed by the owner of the files, so `www-data` must see itself as
+        # the owner.
+        # See http://php.net/manual/en/function.chmod.php#refsect1-function.chmod-notes.
+        m: 'vagrant,www-data',
+        g: 'www-data',
+        perms: 'u=rwX:g=rwD',
+        o: 'nonempty'
+      config.nfs.map_uid = Process.uid
+      config.nfs.map_gid = Process.gid
+    else
+      config.vm.synced_folder synced_folder.fetch('local_path'), synced_folder.fetch('destination'), options
+    end
   end
 
   # Allow override of the default synced folder type.
@@ -103,7 +124,7 @@ Vagrant.configure('2') do |config|
       # See https://www.vagrantup.com/docs/provisioning/ansible_common.html
       ansible.host_vars = {
         "#{vconfig['vagrant_machine_name']}" => {
-          "ansible_ssh_extra_args" => "'-o StrictHostKeyChecking=no'",
+          "ansible_ssh_extra_args" => "",
         }
       }
       ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
