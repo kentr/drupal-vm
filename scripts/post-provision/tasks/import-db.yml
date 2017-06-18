@@ -12,7 +12,7 @@
 # Check whether database dump file is declared.
 - name: Define do_db_import.
   set_fact:
-    do_db_import: drupal_database_import_directory is defined and drupal_database_import_filename is defined
+    do_db_import: "{{ drupal_database_import_directory is defined and drupal_database_import_filename is defined }}"
   when: do_db_import is not defined
   ignore_errors: yes
 
