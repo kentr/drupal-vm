@@ -1,10 +1,15 @@
 ---
 
-# Run Drupal update process.
-
+# EXPERIMENTAL Run Drupal update process for drupal-composer projects
+# within Drupal-VM environment.
+#   - Performs code update.
+#   - Calls geerlingguy.drupal post-update tasks.
+#   - Runs Wraith smoke test on updated code.
+#
 # Prerequisites:
-#   - Server is already set up to run Drupal
+#   - VM is already set up to run Drupal.
 #   - Drupal code exists.
+#   - Drupal-VM configuration files are present and correct.
 #
 # Usage:
 #   `ansible-playbook provisioning/run-updates.yml`
@@ -14,6 +19,9 @@
 #     security updates will be applied.
 #   - drupal_update_projects: Space-separated list of projects to update,
 #     as for `drush pm-updatestatus`.  Default = '' (update all projects).
+#
+# TODO:
+#   - Support non-composer projects.
 
 - hosts: all
   become: No
@@ -85,7 +93,9 @@
   - name: Download updates.
     composer:
       command: "update"
-      arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+      # Substitutes "core" for "drupal".
+      # Todo: make this substitution smarter, based on what's actually installed.
+      arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
       optimize_autoloader: True
       # By default, Drupal composer projects install dev dependencies.
       # We want to follow that behavior here.
