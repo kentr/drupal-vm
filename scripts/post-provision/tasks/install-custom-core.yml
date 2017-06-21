@@ -52,7 +52,7 @@
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
-    dest: "{{ drupal_core_path }}/sites/default/settings.local.php"
+    dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
     mode: 0600
   when: custom_core_add_settings_local_php|default(True)
 
