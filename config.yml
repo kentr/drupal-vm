@@ -289,5 +289,3 @@ instances:
     # Absolute path to web root for the environment.
     root: "/home/{{ vagrant_machine_name }}/public_html"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
-
-adminer_install_dir: ''
