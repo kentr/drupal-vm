@@ -1,0 +1,19 @@
+---
+
+- lineinfile:
+  dest=/home/vagrant/.bashrc
+  state=present
+  insertafter=EOF
+  line="export GEM_HOME=$HOME/.gem/ruby/1.9.1"
+
+- lineinfile:
+  dest=/home/vagrant/.bashrc
+  state=present
+  insertafter=EOF
+  line="export GEM_PATH=$HOME/.gem/ruby/1.9.1"
+
+- lineinfile:
+  dest=/home/vagrant/.bashrc
+  state=present
+  insertafter=EOF
+  line="export PATH=$HOME/.gem/ruby/1.9.1/bin:$PATH"
