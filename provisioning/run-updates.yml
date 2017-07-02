@@ -1,0 +1,134 @@
+---
+
+# EXPERIMENTAL Run Drupal update process for drupal-composer projects
+# within Drupal-VM environment.
+#   - Performs code update.
+#   - Calls geerlingguy.drupal post-update tasks.
+#   - Runs Wraith smoke test on updated code.
+#
+# Prerequisites:
+#   - VM is already set up to run Drupal.
+#   - Drupal code exists.
+#   - Drupal-VM configuration files are present and correct.
+#
+# Usage:
+#   `ansible-playbook provisioning/run-updates.yml`
+#
+# Extra Variables:
+#   - drupal_update_security_only: Boolean. Default = False. If True, only
+#     security updates will be applied.
+#   - drupal_update_projects: Space-separated list of projects to update,
+#     as for `drush pm-updatestatus`.  Default = '' (update all projects).
+#
+# TODO:
+#   - Support non-composer projects.
+
+- hosts: all
+  become: No
+
+  vars_files:
+    - vars/main.yml
+    - ../default.config.yml
+
+  pre_tasks:
+    - name: Include OS-specific variables.
+      include_vars: "{{ ansible_os_family }}.yml"
+
+    - name: Define config_dir.
+      set_fact:
+        config_dir: "{{ playbook_dir }}/.."
+      when: config_dir is not defined
+      tags: ['always']
+
+    # config.yml is imported first b/c the PHP version switching wasn't working
+    # with all items in one list.
+    - include_vars: "{{ item }}"
+      with_fileglob:
+        - "{{ config_dir }}/config.yml"
+      tags: ['always']
+
+    - include_vars: "{{ item }}"
+      with_fileglob:
+        - "{{ config_dir }}/config.php{{ php_version }}.yml"
+        - "{{ config_dir }}/local.config.yml"
+        - "{{ config_dir }}/{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
+      tags: ['always']
+
+    - name: Add `wraith` to gems list.
+      set_fact:
+        ruby_install_gems: "{{ ruby_install_gems + [item] }}"
+      with_items:
+        - wraith
+      when: wraith_testing_framework.install | default(False)
+
+    - name: Add Wraith npm dependencies.
+      set_fact:
+        nodejs_npm_global_packages: "{{ nodejs_npm_global_packages + [item] }}"
+      with_items:
+        - name: phantomjs
+        - name: casperjs
+      when: wraith_testing_framework.install | default(False)
+
+  roles:
+
+    # Install Ruby for Wraith testing
+    - { role: geerlingguy.ruby, when: wraith_testing_framework.install | default(False), become: Yes}
+    - { role: geerlingguy.nodejs, when: wraith_testing_framework.install | default(False), become: Yes }
+
+    # Build Drupal if necessary.
+    # Todo: Add git repo and clone variables.
+    - { role: geerlingguy.drupal, tags: ['drupal'] }
+
+  tasks:
+
+  - name: Create `updates` Git branch if necessary.
+    command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
+
+  - name: Find updates.
+    command: "{{ drush_path }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: updates_available
+
+  - name: Download updates.
+    composer:
+      command: "update"
+      # Substitutes "core" for "drupal".
+      # Todo: make this substitution smarter, based on what's actually installed.
+      arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+      optimize_autoloader: True
+      # By default, Drupal composer projects install dev dependencies.
+      # We want to follow that behavior here.
+      no_dev: False
+      working_dir: "{{ web_app_project_root }}"
+    with_items: "{{ updates_available.stdout_lines }}"
+    register: drupal_updates_download
+
+  - name: Define drupal_updates_updated
+    set_fact:
+      drupal_updated: "{{ drupal_updates_download.changed|default(false) }}"
+
+  - name: Run Drupal post-update tasks.
+    include: "roles/geerlingguy.drupal/tasks/update.yml"
+    when: drupal_updated | default(false)
+    static: no
+
+  - name: Install imagemagick.
+    package:
+      name: imagemagick
+      state: present
+    become: Yes
+
+  - name: Get gems path.
+    command: ruby -rubygems -e 'puts Gem.user_dir'
+    become: no
+    register: gems_path
+
+  - name: Run wraith smoke test.
+    command: "wraith capture configs/smoke.local.yml"
+    become: no
+    args:
+      chdir: "{{ wraith_testing_framework.install_dir }}"
+    environment:
+      PATH: "{{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:{{ ansible_env.PATH }}"
+    when: wraith_testing_framework.install | default(False) and wraith_testing_framework.install_dir is defined and gems_path.stdout is defined
