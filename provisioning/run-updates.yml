@@ -98,12 +98,26 @@
     command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
 
   - name: Find updates.
-    command: "{{ drush_path }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
+    # TODO: Is the `-l` option necessary with sites.php?
+    command: "{{ drush_path }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
     args:
       chdir: "{{ drupal_core_path }}"
     register: updates_available
 
-  - name: Download updates.
+  - name: Determine if this is composer project.
+    stat: "path={{ web_app_project_root }}/composer.json"
+    # Use drupal_deploy_composer_file for consistency & reuse with geerlinguy.drupal.
+    register: drupal_deploy_composer_file
+
+  - name: Run drush pm-update if not composer project.
+    # TODO: Is the `-l` option necessary with sites.php?
+    command: "{{ drush_path }} -l {{ config_site_directory }} up -y --pipe {{ updates_available.stdout_lines | join(' ') }}"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: drupal_updates_download
+    when: drupal_deploy_composer_file.stat.exists == False
+
+  - name: Download updates with composer if composer project.
     composer:
       command: "update"
       # Substitutes "core" for "drupal".
@@ -116,6 +130,7 @@
       working_dir: "{{ web_app_project_root }}"
     with_items: "{{ updates_available.stdout_lines }}"
     register: drupal_updates_download
+    when: drupal_deploy_composer_file.stat.exists == True
 
   - name: Define drupal_updates_updated
     set_fact:
@@ -123,7 +138,7 @@
 
   - name: Run Drupal post-update tasks.
     include: "roles/geerlingguy.drupal/tasks/update.yml"
-    when: drupal_updated | default(false)
+    when: drupal_major_version == 8 and drupal_updated | default(false)
     static: no
 
   - name: Install imagemagick.
