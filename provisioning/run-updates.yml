@@ -25,6 +25,9 @@
 
 - hosts: all
   become: No
+  vars:
+    # Wraith requirement.  For simplicity, using default version of geerlingguy.ruby.
+    ruby_min_version: 2.3.0
 
   vars_files:
     - vars/main.yml
@@ -69,11 +72,15 @@
         - name: casperjs
       when: wraith_testing_framework.install | default(False)
 
+    - name: Get ruby version.
+      command: "ruby -e 'puts RUBY_VERSION'"
+      register: ruby_current_version
+
   roles:
 
     # Install Ruby for Wraith testing
-    - { role: geerlingguy.ruby, when: wraith_testing_framework.install | default(False), become: Yes}
     - { role: geerlingguy.nodejs, when: wraith_testing_framework.install | default(False), become: Yes }
+    - { role: geerlingguy.ruby, ruby_install_from_source: true, workspace: /root, when: ruby_current_version.stdout < ruby_min_version | default(False) and wraith_testing_framework.install | default(False), become: Yes}
 
     # Build Drupal if necessary.
     # Todo: Add git repo and clone variables.
