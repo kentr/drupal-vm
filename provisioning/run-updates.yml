@@ -152,6 +152,14 @@
     become: no
     register: gems_path
 
+  # Add gems path to .bashrc for convenience when testing.
+  - name: Add gems path to .bashrc
+    blockinfile:
+      path: ~/.bashrc
+      backup: True
+      insertafter: EOF
+      content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:$PATH"
+
   - name: Run wraith smoke test.
     command: "wraith capture configs/smoke.local.yml"
     become: no
