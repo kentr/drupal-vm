@@ -10,19 +10,20 @@
     recurse: no
     mode: 0775
   become: yes
-  when: web_app_project_root is defined
+  when: project_type == "drupal" and web_app_project_root is defined
 
 - name: Custom core - ensure sites/default directory exists and is writable.
   file:
     path: "{{ drupal_core_path }}/sites/default"
     mode: "ug+w"
     state: directory
+  when: project_type == "drupal"
 
 - name: Ensure private files directory.
   file:
     path: "{{ drupal_file_private_path }}"
     state: directory
-  when: drupal_file_private_path is defined and drupal_file_private_path | trim != ''
+  when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
 - name: Ensure private files .htaccess.
   template:
@@ -30,13 +31,13 @@
     src: "../scripts/post-provision/templates/private_files_htaccess.j2"
     dest: "{{ drupal_file_private_path }}/.htaccess"
     force: No
-  when: drupal_file_private_path is defined and drupal_file_private_path | trim != ''
+  when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
 - name: Ensure config sync directory.
   file:
     path: "{{ drupal_config_sync_directory }}"
     state: directory
-  when: drupal_major_version == "8" and drupal_config_sync_directory is defined
+  when: project_type == "drupal" and drupal_major_version == "8" and drupal_config_sync_directory is defined
 
 # Pantheon D7 sites don't have settings.php, so we add it for local dev.
 - name: Custom core - add settings.php if it doesn't exist.
@@ -46,7 +47,7 @@
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.php"
     mode: 0600
     force: no
-  when: custom_core_add_settings_local_php|default(True)
+  when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
   template:
@@ -54,7 +55,7 @@
     src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
     mode: 0600
-  when: custom_core_add_settings_local_php|default(True)
+  when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 # # ansible drupalvm -e @default.config.yml -e @config.yml -m composer -a "working_dir={{ web_app_project_root }} command=install optimize_autoloader=True"
 # # @todo: detect composer.json
