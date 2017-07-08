@@ -1,0 +1,13 @@
+---
+
+# Tasks for installing pre-existing web app project onto VM.
+
+- name: Custom core - Ensure web_app_project_root directory exists.
+  file:
+    path: "{{ web_app_project_root }}"
+    state: directory
+    # Don't recursively set permissions.  May cause dirty repo.
+    recurse: no
+    mode: 0775
+  become: yes
+  when: project_type == "wordpress" and web_app_project_root is defined
