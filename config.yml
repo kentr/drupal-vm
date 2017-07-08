@@ -1,7 +1,14 @@
 ---
 vagrant_box: ubuntu/trusty64
 
+# The domain name for the local installation
+# `vagrant_hostname` may be deprecated.
 vagrant_hostname: local.client.org
+domain_name: client.org
+prod_domain: "{{ domain_name }}"
+stage_domain: "stage.{{ domain_name }}"
+local_domain: "local.{{ domain_name }}"
+
 # For consistency with prod, you would set this to the same value as the user on
 # the prod server.
 vagrant_machine_name: client_server_username
@@ -36,7 +43,9 @@ web_app_web_dir: "public_html"
 
 # The location of the actual Drupal site code.
 # It may be the same as web_app_project_root, depending on how your project is set up.
-drupal_core_path: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
+web_app_web_root: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
+
+drupal_core_path: "{{ web_app_web_root }}"
 drupal_core_owner: "{{ drupalvm_user }}"
 
 # Directory under "sites/" that holds settings.php, etc.
@@ -122,12 +131,11 @@ drupal_build_composer: false
 drupal_build_composer_project: false
 
 apache_vhosts_ssl:
-  - servername: "{{ drupal_domain }}"
-    documentroot: "{{ drupal_core_path }}"
+  - servername: "{{ local_domain }}"
+    documentroot: "{{ web_app_web_root }}"
     certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
     certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
-    extra_parameters: |
-          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ drupal_core_path }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
 
 # If a file named "config.php{{ php_version }}.yml" exists in the config
 # directory, it will be included automatically and override the variables in
