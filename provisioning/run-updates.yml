@@ -1,10 +1,15 @@
 ---
 
-# Run Drupal update process.
-
+# EXPERIMENTAL Run Drupal update process for drupal-composer projects
+# within Drupal-VM environment.
+#   - Performs code update.
+#   - Calls geerlingguy.drupal post-update tasks.
+#   - Runs Wraith smoke test on updated code.
+#
 # Prerequisites:
-#   - Server is already set up to run Drupal
+#   - VM is already set up to run Drupal.
 #   - Drupal code exists.
+#   - Drupal-VM configuration files are present and correct.
 #
 # Usage:
 #   `ansible-playbook provisioning/run-updates.yml`
@@ -14,9 +19,16 @@
 #     security updates will be applied.
 #   - drupal_update_projects: Space-separated list of projects to update,
 #     as for `drush pm-updatestatus`.  Default = '' (update all projects).
+#
+# TODO:
+#   - Support non-composer projects.
 
 - hosts: all
   become: No
+  vars:
+    # Wraith requirement.  For simplicity, using default version of geerlingguy.ruby.
+    ruby_min_version: 2.3.0
+    npm_min_version: 3.10.10
 
   vars_files:
     - vars/main.yml
@@ -61,11 +73,20 @@
         - name: casperjs
       when: wraith_testing_framework.install | default(False)
 
+    - name: Get ruby version.
+      command: "ruby -e 'puts RUBY_VERSION'"
+      register: ruby_current_version
+
+    # TODO: proper check if npm is installed.
+    - name: Get npm version.
+      command: "npm -v"
+      register: npm_current_version
+
   roles:
 
     # Install Ruby for Wraith testing
-    - { role: geerlingguy.ruby, when: wraith_testing_framework.install | default(False), become: Yes}
-    - { role: geerlingguy.nodejs, when: wraith_testing_framework.install | default(False), become: Yes }
+    - { role: geerlingguy.ruby, ruby_install_from_source: true, workspace: /root, when: ruby_current_version.stdout < ruby_min_version | default(False) and wraith_testing_framework.install | default(False), become: Yes}
+    - { role: geerlingguy.nodejs, when: npm_current_version.stdout < npm_min_version and wraith_testing_framework.install | default(False), become: Yes }
 
     # Build Drupal if necessary.
     # Todo: Add git repo and clone variables.
@@ -77,15 +98,31 @@
     command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
 
   - name: Find updates.
-    command: "{{ drush_path }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
+    # TODO: Is the `-l` option necessary with sites.php?
+    command: "{{ drush_path }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
     args:
       chdir: "{{ drupal_core_path }}"
     register: updates_available
 
-  - name: Download updates.
+  - name: Determine if this is composer project.
+    stat: "path={{ web_app_project_root }}/composer.json"
+    # Use drupal_deploy_composer_file for consistency & reuse with geerlinguy.drupal.
+    register: drupal_deploy_composer_file
+
+  - name: Run drush pm-update if not composer project.
+    # TODO: Is the `-l` option necessary with sites.php?
+    command: "{{ drush_path }} -l {{ config_site_directory }} up -y --pipe {{ updates_available.stdout_lines | join(' ') }}"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: drupal_updates_download
+    when: drupal_deploy_composer_file.stat.exists == False
+
+  - name: Download updates with composer if composer project.
     composer:
       command: "update"
-      arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+      # Substitutes "core" for "drupal".
+      # Todo: make this substitution smarter, based on what's actually installed.
+      arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
       optimize_autoloader: True
       # By default, Drupal composer projects install dev dependencies.
       # We want to follow that behavior here.
@@ -93,6 +130,7 @@
       working_dir: "{{ web_app_project_root }}"
     with_items: "{{ updates_available.stdout_lines }}"
     register: drupal_updates_download
+    when: drupal_deploy_composer_file.stat.exists == True
 
   - name: Define drupal_updates_updated
     set_fact:
@@ -100,7 +138,7 @@
 
   - name: Run Drupal post-update tasks.
     include: "roles/geerlingguy.drupal/tasks/update.yml"
-    when: drupal_updated | default(false)
+    when: drupal_major_version == 8 and drupal_updated | default(false)
     static: no
 
   - name: Install imagemagick.
@@ -113,6 +151,14 @@
     command: ruby -rubygems -e 'puts Gem.user_dir'
     become: no
     register: gems_path
+
+  # Add gems path to .bashrc for convenience when testing.
+  - name: Add gems path to .bashrc
+    blockinfile:
+      path: ~/.bashrc
+      backup: True
+      insertafter: EOF
+      content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:$PATH"
 
   - name: Run wraith smoke test.
     command: "wraith capture configs/smoke.local.yml"
