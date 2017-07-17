@@ -1,6 +1,9 @@
 ---
 vagrant_box: ubuntu/trusty64
 
+# "drupal" or "wordpress"
+project_type: drupal
+
 # The domain name for the local installation
 domain_name: client.org
 prod_domain: "{{ domain_name }}"
@@ -281,7 +284,7 @@ instances:
     # one of "local", "dev", "stage", "prod"
     env: local
     uri: "http://{{ vagrant_hostname }}"
-    type: drupal
+    type: "{{ project_type }}"
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
     root: "{{ drupal_core_path }}"
@@ -291,7 +294,7 @@ instances:
     # one of "local", "dev", "stage", "prod"
     env: prod
     uri: http://example.com
-    type: drupal
+    type: "{{ project_type }}"
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
     root: "/home/{{ vagrant_machine_name }}/public_html"
