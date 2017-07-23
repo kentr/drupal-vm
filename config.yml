@@ -234,15 +234,6 @@ workspace: /tmp/vagrant-cache/generic
 # See https://bbc-news.github.io/wraith/
 # You must have access to the project repo.
 wraith_testing_framework:
-  install: false
-  repo: repo_url
-  install_dir: "{{ web_app_project_root }}"
-
-# Setup vars for Wraith testing scripts.
-# Assumes Wraith is already installed on system.
-# See https://bbc-news.github.io/wraith/
-# You must have access to the project repo.
-wraith_testing_framework:
   install: False
   # Git URL for wraith testing system.
   repo: repo_url
