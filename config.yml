@@ -226,7 +226,10 @@ php_date_timezone: "America/Los_Angeles"
 # wp_table_prefix: "wp_"
 # wp_debug: true
 
-workspace: /tmp/vagrant-cache/generic
+# vagrant-cachier
+# If you have the `vagrant-cachier` plugin installed, you can uncomment
+# this to get more comprehensive caching.
+# workspace: /tmp/vagrant-cache/generic
 
 # Setup vars for Wraith testing scripts.
 # Assumes Wraith is already installed on system.
