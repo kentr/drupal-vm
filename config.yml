@@ -1,5 +1,4 @@
 ---
-vagrant_box: ubuntu/trusty64
 
 # The domain name for the local installation
 domain_name: client.org
