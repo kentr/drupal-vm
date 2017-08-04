@@ -33,6 +33,6 @@
   roles:
 
 
-    - { role: darthwade.wordpress, when: install_wordpress | default(False) }
+    - { role: kentr.wordpress, when: install_wordpress | default(False) }
 
   tasks:
