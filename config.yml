@@ -189,6 +189,10 @@ php_memory_limit: 1792M
 # Enable APCu for CLI so that drush can enable the apc module and clear caches.
 php_apc_enable_cli: 1
 
+# Disable error display on screen.  Helps with visual regression testing.
+php_display_errors: 0
+php_log_errors: 1
+
 ################################################################################
 # Core already installed in project directory
 ################################################################################
