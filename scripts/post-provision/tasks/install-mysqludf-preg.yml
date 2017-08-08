@@ -6,6 +6,7 @@
     update: Yes
     repo: https://github.com/mysqludf/lib_mysqludf_preg.git
     dest: "{{ workspace }}/lib_mysqludf_preg"
+    force: Yes
 
 - name: Ensure libmysqlclient-dev is installed.
   package:
