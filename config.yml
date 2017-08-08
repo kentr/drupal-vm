@@ -1,7 +1,12 @@
 ---
-vagrant_box: ubuntu/trusty64
 
-vagrant_hostname: local.client.org
+# The domain name for the local installation
+domain_name: client.org
+prod_domain: "{{ domain_name }}"
+stage_domain: "stage.{{ domain_name }}"
+local_domain: "local.{{ domain_name }}"
+vagrant_hostname: "{{ local_domain }}"
+
 # For consistency with prod, you would set this to the same value as the user on
 # the prod server.
 vagrant_machine_name: client_server_username
@@ -36,7 +41,9 @@ web_app_web_dir: "public_html"
 
 # The location of the actual Drupal site code.
 # It may be the same as web_app_project_root, depending on how your project is set up.
-drupal_core_path: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
+web_app_web_root: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
+
+drupal_core_path: "{{ web_app_web_root }}"
 drupal_core_owner: "{{ drupalvm_user }}"
 
 # Directory under "sites/" that holds settings.php, etc.
@@ -54,7 +61,7 @@ drupal_modules_contrib_path: "sites/all/modules"
 
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
-# http://docs.drupalvm.com/en/latest/extras/syncing-folders/ for more info.
+# http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more info.
 vagrant_synced_folders:
   # The first synced folder will be used for the default Drupal installation, if
   # any of the build_* settings are 'true'. By default the folder is set to
@@ -65,6 +72,10 @@ vagrant_synced_folders:
     destination: "{{ base_synced_dir }}"
     type: nfs
     create: true
+    # Whether or not to mount the folder with vagrant-bindfs plugin for nfs mounts.
+    # vagrant-bindfs plugin must be installed separately.  Uses plugin default options.
+    # See https://github.com/gael-ian/vagrant-bindfs
+    use_bindfs: true
 
 # You probably don't want to change this.
 drupal_composer_install_dir: "{{ web_app_project_root }}"
@@ -118,12 +129,11 @@ drupal_build_composer: false
 drupal_build_composer_project: false
 
 apache_vhosts_ssl:
-  - servername: "{{ drupal_domain }}"
-    documentroot: "{{ drupal_core_path }}"
+  - servername: "{{ local_domain }}"
+    documentroot: "{{ web_app_web_root }}"
     certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
     certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
-    extra_parameters: |
-          ProxyPassMatch ^/(.*\.php(/.*)?)$ "fcgi://127.0.0.1:9000{{ drupal_core_path }}"
+    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
 
 # If a file named "config.php{{ php_version }}.yml" exists in the config
 # directory, it will be included automatically and override the variables in
@@ -179,6 +189,10 @@ php_memory_limit: 1792M
 # Enable APCu for CLI so that drush can enable the apc module and clear caches.
 php_apc_enable_cli: 1
 
+# Disable error display on screen.  Helps with visual regression testing.
+php_display_errors: 0
+php_log_errors: 1
+
 ################################################################################
 # Core already installed in project directory
 ################################################################################
@@ -205,27 +219,26 @@ php_date_timezone: "America/Los_Angeles"
 
 # install_wordpress: True
 # wp_version: latest
-# wp_domain: wp.loc
-# wp_install_dir: "{{ web_app_project_root }}/wordpress_html"
+# wp_domain: "{{ local_domain }}"
+# wp_install_dir: "{{ web_app_web_root }}"
 # wp_db_name: "wordpress"
 # wp_db_user: "wordpress"
 # wp_db_password: "wordpress"
 # wp_db_charset: "utf8mb4"
 # wp_db_collate: "utf8mb4_general_ci"
-
+# wp_mysql_site_restore_saved_db: True
+# wp_database_backup: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/db-restore.sql"
+#
+# # Prefix cannot be empty.
 # wp_table_prefix: "wp_"
-# wp_debug: true
+# # Error reporting on screen, and other debug tools.  Ensure this is off when doing
+# # visual regression testing.
+# wp_debug: false
 
-workspace: /tmp/vagrant-cache/generic
-
-# Setup vars for Wraith testing scripts.
-# Assumes Wraith is already installed on system.
-# See https://bbc-news.github.io/wraith/
-# You must have access to the project repo.
-wraith_testing_framework:
-  install: false
-  repo: repo_url
-  install_dir: "{{ web_app_project_root }}"
+# vagrant-cachier
+# If you have the `vagrant-cachier` plugin installed, you can uncomment
+# this to get more comprehensive caching.
+# workspace: /tmp/vagrant-cache/generic
 
 # Setup vars for Wraith testing scripts.
 # Assumes Wraith is already installed on system.

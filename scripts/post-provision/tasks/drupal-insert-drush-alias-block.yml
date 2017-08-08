@@ -10,6 +10,7 @@
     force: no
     dest: "~/.drush/{{ drush_alias_file_prefix }}.aliases.drushrc.php"
     src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.aliases.drushrc.php.j2"
+  when: project_type == "drupal" and insert_local_drush_alias | default(false)
 
 - name: Insert local Drush alias declaration.
   delegate_to: 127.0.0.1
@@ -27,7 +28,7 @@
         // vagrant_hostname
         'remote-host' => '{{ vagrant_hostname }}',
         'remote-user' => '{{ vagrant_user }}',
-        'ssh-options' => '-o PasswordAuthentication=no -i ' . drush_server_home() . '/.vagrant.d/insecure_private_key',
+        'ssh-options' => '-o PasswordAuthentication=no -i ' . drush_server_home() . '/.vagrant.d/insecure_private_key -o LogLevel=quiet',
         'source-command-specific' => array (
           'sql-sync' => array (
             'structure-tables-key' => 'common',
@@ -35,7 +36,7 @@
         ),
         'target-command-specific' => array(
           'sql-sync'  => array(
-            'enable'  => array('devel', 'apc'),
+            'enable'  => array('devel'),
           ),
         ),
         'command-specific' => array (
@@ -51,7 +52,7 @@
           ),
         ),
       );
-  when: insert_local_drush_alias | default(false)
+  when: project_type == "drupal" and insert_local_drush_alias | default(false)
 
 # Add Drush post-sync hook to enable modules.
 # See http://api.drush.ws/api/drush/examples!sync_enable.drush.inc/master.
@@ -63,3 +64,4 @@
     force: no
     dest: "~/.drush/sync_enable.drush.inc"
     src: "{{ playbook_dir }}/../scripts/post-provision/templates/sync_enable.drush.inc.j2"
+  when: project_type == "drupal" and insert_local_drush_alias | default(false)

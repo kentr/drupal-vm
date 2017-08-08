@@ -1,6 +1,14 @@
 ---
 # Inserts project-based Drush shell aliases.
 
+- name: Ensure web_app_project_dir exists.
+  delegate_to: 127.0.0.1
+  become: no
+  file:
+    path: "{{ playbook_dir }}/../{{ web_app_project_dir }}"
+    state: directory
+  when: project_type == "drupal" and drush_insert_project_shell_aliases | default(false)
+
 - name: Ensure web project drushrc.php file exists.
   delegate_to: 127.0.0.1
   become: no
@@ -9,6 +17,7 @@
     force: no
     dest: "{{ playbook_dir }}/../{{ web_app_project_dir }}/drushrc.php"
     src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.drushrc.php.j2"
+  when: project_type == "drupal" and drush_insert_project_shell_aliases | default(false)
 
 - name: Insert project "pull-data" shell-alias.
   delegate_to: 127.0.0.1
@@ -26,7 +35,7 @@
                         chmod -R 777 ' . $local_files_dir . '; \
                         drush @{{ drush_alias_file_prefix }}.loc {{ "cc all" if drupal_major_version == 7 else "cr" }}',
       );
-  when: drush_insert_project_shell_aliases | default(false)
+  when: project_type == "drupal" and drush_insert_project_shell_aliases | default(false)
 
 - name: Ensure container project drushrc.php file exists.
   delegate_to: 127.0.0.1
@@ -36,6 +45,7 @@
     force: no
     dest: "{{ playbook_dir }}/../drushrc.php"
     src: "{{ playbook_dir }}/../scripts/post-provision/templates/drush.drushrc.php.j2"
+  when: project_type == "drupal" and drush_insert_project_shell_aliases | default(false)
 
 - name: Insert web project drushrc.php include.
   delegate_to: 127.0.0.1
@@ -52,5 +62,4 @@
       if (file_exists($local_settings)) {
         include $local_settings;
       }
-
-  when: drush_insert_project_shell_aliases | default(false)
+  when: project_type == "drupal" and drush_insert_project_shell_aliases | default(false)
