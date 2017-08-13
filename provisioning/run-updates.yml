@@ -170,6 +170,49 @@
       insertafter: EOF
       content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:$PATH"
 
+  - name: Disable error logging.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      insertafter: \s*\$config\['system.logging'\]\['error_level'\] = '.*?';
+      line: $config['system.logging']['error_level'] = 'hide'; // ANSIBLE TEMP run-updates.yml
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+
+  - name: Disable development services.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      backrefs: true
+      regexp: (\s*\$settings\['container_yamls'\]\[\] = DRUPAL_ROOT . '/sites/development.services.yml';)
+      line: // \1 // ANSIBLE TEMP run-updates.yml
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+
+  - name: Disable render cache override.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      backrefs: true
+      regexp: (\s*\$settings\['cache'\]\['bins'\]\['render'\] = 'cache.backend.null';)
+      line: // \1 // ANSIBLE TEMP run-updates.yml
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+
+  - name: Disable dynamic_page_cache override.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      backrefs: true
+      regexp: (\s*\$settings\['cache'\]\['bins'\]\['dynamic_page_cache'\] = 'cache.backend.null';)
+      line: // \1 // ANSIBLE TEMP run-updates.yml
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+
   - name: Run wraith smoke test.
     command: "wraith capture configs/smoke.local.yml"
     become: no
@@ -178,3 +221,44 @@
     environment:
       PATH: "{{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:{{ ansible_env.PATH }}"
     when: wraith_testing_framework.install | default(False) and wraith_testing_framework.install_dir is defined and gems_path.stdout is defined
+
+  - name: Restore previous error logging level.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: absent
+      line: $config['system.logging']['error_level'] = 'hide'; // ANSIBLE TEMP run-updates.yml
+
+  - name: Restore development services.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      backrefs: true
+      regexp: // (\s*\$settings\['container_yamls'\]\[\] = DRUPAL_ROOT . '/sites/development.services.yml';)
+      line: \1
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+
+  - name: Restore render cache override.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      backrefs: true
+      regexp: // (\s*\$settings\['cache'\]\['bins'\]\['render'\] = 'cache.backend.null';)
+      line: \1
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+
+  - name: Restore dynamic_page_cache override.
+    delegate_to: 127.0.0.1
+    lineinfile:
+      # path: "{{ drupal_core_path }}/"
+      path: "/Users/Work/eclipse-workspace/kentrichards.net/LOCAL_kr/web/sites/default/settings.local.php"
+      state: present
+      backrefs: true
+      regexp: // (\s*\$settings\['cache'\]\['bins'\]\['dynamic_page_cache'\] = 'cache.backend.null';)
+      line: \1
+    when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
