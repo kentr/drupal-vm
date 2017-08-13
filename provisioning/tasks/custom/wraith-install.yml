@@ -1,10 +1,10 @@
 ---
 
 - name: Install imagemagick.
+  become: Yes
   package:
     name: imagemagick
     state: present
-  become: Yes
 
 - name: Install configured gems.
   gem: "name={{ item }} state=present"
@@ -14,7 +14,7 @@
 
 - name: Get gems path.
   command: ruby -rubygems -e 'puts Gem.user_dir'
-  become: no
+  become: No
   register: gems_path
 
 # Add gems path to .bashrc for convenience when testing.
@@ -29,9 +29,9 @@
   npm:
     name: "{{ item.name | default(item) }}"
     version: "{{ item.version | default('latest') }}"
-    global: yes
+    global: Yes
     state: latest
-  become: yes
+  become: Yes
   environment:
     NPM_CONFIG_PREFIX: "{{ npm_config_prefix }}"
     NODE_PATH: "$NODE_PATH:{{ npm_config_prefix }}/lib/node_modules"
