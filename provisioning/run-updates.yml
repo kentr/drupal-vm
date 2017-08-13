@@ -58,24 +58,12 @@
         - "{{ config_dir }}/{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
       tags: ['always']
 
-    - name: Add `wraith` to gems list.
-      set_fact:
-        ruby_install_gems: "{{ ruby_install_gems + [item] }}"
-      with_items:
-        - wraith
-      when: wraith_testing_framework.install | default(False)
-
-    - name: Add Wraith npm dependencies.
-      set_fact:
-        nodejs_npm_global_packages: "{{ nodejs_npm_global_packages + [item] }}"
-      with_items:
-        - name: phantomjs
-        - name: casperjs
-      when: wraith_testing_framework.install | default(False)
-
     - name: Get ruby version.
       command: "ruby -e 'puts RUBY_VERSION'"
       register: ruby_current_version
+
+    - debug:
+        var: ruby_current_version
 
     # TODO: proper check if npm is installed.
     - name: Get npm version.
@@ -146,6 +134,28 @@
       name: imagemagick
       state: present
     become: Yes
+
+  - name: Install configured gems.
+    gem: "name={{ item }} state=present"
+    with_items:
+      - wraith
+    when: wraith_testing_framework.install | default(False)
+
+  - name: Add Wraith npm dependencies.
+    npm:
+      name: "{{ item.name | default(item) }}"
+      version: "{{ item.version | default('latest') }}"
+      global: yes
+      state: latest
+    become: yes
+    environment:
+      NPM_CONFIG_PREFIX: "{{ npm_config_prefix }}"
+      NODE_PATH: "$NODE_PATH:{{ npm_config_prefix }}/lib/node_modules"
+      NPM_CONFIG_UNSAFE_PERM: "{{ npm_config_unsafe_perm }}"
+    with_items:
+      - name: phantomjs
+      - name: casperjs
+    when: wraith_testing_framework.install | default(False)
 
   - name: Get gems path.
     command: ruby -rubygems -e 'puts Gem.user_dir'
