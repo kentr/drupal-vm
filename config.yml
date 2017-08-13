@@ -75,7 +75,7 @@ vagrant_synced_folders:
     # Whether or not to mount the folder with vagrant-bindfs plugin for nfs mounts.
     # vagrant-bindfs plugin must be installed separately.  Uses plugin default options.
     # See https://github.com/gael-ian/vagrant-bindfs
-    use_bindfs: true
+    use_bindfs: false
 
 # You probably don't want to change this.
 drupal_composer_install_dir: "{{ web_app_project_root }}"
