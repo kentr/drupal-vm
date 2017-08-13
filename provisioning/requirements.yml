@@ -87,6 +87,9 @@
   version: 3.5.5
 - src: geerlingguy.varnish
   version: 1.9.0
+- src: https://github.com/kentr/ansible-role-drupal.git
+  scm: git
+  version: allow-extra-post-deploy-update-tasks
 - src: https://github.com/kentr/wordpress.ansible.role.git
   scm: git
   version: patch-1
