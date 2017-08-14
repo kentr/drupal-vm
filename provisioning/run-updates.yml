@@ -119,6 +119,7 @@
     register: drupal_updates_download
     when: drupal_deploy_composer_file.stat.exists == False
 
+
   - name: Download updates with composer if composer project.
     composer:
       command: "update"
@@ -144,5 +145,7 @@
     static: no
 
   - include: tasks/custom/wraith-install.yml
+    when: drupal_updated | default(false)
 
   - include: tasks/custom/wraith-smoke-test.yml
+    when: drupal_updated | default(false)
