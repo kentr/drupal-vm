@@ -73,9 +73,9 @@
     - { role: geerlingguy.ruby, ruby_install_from_source: true, workspace: /root, when: ruby_current_version.stdout < ruby_min_version | default(False) and wraith_testing_framework.install | default(False), become: Yes}
     - { role: geerlingguy.nodejs, when: npm_current_version.stdout < npm_min_version and wraith_testing_framework.install | default(False), become: Yes }
 
-    # Build Drupal if necessary.
+    # Deploy Drupal if necessary.
     # Todo: Add git repo and clone variables.
-    - { role: geerlingguy.drupal, tags: ['drupal'] }
+    - { role: kentr.drupal, tags: ['drupal'] }
 
   tasks:
 
