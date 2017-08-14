@@ -62,9 +62,6 @@
       command: "ruby -e 'puts RUBY_VERSION'"
       register: ruby_current_version
 
-    - debug:
-        var: ruby_current_version
-
     # TODO: proper check if npm is installed.
     - name: Get npm version.
       command: "npm -v"
