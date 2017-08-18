@@ -121,12 +121,6 @@ Vagrant.configure('2') do |config|
       config_dir: config_dir,
         drupalvm_env: drupalvm_env
       }
-      # See https://www.vagrantup.com/docs/provisioning/ansible_common.html
-      ansible.host_vars = {
-        "#{vconfig['vagrant_machine_name']}" => {
-          "ansible_ssh_extra_args" => "",
-        }
-      }
       ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
     ansible.tags = ENV['DRUPALVM_ANSIBLE_TAGS']
   end
