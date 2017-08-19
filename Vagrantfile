@@ -126,14 +126,12 @@ Vagrant.configure('2') do |config|
   config.vm.synced_folder host_project_dir, '/vagrant', type: vconfig['vagrant_synced_folder_default_type']
 
   # Bootstrap Python on AWS Ubuntu.
-  config.vm.provider :aws do |v|
-    if vconfig['aws_ssh_username'] == 'ubuntu'
-      # Prevent TTY Errors.
-      # See: https://superuser.com/a/1182104
-      config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-      config.vm.provision "bootstrap-python", type: "shell" do |s|
-        s.inline = "test -e /usr/bin/python || (apt-get -y update && apt-get install -y python-minimal)"
-      end
+  if vconfig['aws_ssh_username'] == 'ubuntu' && vconfig['vagrant_box'] == 'aws-dummy'
+    # Prevent TTY Errors.
+    # See: https://superuser.com/a/1182104
+    config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+    config.vm.provision "bootstrap-python", type: "shell" do |s|
+      s.inline = "test -e /usr/bin/python || (apt-get -y update && apt-get install -y python-minimal)"
     end
   end
 
