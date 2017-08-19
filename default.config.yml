@@ -50,6 +50,11 @@ vagrant_synced_folders:
 vagrant_memory: 2048
 vagrant_cpus: 1
 
+# Ensure vagrant plugins are installed.
+vagrant_plugins:
+  - name: vagrant-vbguest
+  - name: vagrant-hostsupdater
+
 # Minimum required versions.
 drupalvm_vagrant_version_min: '1.8.6'
 drupalvm_ansible_version_min: '2.2'
@@ -233,7 +238,7 @@ installed_extras:
   # - upload-progress
   - varnish
   # - xdebug
-  # - xhprof
+  # - xhprof # use `tideways` if you're installing PHP 7+
   # CloudFoundry CLI tool.  Debian only.
   # - cf_cli
 

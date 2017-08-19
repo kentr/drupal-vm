@@ -40,6 +40,8 @@ end
 require_ansible_version ">= #{vconfig['drupalvm_ansible_version_min']}"
 Vagrant.require_version ">= #{vconfig['drupalvm_vagrant_version_min']}"
 
+ensure_plugins(vconfig['vagrant_plugins'])
+
 Vagrant.configure('2') do |config|
   # Set the name of the VM. See: http://stackoverflow.com/a/17864388/100134
   config.vm.define vconfig['vagrant_machine_name']
@@ -73,6 +75,14 @@ Vagrant.configure('2') do |config|
     config.hostmanager.enabled = true
     config.hostmanager.manage_host = true
     config.hostmanager.aliases = aliases
+  end
+
+  # Sync the project root directory to /vagrant
+  unless vconfig['vagrant_synced_folders'].any? { |synced_folder| synced_folder['destination'] == '/vagrant' }
+    vconfig['vagrant_synced_folders'].push(
+      'local_path' => host_project_dir,
+      'destination' => '/vagrant'
+    )
   end
 
   # Synced folders.
@@ -112,20 +122,11 @@ Vagrant.configure('2') do |config|
     end
   end
 
-  # Allow override of the default synced folder type.
-  config.vm.synced_folder host_project_dir, '/vagrant', type: vconfig['vagrant_synced_folder_default_type']
-
   config.vm.provision provisioner do |ansible|
     ansible.playbook = playbook
       ansible.extra_vars = {
       config_dir: config_dir,
         drupalvm_env: drupalvm_env
-      }
-      # See https://www.vagrantup.com/docs/provisioning/ansible_common.html
-      ansible.host_vars = {
-        "#{vconfig['vagrant_machine_name']}" => {
-          "ansible_ssh_extra_args" => "",
-        }
       }
       ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
     ansible.tags = ENV['DRUPALVM_ANSIBLE_TAGS']
