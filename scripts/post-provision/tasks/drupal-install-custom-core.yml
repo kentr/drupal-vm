@@ -9,6 +9,8 @@
     # Don't recursively set permissions.  May cause dirty repo.
     recurse: no
     mode: 0775
+    owner: "{{ drupal_core_owner }}"
+    group: "{{ drupal_core_owner }}"
   become: yes
   when: project_type == "drupal" and web_app_project_root is defined
 
@@ -23,6 +25,8 @@
   file:
     path: "{{ drupal_file_private_path }}"
     state: directory
+    owner: "{{ drupal_core_owner }}"
+    group: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
 - name: Ensure private files .htaccess.
@@ -45,8 +49,10 @@
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/default.settings.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.php"
-    mode: 0600
+    mode: 0440
     force: no
+    owner: "{{ drupal_core_owner }}"
+    group: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
@@ -54,7 +60,9 @@
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
-    mode: 0600
+    mode: 0440
+    owner: "{{ drupal_core_owner }}"
+    group: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 # # ansible drupalvm -e @default.config.yml -e @config.yml -m composer -a "working_dir={{ web_app_project_root }} command=install optimize_autoloader=True"
