@@ -87,6 +87,16 @@
   version: 3.5.5
 - src: geerlingguy.varnish
   version: 1.9.0
+- src: https://github.com/kentr/ansible-role-drupal.git
+  scm: git
+  version: allow-extra-post-deploy-update-tasks
+  name: kentr.wordpress
+- src: https://github.com/kentr/ansible-role-setup-drush.git
+  scm: git
+  name: kentr.setup-drush
+- src: ssh://git@bitbucket.org/kentr/ansible-role-setup-hosting-account.git
+  scm: git
+  name: kentr.setup-hosting-account
 - src: https://github.com/kentr/wordpress.ansible.role.git
   scm: git
   version: patch-1

@@ -30,6 +30,23 @@
     ruby_min_version: 2.3.0
     npm_min_version: 3.10.10
 
+    # Set the version of Node.js to install ("0.10", "0.12", "4.x", "5.x", "6.x").
+    # Version numbers from Nodesource: https://github.com/nodesource/distributions
+    nodejs_version: "6.x"
+
+    # The user for whom the npm packages will be installed.
+    nodejs_install_npm_user: "{{ ansible_user }}"
+
+    # The directory for global installations.
+    npm_config_prefix: "~/.npm-global"
+
+    # Set to true to suppress the UID/GID switching when running package scripts. If set explicitly to false, then installing as a non-root user will fail.
+    npm_config_unsafe_perm: "true"
+
+    # The path of a package.json file used to install packages globally.
+    nodejs_package_json_path: ""
+
+
   vars_files:
     - vars/main.yml
     - ../default.config.yml
@@ -58,21 +75,6 @@
         - "{{ config_dir }}/{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
       tags: ['always']
 
-    - name: Add `wraith` to gems list.
-      set_fact:
-        ruby_install_gems: "{{ ruby_install_gems + [item] }}"
-      with_items:
-        - wraith
-      when: wraith_testing_framework.install | default(False)
-
-    - name: Add Wraith npm dependencies.
-      set_fact:
-        nodejs_npm_global_packages: "{{ nodejs_npm_global_packages + [item] }}"
-      with_items:
-        - name: phantomjs
-        - name: casperjs
-      when: wraith_testing_framework.install | default(False)
-
     - name: Get ruby version.
       command: "ruby -e 'puts RUBY_VERSION'"
       register: ruby_current_version
@@ -88,18 +90,23 @@
     - { role: geerlingguy.ruby, ruby_install_from_source: true, workspace: /root, when: ruby_current_version.stdout < ruby_min_version | default(False) and wraith_testing_framework.install | default(False), become: Yes}
     - { role: geerlingguy.nodejs, when: npm_current_version.stdout < npm_min_version and wraith_testing_framework.install | default(False), become: Yes }
 
-    # Build Drupal if necessary.
+    # Deploy Drupal if necessary.
     # Todo: Add git repo and clone variables.
-    - { role: geerlingguy.drupal, tags: ['drupal'] }
+    - { role: kentr.drupal, tags: ['drupal'] }
 
   tasks:
 
   - name: Create `updates` Git branch if necessary.
     command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
 
+  - name: Set drupal_update_security_only if it's not already defined.
+    set_fact:
+      drupal_update_security_only: True
+    when: drupal_update_security_only is not defined
+
   - name: Find updates.
     # TODO: Is the `-l` option necessary with sites.php?
-    command: "{{ drush_path }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(False) | ternary('--security-only', '') }}"
+    command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
     args:
       chdir: "{{ drupal_core_path }}"
     register: updates_available
@@ -116,6 +123,7 @@
       chdir: "{{ drupal_core_path }}"
     register: drupal_updates_download
     when: drupal_deploy_composer_file.stat.exists == False
+
 
   - name: Download updates with composer if composer project.
     composer:
@@ -141,30 +149,8 @@
     when: drupal_major_version == 8 and drupal_updated | default(false)
     static: no
 
-  - name: Install imagemagick.
-    package:
-      name: imagemagick
-      state: present
-    become: Yes
+  - include: tasks/custom/wraith-install.yml
+    when: drupal_updated | default(false)
 
-  - name: Get gems path.
-    command: ruby -rubygems -e 'puts Gem.user_dir'
-    become: no
-    register: gems_path
-
-  # Add gems path to .bashrc for convenience when testing.
-  - name: Add gems path to .bashrc
-    blockinfile:
-      path: ~/.bashrc
-      backup: True
-      insertafter: EOF
-      content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:$PATH"
-
-  - name: Run wraith smoke test.
-    command: "wraith capture configs/smoke.local.yml"
-    become: no
-    args:
-      chdir: "{{ wraith_testing_framework.install_dir }}"
-    environment:
-      PATH: "{{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:{{ ansible_env.PATH }}"
-    when: wraith_testing_framework.install | default(False) and wraith_testing_framework.install_dir is defined and gems_path.stdout is defined
+  - include: tasks/custom/wraith-smoke-test.yml
+    when: drupal_updated | default(false)

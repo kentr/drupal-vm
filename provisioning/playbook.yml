@@ -117,6 +117,15 @@
 
     - { role: kentr.wordpress, when: install_wordpress | default(False) }
 
+    - role: kentr.setup-hosting-account
+      become: no
+      when: setup_hosting_account
+
+    - role: kentr.setup-drush
+      become: no
+      when: drush_setup_drush | default(False)
+      installations: "{{ instances | selectattr('type', 'equalto', 'drupal')  | list }}"
+
   tasks:
     - include: tasks/sshd.yml
     - include: tasks/extras.yml
