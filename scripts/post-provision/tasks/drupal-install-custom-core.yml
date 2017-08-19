@@ -21,6 +21,14 @@
     state: directory
   when: project_type == "drupal"
 
+- name: Ensure public files directory.
+  file:
+    path: "{{ drupal_file_public_path }}"
+    state: directory
+    owner: "{{ drupal_core_owner }}"
+    group: "{{ drupal_core_owner }}"
+  when: project_type == "drupal" and drupal_file_public_path is defined and drupal_file_public_path | trim != ''
+
 - name: Ensure private files directory.
   file:
     path: "{{ drupal_file_private_path }}"
