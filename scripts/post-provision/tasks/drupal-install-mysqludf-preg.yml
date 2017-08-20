@@ -1,5 +1,10 @@
 ---
 
+- name: Define workspace if not already defined.
+  set_fact:
+    workspace: '/root'
+  when: workspace is not defined
+
 - name: Clone mysqludf_preg repo.
   git:
     depth: 1
