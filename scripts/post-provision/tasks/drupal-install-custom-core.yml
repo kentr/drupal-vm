@@ -23,10 +23,12 @@
 
 - name: Ensure public files directory.
   file:
-    path: "{{ drupal_file_public_path }}"
+    path: "{{ drupal_core_path }}/{{ drupal_file_public_path }}"
     state: directory
     owner: "{{ drupal_core_owner }}"
     group: "{{ drupal_core_owner }}"
+    mode: 0775
+    recurse: True
   when: project_type == "drupal" and drupal_file_public_path is defined and drupal_file_public_path | trim != ''
 
 - name: Ensure private files directory.
@@ -35,6 +37,8 @@
     state: directory
     owner: "{{ drupal_core_owner }}"
     group: "{{ drupal_core_owner }}"
+    mode: 0775
+    recurse: True
   when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
 - name: Ensure private files .htaccess.
@@ -73,13 +77,3 @@
     group: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
-# # ansible drupalvm -e @default.config.yml -e @config.yml -m composer -a "working_dir={{ web_app_project_root }} command=install optimize_autoloader=True"
-# # @todo: detect composer.json
-# - name: Custom core - composer install.
-#   composer:
-#     working_dir: "{{ web_app_project_root }}"
-#     command: install
-#     optimize_autoloader: True
-#   creates: "{{drupal_core_path}}/autoload.php"
-#   # Run as normal user for security and to leverage vagrant-cachier.
-#   becmore: no
