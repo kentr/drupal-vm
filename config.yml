@@ -10,6 +10,9 @@ stage_domain: "stage.{{ domain_name }}"
 local_domain: "local.{{ domain_name }}"
 vagrant_hostname: "{{ local_domain }}"
 
+# Username for the client account on the prod server.
+client_server_username: client_server_username
+
 # For consistency with prod, you would set this to the same value as the user on
 # the prod server.
 vagrant_machine_name: client_server_username
@@ -23,7 +26,7 @@ vagrant_machine_name: client_server_username
 # "{{ ansible_user_home }}"
 # Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
 # do a workaround:
-base_synced_dir: "/home/{{ vagrant_machine_name }}"
+base_synced_dir: "/home/{{ client_server_username }}"
 
 # Root directory for the web app project.
 # This is where the code and everything else in the project's repo will go.
@@ -34,7 +37,7 @@ base_synced_dir: "/home/{{ vagrant_machine_name }}"
 # Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
 # do a workaround:
 # Name of app project directory within Drupal-VM project.
-web_app_project_dir: "LOCAL_{{ vagrant_machine_name }}"
+web_app_project_dir: "LOCAL_{{ client_server_username }}"
 # Full absolute path to project root in target machine (VM).
 web_app_project_root: "{{ base_synced_dir }}/{{ web_app_project_dir }}"
 
@@ -97,7 +100,7 @@ insert_local_drush_alias: true
 # Example: if drush_alias_file_prefix = "my_project", the resulting aliases will be
 #  - @my_project.loc
 #  - @my_project.whatever
-drush_alias_file_prefix: "{{ vagrant_machine_name }}"
+drush_alias_file_prefix: "{{ client_server_username }}"
 
 # Defaults for Drush rsync command.
 drush_rsync_mode: 'Pavu'
@@ -287,5 +290,5 @@ instances:
     type: "{{ project_type }}"
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
-    root: "/home/{{ vagrant_machine_name }}/public_html"
+    root: "/home/{{ client_server_username }}/public_html"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
