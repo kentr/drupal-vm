@@ -2,6 +2,14 @@
 
 # Inserts a block for a local Vagrant-based Drush alias.
 
+- name: Ensure local .drush directory exists.
+  delegate_to: 127.0.0.1
+  become: no
+  file:
+    path: ~/.drush
+    state: directory
+    mode: "u+rwx"
+
 - name: Ensure local Drush alias file exists.
   delegate_to: 127.0.0.1
   become: no
