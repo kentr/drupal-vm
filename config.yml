@@ -56,7 +56,9 @@ config_site_directory: "default"
 # that on prod, then you'll want to set this to match your local site to override the
 # values in the prod database.
 # These should match what is in your Drush alias file, if you have set a value there.
+# Public file directory is relative to web root.
 drupal_file_public_path: "sites/{{ config_site_directory }}/files"
+# Private file path is absolute, since they may be outside the webroot.
 drupal_file_private_path: ""
 
 # Directory where contrib modules live, relative to site root.
