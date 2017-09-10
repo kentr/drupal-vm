@@ -53,7 +53,10 @@
   file:
     path: "{{ drupal_config_sync_directory }}"
     state: directory
-  when: project_type == "drupal" and drupal_major_version == "8" and drupal_config_sync_directory is defined
+    owner: "{{ drupal_core_owner }}"
+    group: "{{ drupalvm_webserver_user }}"
+    mode: 0770
+  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=') and drupal_config_sync_directory is defined
 
 # Pantheon D7 sites don't have settings.php, so we add it for local dev.
 - name: Custom core - add settings.php if it doesn't exist.
