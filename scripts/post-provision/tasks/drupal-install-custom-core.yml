@@ -26,7 +26,7 @@
     path: "{{ drupal_core_path }}/{{ drupal_file_public_path }}"
     state: directory
     owner: "{{ drupal_core_owner }}"
-    group: "{{ drupal_core_owner }}"
+    group: "{{ drupalvm_webserver_user }}"
     mode: 0775
     recurse: True
   when: project_type == "drupal" and drupal_file_public_path is defined and drupal_file_public_path | trim != ''
@@ -36,7 +36,7 @@
     path: "{{ drupal_file_private_path }}"
     state: directory
     owner: "{{ drupal_core_owner }}"
-    group: "{{ drupal_core_owner }}"
+    group: "{{ drupalvm_webserver_user }}"
     mode: 0775
     recurse: True
   when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
@@ -77,7 +77,6 @@
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
     mode: 0440
     owner: "{{ drupal_core_owner }}"
-    group: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - clone database from prod to local.
