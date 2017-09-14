@@ -67,7 +67,6 @@
     mode: 0440
     force: no
     owner: "{{ drupal_core_owner }}"
-    group: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
