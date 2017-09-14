@@ -77,11 +77,3 @@
     mode: 0440
     owner: "{{ drupal_core_owner }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
-
-- name: Custom core - clone database from prod to local.
-  command: 'drush sql-sync -y @rd-speak.prod @rd-speak.local'
-  when: drupal_install_custom_core_pull_db | default(False)
-
-- name: Custom core - clone files from prod to local.
-  command: 'drush -y rsync @rd-speak.prod:%files/ @rd-speak.local:%files/'
-  when: drupal_install_custom_core_pull_files | default(False)
