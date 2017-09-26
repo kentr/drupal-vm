@@ -15,7 +15,7 @@ client_server_username: client_server_username
 
 # For consistency with prod, you would set this to the same value as the user on
 # the prod server.
-vagrant_machine_name: client_server_username
+vagrant_machine_name: "{{ client_server_username }}"
 
 # Primary directory that is synced onto the Vagrant machine.
 # This should usually be equivalent to the directory on the host that contains
