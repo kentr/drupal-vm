@@ -67,6 +67,7 @@
     mode: 0440
     force: no
     owner: "{{ drupal_core_owner }}"
+    group: "{{ drupalvm_webserver_user }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
@@ -76,4 +77,5 @@
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
     mode: 0440
     owner: "{{ drupal_core_owner }}"
+    group: "{{ drupalvm_webserver_user }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
