@@ -259,6 +259,10 @@ wraith_testing_framework:
   # Absolute path in target node for the wraith testing directory.
   install_dir: "{{ web_app_project_root }}/wraith"
 
+  # Paths file
+  # Path on local machine to a file containing the path definitions for Wraith.
+  paths_file: "{{ web_app_project_root }}/wraith"
+
   # SSH remote host to which results will be copied.
   # You must have rsync access to this host.
   rsync_dest_host: "{{ drush_alias_file_prefix }}"
