@@ -1,5 +1,9 @@
 ---
 
+- name: debug vagrant_group
+  debug:
+    var: vagrant_directory.stat.gr_name
+
 # Tasks for installing pre-existing web app project onto VM.
 
 - name: Custom core - Ensure web_app_project_root directory exists.
@@ -9,9 +13,10 @@
     # Don't recursively set permissions.  May cause dirty repo.
     recurse: no
     mode: 0775
-    owner: "{{ drupal_core_owner }}"
-    group: "{{ drupal_core_owner }}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
   become: yes
+  ignore_errors: True
   when: project_type == "drupal" and web_app_project_root is defined
 
 - name: Custom core - ensure sites/default directory exists and is writable.
@@ -25,8 +30,8 @@
   file:
     path: "{{ drupal_core_path }}/{{ drupal_file_public_path }}"
     state: directory
-    owner: "{{ drupal_core_owner }}"
-    group: "{{ drupalvm_webserver_user }}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0775
     recurse: True
   when: project_type == "drupal" and drupal_file_public_path is defined and drupal_file_public_path | trim != ''
@@ -35,8 +40,8 @@
   file:
     path: "{{ drupal_file_private_path }}"
     state: directory
-    owner: "{{ drupal_core_owner }}"
-    group: "{{ drupalvm_webserver_user }}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0775
     recurse: True
   when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
@@ -53,8 +58,8 @@
   file:
     path: "{{ drupal_config_sync_directory }}"
     state: directory
-    owner: "{{ drupal_core_owner }}"
-    group: "{{ drupalvm_webserver_user }}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0770
   when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=') and drupal_config_sync_directory is defined
 
@@ -66,7 +71,8 @@
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.php"
     mode: 0440
     force: no
-    owner: "{{ drupal_core_owner }}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
@@ -75,5 +81,6 @@
     src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
     mode: 0440
-    owner: "{{ drupal_core_owner }}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
