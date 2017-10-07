@@ -35,14 +35,20 @@
     line: // \1 // ANSIBLE TEMP run-updates.yml
   when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
 
-#- name: Run wraith smoke test.
-#  command: "wraith capture configs/smoke.local.yml"
-#  become: no
-#  args:
-#    chdir: "{{ wraith_testing_framework.install_dir }}"
-#  environment:
-#    PATH: "{{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:{{ ansible_env.PATH }}"
-#  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.install_dir is defined and gems_path.stdout is defined
+- name: Get gems path.
+  command: ruby -rubygems -e 'puts Gem.user_dir'
+  become: No
+  register: gems_path
+  when: gems_path is undefined
+
+- name: Run wraith smoke test.
+  command: "wraith capture configs/smoke.local.yml"
+  become: no
+  args:
+    chdir: "{{ wraith_testing_framework.install_dir }}"
+  environment:
+    PATH: "{{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:{{ ansible_env.PATH }}"
+  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.install_dir is defined and gems_path.stdout is defined
 
 - name: Restore previous error logging level.
   lineinfile:
