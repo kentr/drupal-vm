@@ -149,8 +149,8 @@
     when: drupal_major_version == 8 and drupal_updated | default(false)
     static: no
 
-  - include: "{{ playbook_dir }}/../scripts/misc/tasks"/wraith-install.yml
+  - include: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
     when: drupal_updated | default(false)
 
-  - include: "{{ playbook_dir }}/../scripts/misc/tasks"/wraith-smoke-test.yml
+  - include: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
     when: drupal_updated | default(false)
