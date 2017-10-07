@@ -16,6 +16,7 @@
   command: ruby -rubygems -e 'puts Gem.user_dir'
   become: No
   register: gems_path
+  when: gems_path is undefined
 
 # Add gems path to .bashrc for convenience when testing.
 - name: Add gems path to .bashrc
