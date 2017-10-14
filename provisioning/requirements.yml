@@ -89,7 +89,7 @@
   version: 1.9.0
 - src: https://github.com/kentr/ansible-role-drupal.git
   scm: git
-  version: allow-extra-post-deploy-update-tasks
+  version: dev
   name: kentr.wordpress
 - src: https://github.com/kentr/ansible-role-setup-drush.git
   scm: git
