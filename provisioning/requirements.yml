@@ -101,3 +101,4 @@
   scm: git
   version: master
   name: kentr.wordpress
+- src: mychiara.wp-cli
