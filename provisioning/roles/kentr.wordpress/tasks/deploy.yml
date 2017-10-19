@@ -1,0 +1,20 @@
+---
+- name: Ensure wp_deploy_dir directory exists.
+  file:
+    path: "{{ wp_deploy_dir }}"
+    state: directory
+    mode: 0775
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+
+- name: Check out WordPress to the docroot.
+  git:
+    repo: "{{ wp_deploy_repo }}"
+    version: "{{ wp_deploy_version }}"
+    update: "{{ wp_deploy_update }}"
+    force: yes
+    dest: "{{ wp_deploy_dir }}"
+    accept_hostkey: "{{ wp_deploy_accept_hostkey }}"
+  register: wp_deploy_repo_updated
+  notify: clear opcache
+  become: no
