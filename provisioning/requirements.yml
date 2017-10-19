@@ -99,5 +99,5 @@
   name: kentr.setup-hosting-account
 - src: https://github.com/kentr/wordpress.ansible.role.git
   scm: git
-  version: patch-1
+  version: master
   name: kentr.wordpress
