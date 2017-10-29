@@ -1,0 +1,40 @@
+---
+# tasks file for kentr.setup-drush
+
+- name: Ensure .bashrc exists.
+  file:
+    path: "~/.bashrc"
+    state: touch
+
+- name: Run `drush init`.
+  command: drush init -y
+  args:
+    creates: ~/.drush/drush.bashrc
+
+- name: Enable `structure-tables-key, common`.
+  lineinfile:
+    backup: yes
+    dest: ~/.drush/drushrc.php
+    state: present
+    regexp: "^(\\# )?\\$options\\[.structure-tables.\\]\\[.common.\\]"
+    line: "$options['structure-tables']['common'] = array({{ drush_sync_structure_tables_common }});"
+  when: drush_enable_structure_tables_key_common | default(False)
+
+- name: Enable dated `result-file` and `gzip` for `sql-dump.
+  become: no
+  blockinfile:
+    backup: yes
+    dest: ~/.drush/drushrc.php
+    marker: "// {mark} ANSIBLE MANAGED BLOCK"
+    state: present
+    insertafter: EOF
+    content: |
+      $command_specific['sql-dump'] = array(
+        'result-file' => '/home/{{ ansible_user_id }}/drush-backups/archive-dump/@DATABASE_@DATE.sql',
+        'gzip' => 1,
+      );
+
+  when: drush_enable_dated_result_file | default(True)
+
+- include: setup-one-site.yml
+  with_items: "{{ installations }}"

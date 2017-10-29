@@ -1,0 +1,13 @@
+---
+# tasks file for kentr.shared-hosting-account
+
+- name: Init .bash_profile
+  blockinfile:
+    dest: ~/.bash_profile
+    marker: "# {mark} {{ bash_profile_marker_text }}"
+    state: present
+    insertafter: EOF
+    backup: yes
+    create: yes
+    content: "{{ lookup('template', 'templates/bash_profile.j2') }}"
+  when: init_bash_profile | default(True)

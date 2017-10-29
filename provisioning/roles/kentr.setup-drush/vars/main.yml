@@ -1,0 +1,9 @@
+---
+# vars file for kentr.setup-drush
+
+# Values to use for $options['structure-tables']['common'].
+drush_sync_structure_tables_common: "'cache', 'cache_*', 'history', 'sessions', 'watchdog'"
+
+# Values for drush rsync.
+drush_rsync_mode: 'Pavu'
+drush_rsync_excludes: '*.wmv:*.mp4:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'

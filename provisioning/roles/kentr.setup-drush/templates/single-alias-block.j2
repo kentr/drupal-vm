@@ -1,0 +1,31 @@
+      $aliases['{{ item.env }}'] = array(
+        // base URL
+        'uri' => '{{ item.uri | default('default') }}',
+        // drupal_core_path.
+        'root' => '{{ item.root }}',
+
+        {% if item.env not in drush_aliases_remote_skip_ssh %}
+          'remote-host' => '{{ item.ssh_host }}',
+          'remote-user' => '{{ item.ssh_user }}',
+          'ssh-options' => '{{ item.drush_ssh_options | default(drush_ssh_options) }}',
+        {% endif %}
+
+        'source-command-specific' => array (
+          'sql-sync' => array (
+            'structure-tables-key' => 'common',
+          ),
+        ),
+        'command-specific' => array (
+          'sql-dump' => array (
+            'structure-tables-key' => 'common',
+            'gzip' => '1',
+          ),
+          'archive-dump' => array (
+            'structure-tables-key' => 'common',
+          ),
+          'rsync' => array (
+            'mode' => '{{ drush_rsync_mode }}',
+            'exclude-paths' => '{{ drush_rsync_excludes }}',
+          ),
+        ),
+      );
