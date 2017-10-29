@@ -45,6 +45,7 @@
 - name: Get prod URI.
   command: echo "{{ instances | selectattr('env', 'equalto', 'prod') | map(attribute='uri') | join }}"
   register: prod_uri
+  when: wraith_testing_framework.install | default(False)
 
 # Replace the URI for prod environment.
 # Searches config files for lines starting with "  prod: " or "  base: ".
