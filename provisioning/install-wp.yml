@@ -33,6 +33,9 @@
   roles:
 
 
-    - { role: kentr.wordpress, when: install_wordpress | default(False) }
+    - role: kentr.wordpress
+      when: install_wordpress | default(False) or wp_deploy | default(False)
+    - role: mychiara.wp-cli
+      when: 'project_type == "wordpress" or "wp-cli" in installed_extras'
 
   tasks:

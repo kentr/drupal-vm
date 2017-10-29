@@ -90,7 +90,7 @@
 - src: https://github.com/kentr/ansible-role-drupal.git
   scm: git
   version: dev
-  name: kentr.wordpress
+  name: kentr.drupal
 - src: https://github.com/kentr/ansible-role-setup-drush.git
   scm: git
   name: kentr.setup-drush

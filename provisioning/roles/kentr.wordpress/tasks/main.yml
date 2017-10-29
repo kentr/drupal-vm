@@ -1,46 +1,77 @@
 ---
+- name: Register information about the /vagrant directory.
+  stat:
+    path: /vagrant
+  register: vagrant_directory
 
-- name: Wordpresss | Create or restore site database
+- name: Create or restore site database
   include: mysql.yml
   when: wp_mysql_enable
 
-- name: Wordpresss | Ensure that installation directory exists
-  file: path={{wp_install_dir|dirname}} state=directory
+- name: Ensure that installation directory exists
+  file:
+    path: "{{wp_install_dir}}"
+    state: directory
 
-- name: Wordpresss | Download {{wp_version}} to /tmp
-  get_url: url=http://wordpress.org/wordpress-{{wp_version}}.tar.gz force=no dest=/tmp/wordpress-{{wp_version}}.tar.gz
+# Deploy WordPress if configured.
+- include: tasks/deploy.yml
+  when: wp_deploy
+
+- name: Get information about index.php.
+  stat:
+    path: "{{ wp_install_dir }}/index.php"
+  register: index
+
+- name: Download {{wp_version}} to /tmp
+  get_url:
+    url: "http://wordpress.org/wordpress-{{wp_version}}.tar.gz"
+    force: no
+    dest: "/tmp/wordpress-{{wp_version}}.tar.gz"
   # TODO sha256sum="{{ wp_sha256sum }}"
+  creates: "{{ wp_install_dir }}/index.php"
+  when: install_wordpress | default(False) and not index.stat.exists
 
-- name: Wordpresss | Extract archive
-  unarchive: src=/tmp/wordpress-{{wp_version}}.tar.gz dest=/tmp copy=no
+- name: Extract archive
+  unarchive:
+    src: "/tmp/wordpress-{{wp_version}}.tar.gz"
+    dest: /tmp
+    copy: no
+  creates: "{{ wp_install_dir }}/index.php"
+  when: install_wordpress | default(False)
 
-- name: Wordpresss | Move extracted directory to {{wp_install_dir}}
-  command: /bin/mv /tmp/wordpress {{wp_install_dir}} creates={{wp_install_dir}}
+- name: Move extracted directory to {{wp_install_dir}}
+  command: "/bin/mv /tmp/wordpress {{wp_install_dir}}"
+  creates: "{{ wp_install_dir }}"
+  when: install_wordpress | default(False) and not index.stat.exists
 
-- name: Wordpresss | Remove wordpress-{{wp_version}}.tar.gz
-  file: path=/tmp/wordpress-{{wp_version}}.tar.gz state=absent
+- name: Remove wordpress-{{wp_version}}.tar.gz
+  file:
+    path: "/tmp/wordpress-{{wp_version}}.tar.gz"
+    state: absent
+  when: install_wordpress | default(False) and not index.stat.exists
 
-- name: Wordpresss | Fetch random salts for wp-config.php
-  local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
-  sudo: no
+- name: Fetch random salts for wp-config.php
+  command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
 
-- name: Wordpresss | Copy wp-config.php file
-  template: src=wp-config.php.j2 dest={{wp_install_dir}}/wp-config.php
+- name: Copy wp-config.php file
+  template:
+    src: wp-config.php.j2
+    dest: "{{wp_install_dir}}/wp-config.php"
 
-- name: Wordpresss | Change ownership of installation directory
-  file: path={{wp_install_dir}} owner=www-data group=www-data mode=775 state=directory recurse=yes
-  when: ansible_pkg_mgr == "apt"
+- name: Change ownership of installation directory
+  file:
+    path: "{{wp_install_dir}}"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+    mode: 0775
+    state: directory
+    recurse: yes
 
-- name: Wordpresss | Change ownership of installation directory
-  file: path={{wp_install_dir}} owner=nginx group=nginx mode=775 state=directory recurse=yes
-  when: ansible_pkg_mgr == "yum"
-
-- name: Wordpresss | Change ownership of uploads directory on debian system
-  file: path={{wp_install_dir}}/wp-content/uploads/ owner=www-data group=www-data state=directory recurse=yes
-  when: ansible_pkg_mgr == "apt"
-
-- name: Wordpresss | Change ownership of uploads directory on centos system
-  file: path={{wp_install_dir}}/wp-content/uploads/ owner=nginx group=nginx state=directory recurse=yes
-  when: ansible_pkg_mgr == "yum"
-
+- name: Change ownership of uploads directory
+  file:
+    path: "{{wp_install_dir}}/wp-content/uploads/"
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
+    state: directory
+    recurse: yes

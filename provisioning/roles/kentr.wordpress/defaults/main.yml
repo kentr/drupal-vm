@@ -1,4 +1,5 @@
 ---
+
 wp_version: 4.0
 # TODO: https://wordpress.org/download/release-archive/
 # wp_sha256sum: 8543e31d7c0a1b15f73dbb20f9161845f3d2bb8de3d7aef371cf32bba41747ee
@@ -21,3 +22,12 @@ wp_mysql_site_restore_saved_db: false
 wp_backup_local_path: "{{ playbook_dir }}/_private/backup"
 wp_database_backup: "{{ wp_backup_local_path }}/{{ wp_site_name }}.sql"
 wp_site_name: "{{ wp_apache_hostname | default('example') }}"
+
+# Set this to 'true' and specify a Git repository if you want to deploy Drupal
+# to your server from an existing repository.
+wp_deploy: false
+wp_deploy_repo: ""
+wp_deploy_version: master
+wp_deploy_update: true
+wp_deploy_dir: "{{ wp_install_dir }}"
+wp_deploy_accept_hostkey: no
