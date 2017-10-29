@@ -290,7 +290,7 @@ instances:
   - name: "{{ prod_domain }}"
     # one of "local", "dev", "stage", "prod"
     env: prod
-    uri: "http://{{ local_domain }}"
+    uri: "http://{{ prod_domain }}"
     type: "{{ project_type }}"
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
