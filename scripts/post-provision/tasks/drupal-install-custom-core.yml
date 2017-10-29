@@ -1,10 +1,10 @@
 ---
-
-- name: debug vagrant_group
-  debug:
-    var: vagrant_directory.stat.gr_name
-
 # Tasks for installing pre-existing web app project onto VM.
+
+- name: Register information about the /vagrant directory.
+  stat:
+    path: /vagrant
+  register: vagrant_directory
 
 - name: Custom core - Ensure web_app_project_root directory exists.
   file:
