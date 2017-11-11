@@ -157,6 +157,10 @@ php_version: "5.6"
 db_user: vagrant
 db_password: vagrant
 db_name: vagrant
+
+# Destination directory for SQL dump files.
+db_remote_dump_directory: "/home/{{ client_server_username }}/tmp"
+db_local_dump_directory: "{{ web_app_project_root }}/tmp"
 # Comment out any extra utilities you don't want to install. If you don't want
 # to install *any* extras, set this value to an empty set, e.g. `[]`.
 installed_extras:
