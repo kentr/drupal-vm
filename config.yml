@@ -154,6 +154,9 @@ php_version: "5.6"
 # See http://docs.ansible.com/ansible/git_module.html#options.
 # drush_version: "master"
 
+db_user: vagrant
+db_password: vagrant
+db_name: vagrant
 # Comment out any extra utilities you don't want to install. If you don't want
 # to install *any* extras, set this value to an empty set, e.g. `[]`.
 installed_extras:
