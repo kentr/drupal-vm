@@ -104,7 +104,7 @@ drush_alias_file_prefix: "{{ client_server_username }}"
 
 # Defaults for Drush rsync command.
 drush_rsync_mode: 'Pavu'
-drush_rsync_excludes: '*.wmv:*.mp4:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'
+drush_rsync_excludes: '*.mov:*.mp3:*.mp4:*.swf:*.wmv:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'
 
 
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
