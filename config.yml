@@ -161,6 +161,19 @@ db_name: vagrant
 # Destination directory for SQL dump files.
 db_remote_dump_directory: "/home/{{ client_server_username }}/tmp"
 db_local_dump_directory: "{{ web_app_project_root }}/tmp"
+
+# MySQL databases and users.
+mysql_databases:
+  - name: "{{ db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
+
+mysql_users:
+  - name: "{{ db_user }}"
+    host: "%"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+
 # Comment out any extra utilities you don't want to install. If you don't want
 # to install *any* extras, set this value to an empty set, e.g. `[]`.
 installed_extras:
