@@ -11,17 +11,6 @@ drush_enable_structure_tables_key_common: True
 drush_aliases_remote: True
 drush_aliases_local: True
 
-# For drush aliases on the remote machine, items in `installations` that have an
-# `environment` property matching this list will be created as "local" aliases.
-# SSH options will be ignored.
-#
-# This is useful when the remote node being provisioned by Ansible is actually a
-# `local` dev environment.
-# On that remote node, a drush alias for `local` will be created without
-# SSH options, so that the alias acts on the machine.
-drush_aliases_remote_skip_ssh:
-  - local
-
 # Enable dated sql-dump result file.
 drush_enable_dated_result_file: True
 
@@ -30,3 +19,8 @@ drush_alias_file_prefix: "{{ inventory_hostname }}"
 # SSH options passed to Drush.
 # This string will be enclosed by single quotes in the PHP Drush alias file.
 drush_ssh_options: "-o PasswordAuthentication=no -o LogLevel=quiet"
+
+# Destination directory for SQL dump files.
+drush_sql_dump_dir: "/home/{{ ansible_ssh_user }}/drush-backups/archive-dump"
+
+drush_rsync_excludes: ""

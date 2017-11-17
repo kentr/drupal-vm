@@ -4,7 +4,7 @@
         // drupal_core_path.
         'root' => '{{ item.root }}',
 
-        {% if item.env not in drush_aliases_remote_skip_ssh %}
+        {% if not item.drush_alias_is_local_on_remote_node | default(False)  %}
           'remote-host' => '{{ item.ssh_host }}',
           'remote-user' => '{{ item.ssh_user }}',
           'ssh-options' => '{{ item.drush_ssh_options | default(drush_ssh_options) }}',

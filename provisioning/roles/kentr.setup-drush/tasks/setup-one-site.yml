@@ -4,6 +4,13 @@
 #
 # Expects parameter:
 # item:
+#   ssh_host: Required. Hostname that Drush should use for SSH (remote) operations.
+#
+#   ssh_user: Required. User that Drush should use for SSH (remote) operations.
+#
+#   drush_ssh_options: Required. Additional options that Drush should use for SSH (remote)
+#       operations.
+#
 #   root: Required. Absolute path to the item's root web folder.  No default.
 #
 #   env: Required. The environment for this installation.  Will be the ".xyz" suffix
@@ -18,6 +25,14 @@
 #       prefix used in the site alias.  E.g., a value of "my-site" creates the aliases
 #       "@my-site", "@my-site.*".
 #       Defaults to the Ansible inventory_hostname.
+#
+#   drush_alias_include_on_remote_node: EXPERIMENTAL. Optional.  Default = True.  If True,
+#       an alias definition for this item will be on the remote node.
+#
+#   drush_alias_is_local_on_remote_node: Optional.  Default = False.  If True, the alias
+#       created for this item on the remote node will be configured as a "local" alias.
+#       It will not have SSH connection information, and Drush will behave as though the
+#       site is on the machine on which Drush is run.
 ##########################################################################################
 
 
@@ -30,6 +45,9 @@
     force: no
     dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
     src: templates/drush.aliases.drushrc.php.j2
+
+- debug:
+    var: item
 
 - name: Insert remote Drush alias declarations.
   become: no
@@ -58,40 +76,5 @@
     dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
     marker: "// {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
     state: present
-    content: |
-      $aliases['{{ item.env }}'] = array(
-        // base URL
-        'uri' => '{{ item.uri | default('default') }}',
-        // drupal_core_path.
-        'root' => '{{ item.root }}',
-        'remote-host' => '{{ item.ssh_host }}',
-        'remote-user' => '{{ item.ssh_user }}',
-        'ssh-options' => '{{ item.drush_ssh_options | default(drush_ssh_options) }}',
-        'source-command-specific' => array (
-          'sql-sync' => array (
-            'structure-tables-key' => 'common',
-          ),
-        ),
-        'target-command-specific' => array (
-          'sql-sync' => array (
-            'enable' => array(
-              'devel',
-              'diff',
-            ),
-          ),
-        ),
-        'command-specific' => array (
-          'sql-dump' => array (
-            'structure-tables-key' => 'common',
-            'gzip' => '1',
-          ),
-          'archive-dump' => array (
-            'structure-tables-key' => 'common',
-          ),
-          'rsync' => array (
-            'mode' => '{{ drush_rsync_mode }}',
-            'exclude-paths' => '{{ drush_rsync_excludes }}',
-          ),
-        ),
-      );
+    content:  "{{ lookup('template', 'templates/single-alias-block.j2') }}"
   when: item.uri is defined and drush_aliases_local | default(False)
