@@ -197,6 +197,7 @@ installed_extras:
   # - varnish
   - xdebug
   # - xhprof
+  # - wp-cli
 
 
 # XDebug configuration. XDebug is disabled by default for better performance.
