@@ -317,3 +317,7 @@ instances:
     # Absolute path to web root for the environment.
     root: "/home/{{ client_server_username }}/public_html"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
+
+# Misc
+# Set up bash and other basics of login account.
+setup_hosting_account: True
