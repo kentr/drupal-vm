@@ -1,7 +1,7 @@
 # Ansible Role: WordPress
 [![Build Status](https://travis-ci.org/darthwade/ansible-role-wordpress.png)](https://travis-ci.org/darthwade/ansible-role-wordpress)
 [![Gittip](http://img.shields.io/gittip/darthwade.svg)](https://www.gittip.com/darthwade/)
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=darthwade&url=https://github.com/darthwade/ansible-role-wordpress&title=Ansible Role: WordPress&language=&tags=github&category=software) 
+[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=darthwade&url=https://github.com/darthwade/ansible-role-wordpress&title=Ansible Role: WordPress&language=&tags=github&category=software)
 
 Ansible role that installs and configures WordPress.
 
@@ -13,17 +13,17 @@ Features include:
 ## Installation
 
 Using `ansible-galaxy`:
-```shell 
+```shell
 $ ansible-galaxy install darthwade.wordpress
 ```
 
 Using `arm` ([Ansible Role Manager](https://github.com/mirskytech/ansible-role-manager/)):
-```shell 
+```shell
 $ arm install darthwade.wordpress
 ```
 
 Using `git`:
-```shell 
+```shell
 $ git clone https://github.com/darthwade/ansible-role-wordpress.git
 ```
 
@@ -34,21 +34,43 @@ $ git clone https://github.com/darthwade/ansible-role-wordpress.git
 ## Variables
 Here is a list of all the default variables for this role, which are also available in `defaults/main.yml`.
 
-```yaml 
+```yaml
 wp_version: 4.0
 wp_install_dir: '/var/sites/awesome_wordpress_site'
 wp_db_name: 'database_name_here'
 wp_db_user: 'username_here'
 wp_db_password: 'password_here'
 wp_db_host: 'localhost'
-
 wp_db_charset: 'utf8'
 wp_db_collate: ''
 wp_table_prefix: 'wp_'
 wp_debug: false
 
+wp_install_site: False
+wp_admin_user: 'admin'
+wp_admin_email: ''
+wp_site_title: 'My Great WordPress Site'
+
 wp_fs_method: 'direct'
 wp_lang: ''
+
+wp_mysql_enable: true
+wp_mysql_db_create: true
+wp_mysql_site_restore_saved_db: false
+wp_backup_local_path: "{{ playbook_dir }}/_private/backup"
+wp_database_backup: "{{ wp_backup_local_path }}/{{ wp_site_name }}.sql"
+wp_site_name: "{{ wp_apache_hostname | default('example') }}"
+
+# Set this to 'true' and specify a Git repository if you want to deploy Drupal
+# to your server from an existing repository.
+wp_deploy: false
+wp_deploy_repo: ""
+wp_deploy_version: master
+wp_deploy_update: true
+wp_deploy_dir: "{{ wp_install_dir }}"
+wp_deploy_accept_hostkey: no
+
+workspace: /tmp
 ```
 
 ## Example playbook
@@ -66,7 +88,7 @@ wp_lang: ''
 ```
 
 ## Testing
-```shell 
+```shell
 $ git clone https://github.com/darthwade/ansible-role-wordpress.git
 $ cd ansible-role-wordpress
 $ vagrant up

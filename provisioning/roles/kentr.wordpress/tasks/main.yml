@@ -13,42 +13,26 @@
     path: "{{wp_install_dir}}"
     state: directory
 
-# Deploy WordPress if configured.
-- include: tasks/deploy.yml
+- name: Deploy WordPress if configured.
+  include: tasks/deploy.yml
   when: wp_deploy
 
 - name: Get information about index.php.
   stat:
     path: "{{ wp_install_dir }}/index.php"
-  register: index
+  register: index_file
 
-- name: Download {{wp_version}} to /tmp
-  get_url:
-    url: "http://wordpress.org/wordpress-{{wp_version}}.tar.gz"
-    force: no
-    dest: "/tmp/wordpress-{{wp_version}}.tar.gz"
-  # TODO sha256sum="{{ wp_sha256sum }}"
-  creates: "{{ wp_install_dir }}/index.php"
-  when: install_wordpress | default(False) and not index.stat.exists
+- name: Define wordpress_site_exists.
+  set_fact:
+    wordpress_site_exists: "{{ index_file.stat.exists|default(false) }}"
 
-- name: Extract archive
-  unarchive:
-    src: "/tmp/wordpress-{{wp_version}}.tar.gz"
-    dest: /tmp
-    copy: no
-  creates: "{{ wp_install_dir }}/index.php"
-  when: install_wordpress | default(False)
+- name: Download WordPress if configured.
+  include: tasks/download-wordpress.yml
+  when: install_wordpress | default(False) and not wordpress_site_exists
 
-- name: Move extracted directory to {{wp_install_dir}}
-  command: "/bin/mv /tmp/wordpress {{wp_install_dir}}"
-  creates: "{{ wp_install_dir }}"
-  when: install_wordpress | default(False) and not index.stat.exists
-
-- name: Remove wordpress-{{wp_version}}.tar.gz
-  file:
-    path: "/tmp/wordpress-{{wp_version}}.tar.gz"
-    state: absent
-  when: install_wordpress | default(False) and not index.stat.exists
+- name: Install WordPress site if configured.
+  include: tasks/install-site.yml
+  when: wp_install_site
 
 - name: Fetch random salts for wp-config.php
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
@@ -75,3 +59,7 @@
     group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
     state: directory
     recurse: yes
+
+- name: Install dummy data if configured.
+  include: tasks/install-dummy-data.yml
+  when: wp_install_dummy_data

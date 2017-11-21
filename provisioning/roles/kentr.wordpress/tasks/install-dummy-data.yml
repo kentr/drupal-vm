@@ -1,0 +1,15 @@
+---
+
+- name: Download theme-unit-test-data.xml.
+  get_url:
+    url: "https://wpcom-themes.svn.automattic.com/demo/theme-unit-test-data.xml"
+    force: no
+    dest: "{{ workspace }}/wp-theme-unit-test-data.xml"
+
+- name: Install importer plugin.
+  become: no
+  command: "wp --path={{ wp_install_dir }} plugin install wordpress-importer --activate"
+
+- name: Install importer plugin.
+  become: no
+  command: "wp --path={{ wp_install_dir }} import {{ workspace }}/wp-theme-unit-test-data.xml --authors=create"
