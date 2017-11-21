@@ -28,6 +28,7 @@
   unarchive:
     src: "https://xdebug.org/files/xdebug-{{ php_xdebug_version }}.tgz"
     dest: "{{ workspace }}"
+    extra_opts: "--no-same-owner"
     creates: "{{ workspace }}/xdebug-{{ php_xdebug_version }}"
     copy: no
 

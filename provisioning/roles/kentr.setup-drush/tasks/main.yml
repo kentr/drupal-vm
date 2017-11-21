@@ -2,16 +2,19 @@
 # tasks file for kentr.setup-drush
 
 - name: Ensure .bashrc exists.
+  become: no
   file:
     path: "~/.bashrc"
     state: touch
 
 - name: Run `drush init`.
+  become: no
   command: drush init -y
   args:
     creates: ~/.drush/drush.bashrc
 
 - name: Enable `structure-tables-key, common`.
+  become: no
   lineinfile:
     backup: yes
     dest: ~/.drush/drushrc.php
@@ -30,8 +33,9 @@
     insertafter: EOF
     content: |
       $command_specific['sql-dump'] = array(
-        'result-file' => '/home/{{ ansible_user_id }}/drush-backups/archive-dump/@DATABASE_@DATE.sql',
+        'result-file' => '{{ drush_sql_dump_dir }}/@DATABASE_@DATE.sql',
         'gzip' => 1,
+        'structure-tables-key' => 'common',
       );
 
   when: drush_enable_dated_result_file | default(True)
