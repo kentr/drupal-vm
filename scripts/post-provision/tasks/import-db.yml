@@ -1,10 +1,10 @@
 ---
 # Copies specified database dump file and imports it into the database defined
-# by drupal_db_name.
+# by db_name.
 #
 # Available variables:
-#  - drupal_database_import_filename: Base filename for dump file.
-#  - drupal_database_import_directory: Path to directory containing dump file.
+#  - database_import_filename: Base filename for dump file.
+#  - database_import_directory: Path to directory containing dump file.
 #    Either absolute or relative to the directory containing the primary playbook.
 #
 # @todo: improve file path handling: combine filename / path.
@@ -12,14 +12,14 @@
 # Check whether database dump file is declared.
 - name: Define do_db_import.
   set_fact:
-    do_db_import: "{{ drupal_database_import_directory is defined and drupal_database_import_filename is defined }}"
+    do_db_import: "{{ database_import_filename is defined }}"
   when: do_db_import is not defined
   ignore_errors: yes
 
 # Copy dump file to remote node.
-- name: Copy database dump file.
+- name: Copy database dump file to remote.
   copy:
-    src: "{{ drupal_database_import_directory }}/{{ drupal_database_import_filename }}"
+    src: "{{ database_import_filename }}"
     dest: /tmp
   when: do_db_import
   register: db_copy_result
@@ -27,7 +27,7 @@
 # Import dumpfile into database.
 - name: Import database.
   mysql_db:
-    name: "{{ drupal_db_name }}"
+    name: "{{ db_name }}"
     state: import
-    target: "{{ db_copy_result.dest }}"
+    target: "/tmp/{{ database_import_filename | basename }}"
   when: do_db_import and db_copy_result is defined and db_copy_result.state == "file"

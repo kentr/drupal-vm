@@ -116,7 +116,7 @@ drush_insert_project_shell_aliases: true
 
 # Though site is not installed, this is used within the Pantheon project
 # to form the database import file name.
-# see drupal_database_import_filename
+# see database_import_filename
 drupal_major_version: 7
 
 # Install & configure basic site into database. Does not install code.
@@ -231,7 +231,7 @@ php_log_errors: 1
 # Source file for database.  Will be copied to the node and imported into
 # the database specified for the Drupal site.
 # Name of database import source file.
-# drupal_database_import_filename: "prod.d{{ drupal_major_version }}.latest.sql.gz"
+# database_import_filename: "prod.d{{ drupal_major_version }}.latest.sql.gz"
 # Directory where the database source file resides.
 # Path should be relative to the provisioning directory.
 # drupal_database_import_directory: "../backup/prod/db"
