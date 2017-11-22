@@ -264,6 +264,7 @@ wp_db_name: "{{ db_name }}"
 wp_db_user: "{{ db_user }}"
 wp_db_password: "{{ db_password }}"
 
+wp_core_owner: "{{ drupalvm_user }}"
 
 # wp_mysql_site_restore_saved_db: True
 # wp_database_backup: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/db-restore.sql"
