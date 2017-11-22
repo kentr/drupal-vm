@@ -30,10 +30,6 @@
   include: tasks/download-wordpress.yml
   when: install_wordpress | default(False) and not wordpress_site_exists
 
-- name: Install WordPress site if configured.
-  include: tasks/install-site.yml
-  when: wp_install_site
-
 - name: Fetch random salts for wp-config.php
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
@@ -59,6 +55,10 @@
     group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
     state: directory
     recurse: yes
+
+- name: Install WordPress site if configured.
+  include: tasks/install-site.yml
+  when: wp_install_site
 
 - name: Install dummy data if configured.
   include: tasks/install-dummy-data.yml
