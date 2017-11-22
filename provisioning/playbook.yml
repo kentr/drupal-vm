@@ -115,7 +115,11 @@
     # Roles for security and stability on production.
     - { role: geerlingguy.security, when: extra_security_enabled }
 
-    - { role: kentr.wordpress, when: install_wordpress | default(False) }
+    - role: mychiara.wp-cli
+      when: 'project_type == "wordpress" or "wp-cli" in installed_extras'
+
+    - role: kentr.wordpress
+      when: install_wordpress | default(False) or wp_deploy | default(False)
 
     - role: kentr.setup-hosting-account
       become: no
