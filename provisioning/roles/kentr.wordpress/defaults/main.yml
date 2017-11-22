@@ -29,7 +29,7 @@ wp_backup_local_path: "{{ playbook_dir }}/_private/backup"
 wp_database_backup: "{{ wp_backup_local_path }}/{{ wp_site_name }}.sql"
 wp_site_name: "{{ wp_apache_hostname | default('example') }}"
 
-# Set this to 'true' and specify a Git repository if you want to deploy Drupal
+# Set this to 'true' and specify a Git repository if you want to deploy WordPress
 # to your server from an existing repository.
 wp_deploy: false
 wp_deploy_repo: ""
@@ -37,5 +37,8 @@ wp_deploy_version: master
 wp_deploy_update: true
 wp_deploy_dir: "{{ wp_install_dir }}"
 wp_deploy_accept_hostkey: no
+
+wp_core_owner: "{{ ansible_ssh_user | default(ansible_env.SUDO_USER, true) | default(ansible_env.USER, true) | default(ansible_user_id) }}"
+wp_core_group: "{{ ansible_ssh_user | default(ansible_env.SUDO_USER, true) | default(ansible_env.USER, true) | default(ansible_user_id) }}"
 
 workspace: /tmp

@@ -35,7 +35,11 @@ $ git clone https://github.com/darthwade/ansible-role-wordpress.git
 Here is a list of all the default variables for this role, which are also available in `defaults/main.yml`.
 
 ```yaml
+---
+
 wp_version: 4.0
+# TODO: https://wordpress.org/download/release-archive/
+# wp_sha256sum: 8543e31d7c0a1b15f73dbb20f9161845f3d2bb8de3d7aef371cf32bba41747ee
 wp_install_dir: '/var/sites/awesome_wordpress_site'
 wp_db_name: 'database_name_here'
 wp_db_user: 'username_here'
@@ -48,6 +52,7 @@ wp_debug: false
 
 wp_install_site: False
 wp_admin_user: 'admin'
+wp_admin_password: ''
 wp_admin_email: ''
 wp_site_title: 'My Great WordPress Site'
 
@@ -61,7 +66,7 @@ wp_backup_local_path: "{{ playbook_dir }}/_private/backup"
 wp_database_backup: "{{ wp_backup_local_path }}/{{ wp_site_name }}.sql"
 wp_site_name: "{{ wp_apache_hostname | default('example') }}"
 
-# Set this to 'true' and specify a Git repository if you want to deploy Drupal
+# Set this to 'true' and specify a Git repository if you want to deploy WordPress
 # to your server from an existing repository.
 wp_deploy: false
 wp_deploy_repo: ""
@@ -69,6 +74,9 @@ wp_deploy_version: master
 wp_deploy_update: true
 wp_deploy_dir: "{{ wp_install_dir }}"
 wp_deploy_accept_hostkey: no
+
+wp_core_owner: "{{ ansible_ssh_user | default(ansible_env.SUDO_USER, true) | default(ansible_env.USER, true) | default(ansible_user_id) }}"
+wp_core_group: "{{ ansible_ssh_user | default(ansible_env.SUDO_USER, true) | default(ansible_env.USER, true) | default(ansible_user_id) }}"
 
 workspace: /tmp
 ```
