@@ -67,6 +67,12 @@ drupal_file_private_path: ""
 # Directory where contrib modules live, relative to site root.
 drupal_modules_contrib_path: "sites/all/modules"
 
+# The default type for synced folders when `type` isn't specified in the config
+# for the individual folder.
+# This is `virtualbox` by default so that users don't have to set up `nfs`.
+# http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more info.
+vagrant_synced_folder_default_type: virtualbox
+
 # A list of synced folders, with the keys 'local_path', 'destination', and
 # a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
 # http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more info.
@@ -78,7 +84,6 @@ vagrant_synced_folders:
   # above.
   - local_path: .
     destination: "{{ base_synced_dir }}"
-    type: nfs
     create: true
     # Whether or not to mount the folder with vagrant-bindfs plugin for nfs mounts.
     # vagrant-bindfs plugin must be installed separately.  Uses plugin default options.
