@@ -237,9 +237,9 @@ php_log_errors: 1
 # Path should be relative to the provisioning directory.
 # drupal_database_import_directory: "../backup/prod/db"
 
-drush_bde_env_options: "--base-url=https://{{vagrant_hostname}} --site-root={{ drupal_core_path }}"
+drush_bde_env_options: "--base-url=https://{{vagrant_hostname}} --site-root={{ web_app_web_root }}"
 behat_binary_dir: "{{ drupal_composer_install_dir }}/bin"
-behat_config_file: "{{ drupal_core_path }}/sites/default/behat-tests/behat.yml"
+behat_config_file: "{{ web_app_web_root }}/sites/default/behat-tests/behat.yml"
 behat_cmd: "behat -c {{ behat_config_file }}"
 ################################################################################
 
@@ -317,7 +317,7 @@ instances:
     type: "{{ project_type }}"
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
-    root: "{{ drupal_core_path }}"
+    root: "{{ web_app_web_root }}"
     drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
 
   - name: "{{ prod_domain }}"
