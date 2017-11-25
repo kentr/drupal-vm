@@ -15,9 +15,11 @@
 - name: Fetch random salts for wp-config.php
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
+  when: project_type == "wordpress" and web_app_project_root is defined
 
 - name: Copy wp-config.php file
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/wp-config.php.j2"
     dest: "{{wp_install_dir}}/wp-config.php"
+  when: project_type == "wordpress" and web_app_project_root is defined
