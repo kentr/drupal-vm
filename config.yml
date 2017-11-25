@@ -243,7 +243,9 @@ behat_config_file: "{{ web_app_web_root }}/sites/default/behat-tests/behat.yml"
 behat_cmd: "behat -c {{ behat_config_file }}"
 ################################################################################
 
-
+drupal_db_name: "{{ db_name }}"
+drupal_db_user: "{{ db_user }}"
+drupal_db_password: "{{ db_password }}"
 
 php_date_timezone: "America/Los_Angeles"
 
