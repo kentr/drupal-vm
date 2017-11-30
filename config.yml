@@ -335,3 +335,6 @@ instances:
 # Misc
 # Set up bash and other basics of login account.
 setup_hosting_account: True
+
+# Shims for backwards-compatibility.  It's preferable to set agnostic variables above.
+drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
