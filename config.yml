@@ -101,11 +101,6 @@ insert_local_drush_alias: true
 # Example: if cli_alias_file_prefix = "my_project", the resulting aliases will be
 #  - @my_project.loc
 #  - @my_project.whatever
-
-# Defaults for Drush rsync command.
-drush_rsync_mode: 'Pavu'
-drush_rsync_excludes: '*.mov:*.mp3:*.mp4:*.swf:*.wmv:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'
-
 cli_alias_file_prefix: "{{ client_server_username }}"
 
 # Exclude data from these tables in database dumps.
@@ -113,6 +108,25 @@ cli_alias_file_prefix: "{{ client_server_username }}"
 # For WordPress, the tables will be excluded entirely.
 # Format: comma-separated list of table names.
 db_dump_exclude_tables: "'cache', 'cache_*', 'history', 'sessions', 'watchdog'"
+
+# Extra args for `rsync` when synchronizing files from prod.
+files_rsync_extra_args: '-Pavu'
+# Patterns passed to `rsync` --exclude args when synchronizing files from prod.
+files_rsync_excludes:
+  - '*.mov'
+  - '*.mp3'
+  - '*.mp4'
+  - '*.swf'
+  - '*.wmv'
+  - '*.pdf'
+  - '*.doc*'
+  - '*.ppt*'
+  - '*.psd'
+  - '*.xls*'
+  - 'css/**'
+  - 'js/**'
+  - 'php/twig/**'
+  - 'config_**'
 
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
 # clobbers an existing file. So, it's disabled.
@@ -344,3 +358,5 @@ setup_hosting_account: True
 
 # Shims for backwards-compatibility.  It's preferable to set agnostic variables above.
 drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+drush_rsync_mode: "{{ files_rsync_extra_args | default('') }}"
+drush_rsync_excludes: "{{ files_rsync_excludes | default([]) | join(':') }}"
