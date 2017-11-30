@@ -96,17 +96,17 @@ drush_composer_cli_options: "--prefer-dist --no-interaction"
 # Custom Drush alias tasks to insert just the local declaration into an existing
 # alias file.
 insert_local_drush_alias: true
-# Prefix to use on the Drush alias file.  This value will determine the 1st part of
+# Prefix to use on the Drush / WP-CLI alias file.  This value will determine the 1st part of
 # the alias, between the "@" and the first ".".
-# Example: if drush_alias_file_prefix = "my_project", the resulting aliases will be
+# Example: if cli_alias_file_prefix = "my_project", the resulting aliases will be
 #  - @my_project.loc
 #  - @my_project.whatever
-drush_alias_file_prefix: "{{ client_server_username }}"
 
 # Defaults for Drush rsync command.
 drush_rsync_mode: 'Pavu'
 drush_rsync_excludes: '*.mov:*.mp3:*.mp4:*.swf:*.wmv:*.pdf:*.doc*:*.ppt*:*.psd:*.xls*:css/**:js/**:php/twig/**'
 
+cli_alias_file_prefix: "{{ client_server_username }}"
 
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
 # clobbers an existing file. So, it's disabled.
@@ -300,7 +300,7 @@ wraith_testing_framework:
 
   # SSH remote host to which results will be copied.
   # You must have rsync access to this host.
-  rsync_dest_host: "{{ drush_alias_file_prefix }}"
+  rsync_dest_host: "{{ cli_alias_file_prefix }}"
 
   # Remote directory to which results will be copied.
   # Directory must already exist on the target machine, and you must have write
@@ -320,7 +320,7 @@ instances:
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
     root: "{{ web_app_web_root }}"
-    drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
 
   - name: "{{ prod_domain }}"
     # one of "local", "dev", "stage", "prod"
@@ -330,7 +330,7 @@ instances:
     major_version: "{{ drupal_major_version }}"
     # Absolute path to web root for the environment.
     root: "/home/{{ client_server_username }}/public_html"
-    drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
 
 # Misc
 # Set up bash and other basics of login account.
