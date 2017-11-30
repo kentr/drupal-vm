@@ -1,5 +1,8 @@
 ---
 
+# @todo: Check if already installed
+# mysql -e "SELECT name FROM mysql.func WHERE name='preg_replace'" --batch --skip-column-names
+
 - name: Define workspace if not already defined.
   set_fact:
     workspace: '/root'
