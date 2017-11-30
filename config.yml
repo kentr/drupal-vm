@@ -108,6 +108,12 @@ drush_rsync_excludes: '*.mov:*.mp3:*.mp4:*.swf:*.wmv:*.pdf:*.doc*:*.ppt*:*.psd:*
 
 cli_alias_file_prefix: "{{ client_server_username }}"
 
+# Exclude data from these tables in database dumps.
+# For Drupal, the table structure will be included.
+# For WordPress, the tables will be excluded entirely.
+# Format: comma-separated list of table names.
+db_dump_exclude_tables: "'cache', 'cache_*', 'history', 'sessions', 'watchdog'"
+
 # This is Drupal-VM's default Drush alias feature, which creates funky aliases and
 # clobbers an existing file. So, it's disabled.
 configure_drush_aliases: false
