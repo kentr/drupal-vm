@@ -95,7 +95,10 @@ drush_composer_cli_options: "--prefer-dist --no-interaction"
 
 # Custom Drush alias tasks to insert just the local declaration into an existing
 # alias file.
-insert_local_drush_alias: true
+insert_local_drush_alias: True
+# Experimental role to set up drush alias locally and on remote.
+# Won't do much if project_type != 'drupal'.
+drush_setup_drush: True
 # Prefix to use on the Drush / WP-CLI alias file.  This value will determine the 1st part of
 # the alias, between the "@" and the first ".".
 # Example: if cli_alias_file_prefix = "my_project", the resulting aliases will be
