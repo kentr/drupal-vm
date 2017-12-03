@@ -24,10 +24,6 @@
     file_type: any
   register: wraith_find
 
-- name: Debug.
-  debug:
-    msg: "{{ wraith_find.files | rejectattr('path', 'equalto', wraith_testing_framework.install_dir + '/.git') | list | length > 0 }}"
-
 - name: Clone wraith project directory.
   git:
     repo: "{{ wraith_testing_framework.repo }}"
