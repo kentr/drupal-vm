@@ -77,12 +77,22 @@
 
     - name: Get ruby version.
       command: "ruby -e 'puts RUBY_VERSION'"
+      ignore_errors: True
       register: ruby_current_version
+
+    - name: Set `ruby_install`.
+      set_fact:
+        ruby_install: "{{ ruby_current_version.failed | default(False) or ruby_current_version.stdout < ruby_min_version }}"
 
     # TODO: proper check if npm is installed.
     - name: Get npm version.
       command: "npm -v"
+      ignore_errors: True
       register: npm_current_version
+
+    - name: Set `npm_install`.
+      set_fact:
+        npm_install: "{{ npm_current_version.failed | default(False) or npm_current_version.stdout < npm_min_version }}"
 
   roles:
 
