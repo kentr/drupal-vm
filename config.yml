@@ -245,6 +245,7 @@ php_apc_enable_cli: 1
 # Disable error display on screen.  Helps with visual regression testing.
 php_display_errors: 0
 php_log_errors: 1
+php_error_log: /var/log/apache2/error.log
 
 ################################################################################
 # Core already installed in project directory
