@@ -124,7 +124,7 @@
     # Use drupal_deploy_composer_file for consistency & reuse with geerlinguy.drupal.
     register: drupal_deploy_composer_file
 
-  - name: Run drush pm-update if not composer project.
+  - name: Run `drush pm-update` if not composer project.
     # TODO: Is the `-l` option necessary with sites.php?
     command: "{{ drush_path }} -l {{ config_site_directory }} up -y --pipe {{ updates_available.stdout_lines | join(' ') }}"
     args:
