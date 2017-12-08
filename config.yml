@@ -53,6 +53,8 @@ drupal_core_path: "{{ web_app_web_root }}"
 drupal_core_owner: "{{ drupalvm_user }}"
 drupal_deploy_dir: "{{ web_app_project_root }}"
 drupal_deploy_repo: "{{ project_repo }}"
+# Discard existing files in Drupal working directory?
+drupal_deploy_force: No
 
 # Directory under "sites/" that holds settings.php, etc.
 config_site_directory: "default"
