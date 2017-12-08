@@ -51,6 +51,7 @@ web_app_web_root: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
 
 drupal_core_path: "{{ web_app_web_root }}"
 drupal_core_owner: "{{ drupalvm_user }}"
+drupal_deploy: "{{ web_app_deploy }}"
 drupal_deploy_dir: "{{ web_app_project_root }}"
 drupal_deploy_repo: "{{ project_repo }}"
 # Discard existing files in Drupal working directory?
