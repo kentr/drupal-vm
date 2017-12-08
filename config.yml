@@ -217,7 +217,7 @@ installed_extras:
   # - memcached
   # - newrelic
   # - nodejs
-  # - pimpmylog
+  - pimpmylog
   # - redis
   # - ruby
   # - selenium
