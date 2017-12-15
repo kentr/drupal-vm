@@ -31,13 +31,3 @@
     state: import
     target: "/tmp/{{ database_import_filename | basename }}"
   when: do_db_import and db_copy_result is defined and db_copy_result.state == "file"
-
-- name: Run `wp search-replace`
-  become: no
-  command: |
-    wp
-    --path='{{ web_app_web_root }}'
-    search-replace
-    '{{ prod_domain }}'
-    '{{ local_domain }}'
-  when: do_db_import and project_type == 'wordpress'
