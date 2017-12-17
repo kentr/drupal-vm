@@ -23,3 +23,14 @@
     src: "../scripts/post-provision/templates/wp-config.php.j2"
     dest: "{{wp_install_dir}}/wp-config.php"
   when: project_type == "wordpress" and web_app_project_root is defined
+
+# TODO: Fix this hack.  Should be a handler or something.
+- name: Run `wp search-replace`
+  become: no
+  command: |
+    wp
+    --path='{{ web_app_web_root }}'
+    search-replace
+    '{{ prod_domain }}'
+    '{{ local_domain }}'
+  when: project_type == 'wordpress' and do_db_import

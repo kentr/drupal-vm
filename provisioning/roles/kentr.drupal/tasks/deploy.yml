@@ -13,7 +13,7 @@
     repo: "{{ drupal_deploy_repo }}"
     version: "{{ drupal_deploy_version }}"
     update: "{{ drupal_deploy_update }}"
-    force: yes
+    force: "{{ drupal_deploy_force }}"
     dest: "{{ drupal_deploy_dir }}"
     accept_hostkey: "{{ drupal_deploy_accept_hostkey }}"
   register: drupal_deploy_repo_updated

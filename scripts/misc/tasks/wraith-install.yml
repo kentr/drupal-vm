@@ -12,10 +12,15 @@
     - wraith
   when: wraith_testing_framework.install | default(False)
 
-- name: Get gems path.
+- name: Check gems path.
   command: ruby -rubygems -e 'puts Gem.user_dir'
   become: No
-  register: gems_path
+  register: gems_path_check
+  when: gems_path is undefined
+
+- name: Set gems path.
+  set_fact:
+    gems_path: "{{ gems_path_check.stdout }}"
   when: gems_path is undefined
 
 # Add gems path to .bashrc for convenience when testing.
@@ -24,7 +29,7 @@
     path: ~/.bashrc
     backup: True
     insertafter: EOF
-    content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path.stdout }}/bin:$PATH"
+    content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path }}/bin:$PATH"
 
 - name: Add Wraith npm dependencies.
   npm:

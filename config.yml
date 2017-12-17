@@ -51,6 +51,11 @@ web_app_web_root: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
 
 drupal_core_path: "{{ web_app_web_root }}"
 drupal_core_owner: "{{ drupalvm_user }}"
+drupal_deploy: "{{ web_app_deploy }}"
+drupal_deploy_dir: "{{ web_app_project_root }}"
+drupal_deploy_repo: "{{ project_repo }}"
+# Discard existing files in Drupal working directory?
+drupal_deploy_force: No
 
 # Directory under "sites/" that holds settings.php, etc.
 config_site_directory: "default"
@@ -213,7 +218,7 @@ installed_extras:
   # - memcached
   # - newrelic
   # - nodejs
-  # - pimpmylog
+  - pimpmylog
   # - redis
   # - ruby
   # - selenium
@@ -302,9 +307,7 @@ wp_core_owner: "{{ drupalvm_user }}"
 # visual regression testing.
 # wp_debug: True
 
-# vagrant-cachier
-# If you have the `vagrant-cachier` plugin installed, you can uncomment
-# this to get more comprehensive caching.
+# Set `workspace` to take advantage of `vagrant-cachier`.
 workspace: /tmp/vagrant-cache/generic
 
 # Setup vars for Wraith testing scripts.
@@ -364,3 +367,9 @@ setup_hosting_account: True
 drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
 drush_rsync_mode: "{{ files_rsync_extra_args | default('') }}"
 drush_rsync_excludes: "{{ files_rsync_excludes | default([]) | join(':') }}"
+
+# Ensure vagrant plugins are installed.
+vagrant_plugins:
+  - name: vagrant-vbguest
+  - name: vagrant-hostsupdater
+  - name: vagrant-cachier
