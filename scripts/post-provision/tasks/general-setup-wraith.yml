@@ -109,7 +109,7 @@
 - name: Copy SQL file.
   copy:
     dest: /tmp/wraith-paths.sql
-    src: "{{ post_provision_tasks_dir | dirname }}/../templates/wraith-paths-sql-drupal-d7.sql"
+    src: "{{ post_provision_tasks_dir | dirname }}/../templates/wraith-paths-drupal-d7.sql"
   register: paths
 
 - name: Run wraith paths SQL.
