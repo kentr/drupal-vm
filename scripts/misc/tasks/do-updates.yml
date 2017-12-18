@@ -1,0 +1,7 @@
+# Tasks to perform code updates.
+
+- name: Create `updates` Git branch if necessary.
+  command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
+
+- include_tasks: do-updates.drupal.yml
+  when: project_type == 'drupal'
