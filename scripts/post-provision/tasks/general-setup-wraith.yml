@@ -113,10 +113,13 @@
   register: paths
 
 - name: Run wraith paths SQL.
+  become: No
   mysql_db:
     name: "{{ db_name }}"
     state: import
     target: /tmp/wraith-paths.sql
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
   register: wraith_paths_query
 
 - name: Set `wraith_paths_file`.
