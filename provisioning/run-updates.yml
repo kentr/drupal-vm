@@ -176,8 +176,8 @@
     include_tasks: "roles/kentr.drupal/tasks/update.yml"
     when: drupal_updated | default(false)
 
-  - include: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
+  - include_tasks: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
     when: drupal_updated | default(False)
 
-  - include: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
+  - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
     when: drupal_updated | default(false)
