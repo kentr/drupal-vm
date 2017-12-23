@@ -9,3 +9,17 @@
   command: "timedatectl set-timezone {{ php_date_timezone }}"
   when: php_date_timezone is defined
 
+# `known_hosts` must come before any provisioning that uses SSH, such as Git checkouts.
+- name: Check if local known_hosts file is present.
+  stat: "path={{ known_hosts_path | default('~/.ssh/known_hosts') }}"
+  register: known_hosts_file
+  connection: local
+  become: no
+
+- name: Copy known_hosts file from host into Drupal VM.
+  copy:
+    src: "{{ known_hosts_path | default('~/.ssh/known_hosts') }}"
+    dest: ~/.ssh/known_hosts
+    mode: 0644
+  become: no
+  when: known_hosts_file.stat.exists
