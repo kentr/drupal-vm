@@ -4,3 +4,8 @@
   file:
     path: "{{ workspace }}"
     state: directory
+
+- name: Set server timezone.
+  command: "timedatectl set-timezone {{ php_date_timezone }}"
+  when: php_date_timezone is defined
+
