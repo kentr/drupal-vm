@@ -21,7 +21,7 @@
 
 - name: Set `db_do_sync`.
   set_fact:
-    db_do_sync: "{{ not do_db_import and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
+    db_do_sync: "{{ not do_db_import | default(False) and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
 
 - name: Ensure prod SQL dump directory exists.
   # Delegate to localhost because we're performing an operation on prod, not on the
