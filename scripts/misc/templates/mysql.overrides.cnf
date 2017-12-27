@@ -1,0 +1,6 @@
+# Overrides for MySQL global configuration.
+
+[mysqld]
+# Disabling `innodb_strict_mode` allows some operations to complete without error,
+# such as importing tables that would normally violate the `innodb` row size limits.
+innodb_strict_mode = OFF
