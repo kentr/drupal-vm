@@ -251,6 +251,9 @@ php_memory_limit: 1024M
 # A list of files that should override the default global my.cnf.
 # Each item in the array requires a "src" parameter which is a path to a file.
 # An optional "force" parameter can force the file to be updated each time ansible runs.
+# See:
+#   - https://github.com/geerlingguy/ansible-role-mysql
+#   - https://dev.mysql.com/doc/refman/5.7/en/option-files.html
 mysql_config_include_files:
   - src: "{{ playbook_dir }}/../scripts/misc/templates/mysql.overrides.cnf"
     force: True
