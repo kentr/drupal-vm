@@ -122,53 +122,87 @@
       drupal_update_security_only: True
     when: drupal_update_security_only is not defined
 
-  - name: Find updates.
-    # TODO: Is the `-l` option necessary with sites.php?
-    command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
+  - name: Get drush version.
+    command: "{{ drush_path }} status --field=drush-version"
     args:
       chdir: "{{ drupal_core_path }}"
-    register: updates_available
+    register: drush_version_result
 
   - name: Determine if this is composer project.
     stat: "path={{ web_app_project_root }}/composer.json"
     # Use drupal_deploy_composer_file for consistency & reuse with geerlinguy.drupal.
     register: drupal_deploy_composer_file
 
-  - name: Run `drush pm-update` if not composer project.
+  - name: Find updates, Drush 8.x.
     # TODO: Is the `-l` option necessary with sites.php?
-    command: "{{ drush_path }} -l {{ config_site_directory }} up -y --pipe {{ updates_available.stdout_lines | join(' ') }}"
+    command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: updates_available_result
+    when: drush_version_result.stdout | version_compare('9', '<')
+
+  - name: Set `updates_available`, Drush 8.x.
+    set_fact:
+      # Though it's silly to strip out "drupal/" only to replace it later, we need to
+      # allow for a list from other sources, such as from `drush pm:sec`.
+      updates_available: "{{ drush_version_result.stdout_lines }}"
+    when: drush_version_result.stdout | version_compare('9', '<')
+
+  - name: Find updates, Drush 9.x, all updates.
+    composer:
+      command: "show"
+      arguments: "--outdated --format=json drupal/*"
+      working_dir: "{{ web_app_project_root }}"
+    register: updates_available_result
+    when: drush_version_result.stdout | version_compare('9', '>=') and not drupal_update_security_only
+
+  - name: Set `updates_available`, Drush 9.x, all updates.
+    set_fact:
+      # Though it's silly to strip out "drupal/" only to replace it later, we have to
+      # allow for a list from other sources, such as from `drush pm:sec`.
+      updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
+    when: drush_version_result.stdout | version_compare('9', '>=') and not drupal_update_security_only
+
+  - name: Find updates, Drush 9.x, security-only.
+    command: "{{ drush_path }} sec --format=json"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: updates_available_result
+    when: drush_version_result.stdout | version_compare('9', '>=') and drupal_update_security_only
+
+  - name: Run `drush pm-update`.
+    # TODO: Is the `-l` option necessary with sites.php?
+    command: "{{ drush_path }} -l {{ config_site_directory }} up -y --pipe {{ updates_available | join(' ') }}"
     args:
       chdir: "{{ drupal_core_path }}"
     register: drupal_updates_download
     when: drupal_deploy_composer_file.stat.exists == False
 
-
-  - name: Download updates with composer if composer project.
+  - name: Download updates with composer.
     composer:
       command: "update"
       # Substitutes "core" for "drupal".
       # Todo: make this substitution smarter, based on what's actually installed.
-      arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+      arguments: "{{ updates_available | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
       optimize_autoloader: True
       # By default, Drupal composer projects install dev dependencies.
       # We want to follow that behavior here.
       no_dev: False
       working_dir: "{{ web_app_project_root }}"
-    with_items: "{{ updates_available.stdout_lines }}"
+    # with_items: "{{ updates_available }}"
     register: drupal_updates_download
-    when: drupal_deploy_composer_file.stat.exists == True
+    when: drupal_deploy_composer_file.stat.exists == True and updates_available | length > 0
 
-  - name: Define drupal_updates_updated
+  - name: Define `drupal_updates_updated`.
     set_fact:
-      drupal_updated: "{{ drupal_updates_download.changed|default(false) }}"
+      drupal_updated: "{{ drupal_updates_download.changed | default(false) }}"
 
   - name: Run Drupal post-update tasks.
-    include: "roles/geerlingguy.drupal/tasks/update.yml"
+    include_tasks: "roles/geerlingguy.drupal/tasks/update.yml"
     when: drupal_major_version == 8 and drupal_updated | default(false)
-    static: no
 
-  - include: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
+  - include_tasks: "{{ post_provision_tasks_dir | dirname }}/general-setup-wraith.yml"
     when: drupal_updated | default(False)
 
-  - include: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
+  - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
     when: drupal_updated | default(false)

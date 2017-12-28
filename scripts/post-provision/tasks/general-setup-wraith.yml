@@ -119,6 +119,8 @@
 
 - name: Run wraith paths SQL.
   mysql_db:
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
     name: "{{ db_name }}"
     state: import
     target: /tmp/wraith-paths.sql
