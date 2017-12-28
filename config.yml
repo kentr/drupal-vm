@@ -115,7 +115,7 @@ cli_alias_file_prefix: "{{ client_server_username }}"
 # For Drupal, the table structure will be included.
 # For WordPress, the tables will be excluded entirely.
 # Format: comma-separated list of table names.
-db_dump_exclude_tables: "'cache', 'cache_*', 'history', 'sessions', 'watchdog'"
+db_dump_exclude_tables: "'cache','cache_*','history','sessions','watchdog'"
 
 # Extra args for `rsync` when synchronizing files from prod.
 files_rsync_extra_args: '-Pavu'

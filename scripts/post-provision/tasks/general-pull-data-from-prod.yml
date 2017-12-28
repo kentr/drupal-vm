@@ -46,16 +46,23 @@
 # SSH key forwarding may be required, depending on the command that is run.
 - name: Set SQL dump command.
   set_fact:
-    db_dump_command: |
-      drush @{{ cli_alias_file_prefix }}.prod sql-dump --nocolor --gzip --result-file={{ database_dump_file | regex_replace('\\.gz$', '') }} --structure-tables-list={{ db_dump_exclude_tables }}
+    db_dump_command: >
+      drush @{{ cli_alias_file_prefix }}.prod
+      --gzip
+      --result-file={{ database_dump_file | regex_replace('\\.gz$', '') }}
+      --structure-tables-list={{ db_dump_exclude_tables }}
+      sql-dump
   when: db_do_sync and project_type == 'drupal'
 
-# @todo: --structure-tables-list
 - name: Create remote SQL dump.
   # No become, so that drush aliases in the normal user's directory can be found.
   become: no
   # Drush adds '.gz' if the `--gzip` option is used, so we remove it preemptively.
   command: "{{ db_dump_command }}"
+  register: db_dump_result
+  # Workaround for wonky Drush 9 exit codes.
+  # Currently, a success results in stderr containing "(returned:  [success] ..., code: 0)"
+  failed_when: "'[error]' in db_dump_result.stderr and (not (db_dump_result.stderr | regex_search('code:\\s*0') or '[success]' in db_dump_result.stdout) )"
   when: db_do_sync
 
 - name: Ensure SQL dump destination directory exists.
