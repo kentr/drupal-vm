@@ -7,7 +7,7 @@ SELECT
     )
     ORDER BY TYPE, path
     SEPARATOR "\n"
-  )
+  ) as `paths:`
 FROM (
   -- NODES
   SELECT
