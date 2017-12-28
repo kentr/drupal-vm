@@ -21,8 +21,7 @@
 
 - name: Set `db_do_sync`.
   set_fact:
-    db_do_sync: "{{ db_tables_output.stdout_lines | length == 0 }}"
-
+    db_do_sync: "{{ not do_db_import | default(False) and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
 
 - name: Ensure prod SQL dump directory exists.
   # Delegate to localhost because we're performing an operation on prod, not on the
@@ -44,7 +43,7 @@
 # Database dump command to be run on PROD server.
 # This command should be executable via SSH from the dev machine, as a standard user.
 # SSH key forwarding may be required, depending on the command that is run.
-- name: Set SQL dump command.
+- name: Set SQL dump command -- Drupal.
   set_fact:
     db_dump_command: >
       drush @{{ cli_alias_file_prefix }}.prod
@@ -53,6 +52,16 @@
       --structure-tables-list={{ db_dump_exclude_tables }}
       sql-dump
   when: db_do_sync and project_type == 'drupal'
+
+# Database dump command to be run on PROD server.
+# This command should be executable via SSH from the dev machine, as a standard user.
+# SSH key forwarding may be required, depending on the command that is run.
+- name: Set SQL dump command -- WordPress.
+  set_fact:
+    db_dump_command: |
+      ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }} \
+      "wp --path={{ prod_instance.root }} db export - | gzip > {{ database_dump_file }}.gz"
+  when: db_do_sync and project_type == 'wordpress'
 
 - name: Create remote SQL dump.
   # No become, so that drush aliases in the normal user's directory can be found.
@@ -85,6 +94,7 @@
   when: db_do_sync
 
 - name: Import dump file.
+  become: no
   mysql_db:
     login_user: "{{ db_user }}"
     login_password: "{{ db_password }}"
@@ -93,6 +103,7 @@
     # '.gz' extension is handled automatically.
     target: "{{ database_dump_file_local }}"
   when: db_do_sync
+  register: db_updated
 
 - name: Set files sync command.
   set_fact:
@@ -101,8 +112,20 @@
     # This command should be executable via SSH from the dev machine, as a standard user.
     # SSH key forwarding may be required, depending on the command that is run.
     files_sync_command: "rsync {{ files_rsync_extra_args | default('') }} {{ files_rsync_excludes | default([]) |  map('regex_replace', '^(.*)$', '--exclude=\\1') | join(' ') }} -e 'ssh {{ prod_instance.drush_ssh_options | default('') }}' {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}:{{ prod_instance.root }}/{{ drupal_file_public_path }}/ {{ web_app_web_root }}/{{ drupal_file_public_path }}/"
-  when: project_type == 'drupal'
+  when: do_user_files_sync | default(False) and project_type == 'drupal'
 
 - name: Retrieve user files.
   become: no
   command: "{{ files_sync_command }}"
+  when: do_user_files_sync | default(False)
+
+# TODO: Fix this hack.  Should be a handler or something.
+- name: Run `wp search-replace`
+  become: no
+  command: |
+    wp
+    --path='{{ web_app_web_root }}'
+    search-replace
+    '{{ prod_domain }}'
+    '{{ local_domain }}'
+  when: project_type == 'wordpress' and db_updated.changed
