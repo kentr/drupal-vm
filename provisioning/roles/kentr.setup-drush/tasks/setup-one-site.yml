@@ -46,24 +46,46 @@
 # ----------------------------------------------
 # REMOTE
 
+# TODO: Move one-time tasks to `main.yml`.
+
+# Create wrapper php file for aliases if needed.
 - name: Ensure remote Drush alias file exists.
   template:
     # Don't overwrite existing file.
     force: no
     dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
     src: templates/drush.aliases.drushrc.php.j2
+  when: not drush_9_or_higher
+
+- name: Define `drush_single_alias_template`.
+  set_fact:
+    drush_single_alias_template: "{{ drush_9_or_higher | ternary('single-alias-block.yml.j2', 'single-alias-block.j2') }}"
+
+- name: Define remote Drush alias file, Drush < 9.
+  set_fact:
+    drush_remote_alias_file: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
+  when: not drush_9_or_higher
+
+- name: Define remote Drush alias file, Drush >= 9.
+  set_fact:
+    drush_remote_alias_file: "~/.drush/sites/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.site.yml"
+  when: drush_9_or_higher
 
 - name: Insert remote Drush alias declarations.
   become: no
   blockinfile:
-    dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
-    marker: "// {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
+    dest: "{{ drush_remote_alias_file }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
     state: present
-    content:  "{{ lookup('template', 'templates/single-alias-block.j2') }}"
+    content:  "{{ lookup('template', 'templates/' + drush_single_alias_template) }}"
+    # For Drush >= 9, it's a simple YAML file that can be created as we go.
+    create: "{{ drush_9_or_higher }}"
   when: item.uri is defined and drush_aliases_remote | default(False)
 
 # ----------------------------------------------
 # LOCAL
+
+# TODO: Adapt to Drush 9
 
 - name: Ensure local Drush alias file exists.
   delegate_to: 127.0.0.1
