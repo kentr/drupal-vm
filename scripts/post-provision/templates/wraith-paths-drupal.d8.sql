@@ -142,4 +142,39 @@ FROM (
     AND alias.source IS NULL
   -- /MISC
 
-  ) AS `ALL`
+  UNION
+
+  -- TAXONOMY
+  SELECT
+    `name` AS title
+    , 'taxonomy' AS `type`
+    , CONCAT('/tag/', `name`) AS `path`
+  FROM (
+    SELECT
+      `name`
+      , COUNT(nid) AS num_nodes
+    FROM (
+      SELECT DISTINCT
+        LOWER(ttd.name) AS NAME
+        , ti.nid
+      FROM
+        taxonomy_term_field_data ttd
+        JOIN taxonomy_index ti
+          USING (tid)
+        JOIN node_field_revision nfr
+          USING(nid)
+      WHERE
+        ttd.vid = 'tags'
+        AND nfr.status = 1
+        ) t1
+      GROUP BY
+        NAME
+      HAVING
+        num_nodes <= 10
+      ORDER BY
+        num_nodes DESC
+      LIMIT 1
+  ) t
+  -- /TAXONOMY
+
+) z
