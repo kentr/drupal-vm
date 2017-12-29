@@ -21,6 +21,7 @@
     state: present
     regexp: "^(\\# )?\\$options\\[.structure-tables.\\]\\[.common.\\]"
     line: "$options['structure-tables']['common'] = array({{ drush_sync_structure_tables_common }});"
+    create: Yes
   when: drush_enable_structure_tables_key_common | default(False)
 
 - name: Enable dated `result-file` and `gzip` for `sql-dump.
@@ -37,8 +38,19 @@
         'gzip' => 1,
         'structure-tables-key' => 'common',
       );
-
+    create: Yes
   when: drush_enable_dated_result_file | default(True)
+
+- name: Define `drush_9_or_higher`.
+  set_fact:
+    drush_9_or_higher: "{{ drush_version | version_compare('9', '>=') }}"
+
+- name: Ensure `sites` directory exists.
+  become: No
+  file:
+    path: ~/.drush/sites
+    state: directory
+  when: drush_9_or_higher
 
 - include: setup-one-site.yml
   with_items: "{{ installations }}"
