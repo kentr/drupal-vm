@@ -22,6 +22,7 @@
 #
 # TODO:
 #   - Support non-composer projects.
+#   - Move Wraith installation to role.
 
 - hosts: all
   become: No
@@ -204,5 +205,11 @@
   - include_tasks: "{{ post_provision_tasks_dir | dirname }}/general-setup-wraith.yml"
     when: drupal_updated | default(False)
 
+  # Install Wraith itself.  Assumes that dependencies are already installed.
+  - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
+    become: no
+    when: drupal_updated | default(false)
+
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
+    become: no
     when: drupal_updated | default(false)
