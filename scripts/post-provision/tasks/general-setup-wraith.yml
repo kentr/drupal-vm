@@ -106,14 +106,21 @@
     state: present
   when: wraith_testing_framework.install | default(False)
 
-- name: Copy SQL file.
+- name: Set `wraith_paths_sql_file`, Drupal.
+  set_fact:
+    wraith_paths_sql_file: "wraith-paths-drupal.d{{ drupal_major_version }}.sql"
+  when: project_type == 'drupal'
+
+- name: Copy `wraith_paths_sql_file` file.
   copy:
     dest: /tmp/wraith-paths.sql
-    src: "{{ post_provision_tasks_dir | dirname }}/../templates/wraith-paths-drupal-d7.sql"
+    src: "{{ post_provision_tasks_dir | dirname }}/../templates/{{ wraith_paths_sql_file }}"
   register: paths
 
 - name: Run wraith paths SQL.
   mysql_db:
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
     name: "{{ db_name }}"
     state: import
     target: /tmp/wraith-paths.sql
