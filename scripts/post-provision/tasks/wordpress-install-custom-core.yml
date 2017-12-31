@@ -12,6 +12,7 @@
   become: yes
   when: project_type == "wordpress" and web_app_project_root is defined
 
+# TODO: Add 'creates' to keep this from running repeatedly
 - name: Fetch random salts for wp-config.php
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
@@ -33,4 +34,4 @@
     search-replace
     '{{ prod_domain }}'
     '{{ local_domain }}'
-  when: project_type == 'wordpress' and do_db_import
+  when: project_type == 'wordpress' and db_updated.changed | default(False)
