@@ -43,10 +43,12 @@ web_app_project_root: "{{ base_synced_dir }}/{{ web_app_project_dir }}"
 
 # Directory containing actual web files, relative to project root.
 # For Drupal Composer projects, this would be "web".
+# If the web directory is the same as the project root, leave this empty.
 web_app_web_dir: "public_html"
 
 # The location of the actual Drupal site code.
 # It may be the same as web_app_project_root, depending on how your project is set up.
+# TODO: Improve handling of empty `web_app_web_dir`.
 web_app_web_root: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
 
 drupal_core_path: "{{ web_app_web_root }}"
@@ -94,7 +96,7 @@ vagrant_synced_folders:
 # You probably don't want to change this.
 drupal_composer_install_dir: "{{ web_app_project_root }}"
 
-drush_version: "8.x"
+drush_version: "8.1.15"
 drush_keep_updated: false
 drush_composer_cli_options: "--prefer-dist --no-interaction"
 
@@ -186,6 +188,8 @@ php_version: "5.6"
 db_user: vagrant
 db_password: vagrant
 db_name: vagrant
+db_charset: utf8mb4
+db_collate: utf8mb4_general_ci
 
 # Destination directory for SQL dump files.
 db_remote_dump_directory: "/home/{{ client_server_username }}/tmp"
@@ -194,8 +198,8 @@ db_local_dump_directory: "{{ web_app_project_root }}/tmp"
 # MySQL databases and users.
 mysql_databases:
   - name: "{{ db_name }}"
-    encoding: utf8mb4
-    collation: utf8mb4_general_ci
+    encoding: "{{ db_charset }}"
+    collation: "{{ db_collate }}"
 
 mysql_users:
   - name: "{{ db_user }}"
@@ -243,6 +247,16 @@ php_xdebug_idekey: ECLIPSE_DBGP
 # Composer requires lots of memory.
 # See https://github.com/geerlingguy/drupal-vm/issues/547
 php_memory_limit: 1024M
+
+# A list of files that should override the default global my.cnf.
+# Each item in the array requires a "src" parameter which is a path to a file.
+# An optional "force" parameter can force the file to be updated each time ansible runs.
+# See:
+#   - https://github.com/geerlingguy/ansible-role-mysql
+#   - https://dev.mysql.com/doc/refman/5.7/en/option-files.html
+mysql_config_include_files:
+  - src: "{{ playbook_dir }}/../scripts/misc/templates/mysql.overrides.cnf"
+    force: True
 
 # Enable APCu for CLI so that drush can enable the apc module and clear caches.
 php_apc_enable_cli: 1
@@ -292,20 +306,25 @@ wp_site_title: "{{ client_server_username|capitalize }} WordPress Site"
 # WARNING: Dummy data can be installed multiple times.
 wp_install_dummy_data: False
 
+# Error reporting on screen, and other debug tools.  Ensure this is off when doing
+# visual regression testing.
+wp_debug: True
+
 wp_db_name: "{{ db_name }}"
 wp_db_user: "{{ db_user }}"
 wp_db_password: "{{ db_password }}"
+wp_db_charset: "{{ db_charset }}"
+wp_db_collate: "{{ db_collate }}"
+# Prefix cannot be empty.
+wp_table_prefix: "wp_"
+wp_fs_method: 'direct'
+wp_lang: ''
+
 
 wp_core_owner: "{{ drupalvm_user }}"
 
 # wp_mysql_site_restore_saved_db: True
 # wp_database_backup: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/db-restore.sql"
-#
-# # Prefix cannot be empty.
-# wp_table_prefix: "wp_"
-# Error reporting on screen, and other debug tools.  Ensure this is off when doing
-# visual regression testing.
-# wp_debug: True
 
 # Set `workspace` to take advantage of `vagrant-cachier`.
 workspace: /tmp/vagrant-cache/generic
