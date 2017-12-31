@@ -131,4 +131,4 @@
     search-replace
     '{{ prod_domain }}'
     '{{ local_domain }}'
-  when: project_type == 'wordpress' and db_updated.changed
+  when: project_type == 'wordpress' and db_updated.changed | default(False)
