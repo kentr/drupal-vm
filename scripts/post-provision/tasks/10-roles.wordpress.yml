@@ -1,37 +1,14 @@
 ---
 
-# Tasks for installing pre-existing web app project onto VM.
+# Install WP-CLI before attempting WordPress setup.
+- name: Include `mychiara.wp-cli` role to setup WP-CLI.
+  include_role:
+    name: mychiara.wp-cli
+  when: project_type == "wordpress" or "wp-cli" in installed_extras
 
-- name: Custom core - Ensure web_app_project_root directory exists.
-  file:
-    path: "{{ web_app_project_root }}"
-    state: directory
-    # Don't recursively set permissions.  May cause dirty repo.
-    recurse: no
-    mode: 0775
-  become: yes
-  when: project_type == "wordpress" and web_app_project_root is defined
-
-# TODO: Add 'creates' to keep this from running repeatedly
-- name: Fetch random salts for wp-config.php
-  command: curl https://api.wordpress.org/secret-key/1.1/salt/
-  register: 'wp_salt'
-  when: project_type == "wordpress" and web_app_project_root is defined
-
-- name: Copy wp-config.php file
-  template:
-    # Src is relative to provisioning directory.
-    src: "../scripts/post-provision/templates/wp-config.php.j2"
-    dest: "{{wp_install_dir}}/wp-config.php"
-  when: project_type == "wordpress" and web_app_project_root is defined
-
-# TODO: Fix this hack.  Should be a handler or something.
-- name: Run `wp search-replace`
-  become: no
-  command: |
-    wp
-    --path='{{ web_app_web_root }}'
-    search-replace
-    '{{ prod_domain }}'
-    '{{ local_domain }}'
-  when: project_type == 'wordpress' and db_updated.changed | default(False)
+# Call the existing `kentr.wordpress` role with pre-existing values
+# for `wp_install` or `wp_deploy`.
+- name: Include `kentr.wordpress` role to setup WordPress.
+  include_role:
+    name: kentr.wordpress
+  when: project_type == "wordpress"
