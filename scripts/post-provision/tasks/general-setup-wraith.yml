@@ -20,7 +20,6 @@
   find:
     paths: "{{ wraith_testing_framework.install_dir }}"
     hidden: True
-#    patterns: "*"
     file_type: any
   register: wraith_find
 
@@ -106,13 +105,24 @@
     state: present
   when: wraith_testing_framework.install | default(False)
 
+- name: Check for `page_manager` table.
+  command: >
+    mysql --batch --skip-column-names -e 'SHOW TABLES LIKE "page_manager";' {{ db_name }}
+  register: db_page_manager_query_result
+  when: project_type == 'drupal'
+
+- name: Set `db_page_manager_table_exists`.
+  set_fact:
+    db_page_manager_table_exists: "{{ db_page_manager_query_result.stdout == 'page_manager' }}"
+  when: project_type == 'drupal'
+
 - name: Set `wraith_paths_sql_file`, Drupal.
   set_fact:
     wraith_paths_sql_file: "wraith-paths-drupal.d{{ drupal_major_version }}.sql"
   when: project_type == 'drupal'
 
 - name: Copy `wraith_paths_sql_file` file.
-  copy:
+  template:
     dest: /tmp/wraith-paths.sql
     src: "{{ post_provision_tasks_dir | dirname }}/../templates/{{ wraith_paths_sql_file }}"
   register: paths

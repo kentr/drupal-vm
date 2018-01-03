@@ -105,6 +105,7 @@ FROM (
   ) t
   -- /NODES
 
+{% if page_manager_table_exists | default(False) %}
   UNION
 
   -- PANELS
@@ -116,6 +117,7 @@ FROM (
   WHERE
     access = 'a:0:{}'
   -- /PANELS
+{% endif %}
 
   UNION
 
