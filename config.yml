@@ -84,7 +84,7 @@ drupal_deploy: "{{ web_app_deploy }}"
 drupal_deploy_dir: "{{ web_app_project_root }}"
 drupal_deploy_repo: "{{ project_repo }}"
 # Discard existing files in Drupal working directory?
-drupal_deploy_force: No
+drupal_deploy_force: "{{ web_app_deploy_force | default(False) }}"
 
 # Directory under "sites/" that holds settings.php, etc.
 config_site_directory: "default"
