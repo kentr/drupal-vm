@@ -1,3 +1,11 @@
+// This gulp support is experimental, and any given web project may have
+// it's own gulp setup that should be used before using this setup.
+
+// The gulp setup here may not even work for some web projects.
+
+// To configure, copy `example.gulp-config.yml` to `example.gulp-config.yml`, and edit
+// that file as required.
+
 // Include gulp.
 var gulp = require('gulp');
 var browserSync = require('browser-sync').create();

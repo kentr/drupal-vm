@@ -1,7 +1,34 @@
 ---
 
-# "drupal" or "wordpress"
+# Web app project type.
+# Possible values: 'drupal', 'wordpress' (case-sensitive).
 project_type: drupal
+# Repo for the web app project.
+project_repo: "git@bitbucket.org:git-repo.git"
+
+# Attempt to sync database from prod on provision?
+# Possible values: 'once', 'always', 'never' (case-sensitive).
+db_do_sync: never
+
+# Attempt to sync user-uploaded files from prod on provision?
+do_user_files_sync: True
+
+# Perform a database import from a dump file?
+do_db_import: False
+# Path to database dump file on local (host) machine.
+# Should either be an absolute path or relative to the directory `scripts/post-provision/tasks`.
+# The dump file must exist at the path specified.  If a dump file doesn't exist, you'll
+# need to create it an put it in the specified location.
+database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/insert-filename-here"
+
+# Deploy web app project from repo?
+# Note: Assumes database and `settings.php` are already in place, which may not
+# true for a dev environment.
+web_app_deploy: False
+# Force the deployment?
+# If False, deploy will fail if there are local modifications to the web project files.
+# If True, local modifications to web project files may be discarded.
+web_app_deploy_force: True
 
 # The domain name for the local installation
 domain_name: client.org
@@ -57,7 +84,7 @@ drupal_deploy: "{{ web_app_deploy }}"
 drupal_deploy_dir: "{{ web_app_project_root }}"
 drupal_deploy_repo: "{{ project_repo }}"
 # Discard existing files in Drupal working directory?
-drupal_deploy_force: No
+drupal_deploy_force: "{{ web_app_deploy_force | default(False) }}"
 
 # Directory under "sites/" that holds settings.php, etc.
 config_site_directory: "default"

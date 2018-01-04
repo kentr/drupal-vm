@@ -1,4 +1,9 @@
 ---
+# Example config file for the included gulpfile.js.
+# Note that this gulp support is experimental, and that any given web project may have
+# it's own gulp setup that should be used before using this setup.
+
+# The gulp setup here and in `gulpfile.js` may not even work for some web projects.
 
 # URL of backend dev server to be proxied by browser sync.
 browserSyncProxy: 'http://example.dev'
@@ -13,19 +18,19 @@ css:
 
   # Name of CSS output file.
   file: my_theme.style.scss
-  
+
   # Sass source glob.  Relative to theme directory.
   src:
     - 'scss/**/*.scss'
-    
+
   # Sass CSS destination directory.  Relative to theme directory.
   dest: assets/css
-  
+
   # Sass output style.  'compressed' is recommended for production site.
   outputStyle: 'compressed'
-  
+
   # Include paths for directories with extra SCSS files.  Relative to gulpfile.js.
-  includePaths: 
+  includePaths:
     - ./path/to/bootstrap-sass/assets/stylesheets
     - ./path/to/font-awesome/scss
 
@@ -33,11 +38,11 @@ js:
 
   # Name of JS output file.
   file: my_theme.script.js
-  
+
   # JS source glob.  Relative to theme directory.
   src:
     - 'assets/js/**/*.js'
-    
+
   # JS destination directory.  Relative to theme directory.
   dest: assets/js
 
@@ -46,15 +51,15 @@ images:
   # Images source glob.  Relative to theme directory.
   src:
     - 'assets/images/**/*'
-    
+
   # Images destination directory.  Relative to theme directory.
   dest: assets/images/
-  
+
 fonts:
 
   # Fonts source glob.  Relative to theme directory.
   src:
     - './path/to/font-awesome/fonts/**.*'
-    
+
   # Fonts destination directory.  Relative to theme directory.
   dest: ./assets/fonts/
