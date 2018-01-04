@@ -22,6 +22,7 @@
     hidden: True
     file_type: any
   register: wraith_find
+  when: wraith_testing_framework.install | default(False)
 
 - name: Clone wraith project directory.
   git:
@@ -109,23 +110,24 @@
   command: >
     mysql --batch --skip-column-names -e 'SHOW TABLES LIKE "page_manager";' {{ db_name }}
   register: db_page_manager_query_result
-  when: project_type == 'drupal'
+  when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
 
 - name: Set `db_page_manager_table_exists`.
   set_fact:
     db_page_manager_table_exists: "{{ db_page_manager_query_result.stdout == 'page_manager' }}"
-  when: project_type == 'drupal'
+  when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
 
 - name: Set `wraith_paths_sql_file`, Drupal.
   set_fact:
     wraith_paths_sql_file: "wraith-paths-drupal.d{{ drupal_major_version }}.sql"
-  when: project_type == 'drupal'
+  when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
 
 - name: Copy `wraith_paths_sql_file` file.
   template:
     dest: /tmp/wraith-paths.sql
     src: "{{ post_provision_tasks_dir | dirname }}/../templates/{{ wraith_paths_sql_file }}"
   register: paths
+  when: wraith_testing_framework.install | default(False)
 
 - name: Run wraith paths SQL.
   mysql_db:
@@ -135,10 +137,12 @@
     state: import
     target: /tmp/wraith-paths.sql
   register: wraith_paths_query
+  when: wraith_testing_framework.install | default(False)
 
 - name: Set `wraith_paths_file`.
   set_fact:
     wraith_paths_file: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_NOTES/wraith/paths.txt"
+  when: wraith_testing_framework.install | default(False)
 
 - name: Ensure parent directory for `wraith_paths_file` exists.
   delegate_to: localhost
@@ -146,6 +150,7 @@
   file:
     path: "{{ wraith_paths_file | dirname }}"
     state: directory
+  when: wraith_testing_framework.install | default(False)
 
 - name: Create `wraith-paths.txt` file.
   delegate_to: localhost
@@ -155,7 +160,7 @@
     # MySQL output currently replaces strings that matche the DB password with "********",
     # so we restore the strings before writing to the file.
     content: "{{ wraith_paths_query.msg | regex_replace('\\\\n', '\n') | replace('********', db_password ) }}"
-  when: wraith_paths_query.msg is defined
+  when: wraith_testing_framework.install | default(False) and wraith_paths_query.msg is defined
   creates: "{{ wraith_paths_file }}"
   register: wraith_paths_file_result
 
@@ -165,4 +170,4 @@
     insertafter: EOF
     marker: "# {mark} ANSIBLE MANAGED BLOCK paths"
     content: "{{ lookup('file', wraith_paths_file) }}"
-  when: wraith_paths_file is defined
+  when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined
