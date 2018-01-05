@@ -16,7 +16,7 @@ database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/i
 
 # EXPERIMENTAL.  Attempt to automatically sync database from prod on provision?
 # Possible values: 'once', 'always', 'never' (case-sensitive).
-# If `do_db_import` is True, then this value is ignored and no auto-sync is performed.
+# If `do_db_import` is True, this value is ignored and no auto-sync is performed.
 # This feature is not documented, and may cause you frustration.
 db_do_sync: never
 
