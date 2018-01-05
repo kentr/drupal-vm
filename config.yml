@@ -6,13 +6,6 @@ project_type: drupal
 # Repo for the web app project.
 project_repo: "git@bitbucket.org:git-repo.git"
 
-# Attempt to sync database from prod on provision?
-# Possible values: 'once', 'always', 'never' (case-sensitive).
-db_do_sync: never
-
-# Attempt to sync user-uploaded files from prod on provision?
-do_user_files_sync: False
-
 # Perform a database import from a dump file?
 do_db_import: False
 # Path to database dump file on local (host) machine.
@@ -20,6 +13,16 @@ do_db_import: False
 # The dump file must exist at the path specified.  If a dump file doesn't exist, you'll
 # need to create it an put it in the specified location.
 database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/insert-filename-here"
+
+# EXPERIMENTAL.  Attempt to automatically sync database from prod on provision?
+# Possible values: 'once', 'always', 'never' (case-sensitive).
+# If `do_db_import` is True, then this value is ignored and no auto-sync is performed.
+# This feature is not documented, and may cause you frustration.
+db_do_sync: never
+
+# EXPERIMENTAL. Attempt to sync user-uploaded files from prod on provision?
+# This feature is not documented, and may cause you frustration.
+do_user_files_sync: False
 
 # Deploy web app project from repo?
 # Note: Assumes database and `settings.php` are already in place, which may not
