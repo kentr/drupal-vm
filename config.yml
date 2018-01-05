@@ -11,7 +11,7 @@ project_repo: "git@bitbucket.org:git-repo.git"
 db_do_sync: never
 
 # Attempt to sync user-uploaded files from prod on provision?
-do_user_files_sync: True
+do_user_files_sync: False
 
 # Perform a database import from a dump file?
 do_db_import: False
