@@ -25,6 +25,7 @@
 #
 # TODO:
 #   - Support non-composer projects.
+#   - Move Wraith installation to role.
 
 - hosts: all
   become: No

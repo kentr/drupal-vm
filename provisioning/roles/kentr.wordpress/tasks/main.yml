@@ -30,6 +30,7 @@
   include: tasks/download-wordpress.yml
   when: install_wordpress | default(False) and not wordpress_site_exists
 
+# TODO: Add 'creates' to keep this from running repeatedly
 - name: Fetch random salts for wp-config.php
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
@@ -43,7 +44,7 @@
   file:
     path: "{{wp_install_dir}}"
     owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0775
     state: directory
     recurse: yes

@@ -62,7 +62,7 @@
 
     # Conditionally-installed roles.
     - { role: geerlingguy.drupal-console, when: 'drupal_major_version > 7 and "drupalconsole" in installed_extras' }
-    - { role: kentr.drush, when: '"drush" in installed_extras' }
+    - { role: geerlingguy.drush, when: '"drush" in installed_extras' }
     - { role: geerlingguy.memcached, when: '"memcached" in installed_extras' }
     - { role: geerlingguy.php-memcached, when: '"memcached" in installed_extras', tags: ['php'] }
 
@@ -114,12 +114,6 @@
 
     # Roles for security and stability on production.
     - { role: geerlingguy.security, when: extra_security_enabled }
-
-    - role: mychiara.wp-cli
-      when: 'project_type == "wordpress" or "wp-cli" in installed_extras'
-
-    - role: kentr.wordpress
-      when: install_wordpress | default(False) or wp_deploy | default(False)
 
     - role: kentr.setup-hosting-account
       become: no

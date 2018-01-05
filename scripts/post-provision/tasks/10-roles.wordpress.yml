@@ -1,0 +1,14 @@
+---
+
+# Install WP-CLI before attempting WordPress setup.
+- name: Include `mychiara.wp-cli` role to setup WP-CLI.
+  include_role:
+    name: mychiara.wp-cli
+  when: project_type == "wordpress" or "wp-cli" in installed_extras
+
+# Call the existing `kentr.wordpress` role with pre-existing values
+# for `wp_install` or `wp_deploy`.
+- name: Include `kentr.wordpress` role to setup WordPress.
+  include_role:
+    name: kentr.wordpress
+  when: project_type == "wordpress"
