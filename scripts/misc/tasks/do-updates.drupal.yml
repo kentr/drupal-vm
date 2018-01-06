@@ -1,54 +1,103 @@
 ---
 # Tasks to perform Drupal code updates.
 
-- name: Set drupal_update_security_only if it's not already defined.
+- name: Set `drupal_update_security_only` if it's not already defined.
   set_fact:
     drupal_update_security_only: True
   when: drupal_update_security_only is not defined
 
-- name: Find updates.
-  # TODO: Is the `-l` option necessary with sites.php?
-  command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
+- name: Get drush version.
+  command: "{{ drush_path }} status --fields=drush-version"
   args:
     chdir: "{{ drupal_core_path }}"
-  register: updates_available
+  register: drush_version_result
+
+- name: Get drush status.
+  command: "{{ drush_path }} status --format=yaml"
+  args:
+    chdir: "{{ drupal_core_path }}"
+  register: drush_status_result
+
+- name: Set `_drush_version`.
+  set_fact:
+    _drush_version: "{{ (drush_status_result.stdout | from_yaml)['drush-version'] }}"
 
 - name: Determine if this is composer project.
   stat: "path={{ web_app_project_root }}/composer.json"
   # Use drupal_deploy_composer_file for consistency & reuse with geerlinguy.drupal.
   register: drupal_deploy_composer_file
 
-- name: Run `drush pm-updatecode` if not composer project.
+# Though this is redundant for Drush 8's `pm-updatecode`, we need a list of projects
+# for updating D7 composer projects.
+- name: Find updates, Drush 8.x.
   # TODO: Is the `-l` option necessary with sites.php?
-  command: "{{ drush_path }} -l {{ config_site_directory }} pm-updatecode -y {{ item }}"
+  # `chdir` isn't working as expected, so `--root` is provided in the arguments.
+  command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} --root='{{ drupal_core_path }}' pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
   args:
     chdir: "{{ drupal_core_path }}"
-  with_items: "{{ updates_available.stdout_lines }}"
-  register: drupal_updates_download
-  when: drupal_deploy_composer_file.stat.exists == False
+  register: updates_available_result
+  when: _drush_version | version_compare('9', '<')
 
-# Must define `drupal_updated` here before `drupal_updates_download` is reset below.
-- name: Define `drupal_updated`.
+- name: Set `updates_available`, Drush 8.x.
+  set_fact:
+    # Though it's silly to strip out "drupal/" only to replace it later, we need to
+    # allow for a list from other sources, such as from `drush pm:sec`.
+    updates_available: "{{ updates_available_result.stdout_lines }}"
+  when: _drush_version | version_compare('9', '<')
+
+- name: Find updates, Drush 9.x, all updates.
+  composer:
+    command: "show"
+    arguments: "--outdated --format=json drupal/*"
+    working_dir: "{{ web_app_project_root }}"
+  register: updates_available_result
+  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
+
+- name: Set `updates_available`, Drush 9.x, all updates.
+  set_fact:
+    # Though it's silly to strip out "drupal/" only to replace it later, we have to
+    # allow for a list from other sources, such as from `drush pm:sec`.
+    updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
+  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
+
+- name: Find updates, Drush 9.x, security-only.
+  command: "{{ drush_path }} sec --format=json"
+  args:
+    chdir: "{{ drupal_core_path }}"
+  register: updates_available_result
+  when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
+
+# For consistency with composer-managed projects, database updates are performed later.
+- name: Run `drush pm-updatecode`.
+  # TODO: Is the `-l` option necessary with sites.php?
+  # `chdir` isn't working as expected, so `--root` is provided in the arguments.
+  command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} --root='{{ drupal_core_path }}' pm-updatecode {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
+  args:
+    chdir: "{{ drupal_core_path }}"
+  register: drupal_updates_download
+  when: drupal_deploy_composer_file.stat.exists == False and updates_available | length > 0
+
+- name: Set `drupal_updated`, drush update.
   set_fact:
     drupal_updated: "{{ drupal_updates_download.changed | default(false) }}"
   when: drupal_deploy_composer_file.stat.exists == False
 
-- name: Download updates with composer if composer project.
+- name: Download updates with composer.
   composer:
     command: "update"
     # Substitutes "core" for "drupal".
     # Todo: make this substitution smarter, based on what's actually installed.
-    arguments: "{{ updates_available.stdout_lines | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+    arguments: "{{ updates_available | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
     optimize_autoloader: True
     # By default, Drupal composer projects install dev dependencies.
     # We want to follow that behavior here.
     no_dev: False
     working_dir: "{{ web_app_project_root }}"
-  with_items: "{{ updates_available.stdout_lines }}"
+  # with_items: "{{ updates_available }}"
   register: drupal_updates_download
-  when: drupal_deploy_composer_file.stat.exists == True
+  when: drupal_deploy_composer_file.stat.exists == True and updates_available | length > 0
 
-- name: Define `drupal_updated`.
+- name: Set `drupal_updated`, composer update.
   set_fact:
     drupal_updated: "{{ drupal_updates_download.changed | default(false) }}"
   when: drupal_deploy_composer_file.stat.exists == True

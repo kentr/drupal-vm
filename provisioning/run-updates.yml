@@ -121,10 +121,10 @@
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/do-updates.yml"
 
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
-    when: drupal_updated | default(false)
+    when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
 
   - include_tasks: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
-    when: drupal_updated | default(False)
+    when: drupal_updated | default(False) and wraith_testing_framework.install | default(False)
 
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
-    when: drupal_updated | default(false)
+    when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
