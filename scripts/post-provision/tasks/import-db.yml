@@ -30,4 +30,5 @@
     name: "{{ db_name }}"
     state: import
     target: "/tmp/{{ database_import_filename | basename }}"
+  register: db_updated
   when: do_db_import and db_copy_result is defined and db_copy_result.state == "file"

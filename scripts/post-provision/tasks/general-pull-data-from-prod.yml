@@ -19,9 +19,9 @@
   command: "mysql --batch --skip-column-names -e 'SHOW TABLES;' {{ db_name }}"
   register: db_tables_output
 
-- name: Set `db_do_sync`.
+- name: Set `_db_do_sync`.
   set_fact:
-    db_do_sync: "{{ not do_db_import | default(False) and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
+    _db_do_sync: "{{ not do_db_import | default(False) and db_do_sync | default('once') != 'never' and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
 
 - name: Ensure prod SQL dump directory exists.
   # Delegate to localhost because we're performing an operation on prod, not on the
@@ -32,13 +32,13 @@
   command: |
     ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }} \
     'if [ ! -e '{{ db_remote_dump_directory }}' ]; then mkdir -p '{{ db_remote_dump_directory }}'; fi'
-  when: db_do_sync
+  when: _db_do_sync
 
 - name: Set SQL dump path.
   set_fact:
     # Dump file name should not end in '.gz'.  That extension will be added if required.
     database_dump_file: "{{ db_remote_dump_directory }}/PROD.{{ ansible_date_time.iso8601_basic_short }}.sql"
-  when: db_do_sync
+  when: _db_do_sync
 
 # Database dump command to be run on PROD server.
 # This command should be executable via SSH from the dev machine, as a standard user.
@@ -51,7 +51,7 @@
       --result-file={{ database_dump_file | regex_replace('\\.gz$', '') }}
       --structure-tables-list={{ db_dump_exclude_tables }}
       sql-dump
-  when: db_do_sync and project_type == 'drupal'
+  when: _db_do_sync and project_type == 'drupal'
 
 # Database dump command to be run on PROD server.
 # This command should be executable via SSH from the dev machine, as a standard user.
@@ -61,7 +61,7 @@
     db_dump_command: |
       ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }} \
       "wp --path={{ prod_instance.root }} db export - | gzip > {{ database_dump_file }}.gz"
-  when: db_do_sync and project_type == 'wordpress'
+  when: _db_do_sync and project_type == 'wordpress'
 
 - name: Create remote SQL dump.
   # No become, so that drush aliases in the normal user's directory can be found.
@@ -72,18 +72,18 @@
   # Workaround for wonky Drush 9 exit codes.
   # Currently, a success results in stderr containing "(returned:  [success] ..., code: 0)"
   failed_when: "'[error]' in db_dump_result.stderr and (not (db_dump_result.stderr | regex_search('code:\\s*0') or '[success]' in db_dump_result.stdout) )"
-  when: db_do_sync
+  when: _db_do_sync
 
 - name: Ensure SQL dump destination directory exists.
   file:
     path: "{{ db_local_dump_directory | default('/tmp') }}"
     state: directory
-  when: db_do_sync
+  when: _db_do_sync
 
 - name: Set local SQL dump file path.
   set_fact:
     database_dump_file_local: "{{ db_local_dump_directory }}/{{ database_dump_file | basename }}.gz"
-  when: db_do_sync
+  when: _db_do_sync
 
 - name: Retrieve remote SQL dump.
   become: no
@@ -91,7 +91,7 @@
   # This command should be executable via SSH from the dev machine, as a standard user.
   # SSH key forwarding may be required, depending on the command that is run.
   command: "rsync -au --partial -e 'ssh {{ prod_instance.drush_ssh_options | default('') }}' {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}:{{ database_dump_file }}.gz {{ database_dump_file_local }}"
-  when: db_do_sync
+  when: _db_do_sync
 
 - name: Import dump file.
   become: no
@@ -102,10 +102,10 @@
     state: import
     # '.gz' extension is handled automatically.
     target: "{{ database_dump_file_local }}"
-  when: db_do_sync
+  when: _db_do_sync
   register: db_updated
 
-- name: Set files sync command.
+- name: Set `files_sync_command`, Drupal.
   set_fact:
     # Use raw rsync because `drush rsync` will be destructive if the aliases are incorrect,
     # and WP-CLI doesn't currently have something like `drush rsync` anyway.
@@ -114,10 +114,19 @@
     files_sync_command: "rsync {{ files_rsync_extra_args | default('') }} {{ files_rsync_excludes | default([]) |  map('regex_replace', '^(.*)$', '--exclude=\\1') | join(' ') }} -e 'ssh {{ prod_instance.drush_ssh_options | default('') }}' {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}:{{ prod_instance.root }}/{{ drupal_file_public_path }}/ {{ web_app_web_root }}/{{ drupal_file_public_path }}/"
   when: do_user_files_sync | default(False) and project_type == 'drupal'
 
+- name: Set `files_sync_command`, WordPress.
+  set_fact:
+    # Use raw rsync because `drush rsync` will be destructive if the aliases are incorrect,
+    # and WP-CLI doesn't currently have something like `drush rsync` anyway.
+    # This command should be executable via SSH from the dev machine, as a standard user.
+    # SSH key forwarding may be required, depending on the command that is run.
+    files_sync_command: "rsync {{ files_rsync_extra_args | default('') }} {{ files_rsync_excludes | default([]) |  map('regex_replace', '^(.*)$', '--exclude=\\1') | join(' ') }} -e 'ssh {{ prod_instance.drush_ssh_options | default('') }}' {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}:{{ prod_instance.root }}/wp-content/uploads/ {{ web_app_web_root }}/wp-content/uploads/"
+  when: do_user_files_sync | default(False) and project_type == 'wordpress'
+
 - name: Retrieve user files.
   become: no
   command: "{{ files_sync_command }}"
-  when: do_user_files_sync | default(False)
+  when: do_user_files_sync | default(False) and files_sync_command is defined
 
 # TODO: Fix this hack.  Should be a handler or something.
 - name: Run `wp search-replace`
@@ -128,4 +137,4 @@
     search-replace
     '{{ prod_domain }}'
     '{{ local_domain }}'
-  when: project_type == 'wordpress' and db_updated.changed
+  when: project_type == 'wordpress' and db_updated.changed | default(False)
