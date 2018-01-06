@@ -6,12 +6,6 @@
     drupal_update_security_only: True
   when: drupal_update_security_only is not defined
 
-- name: Get drush version.
-  command: "{{ drush_path }} status --fields=drush-version"
-  args:
-    chdir: "{{ drupal_core_path }}"
-  register: drush_version_result
-
 - name: Get drush status.
   command: "{{ drush_path }} status --format=yaml"
   args:
@@ -32,7 +26,7 @@
 - name: Find updates, Drush 8.x.
   # TODO: Is the `-l` option necessary with sites.php?
   # `chdir` isn't working as expected, so `--root` is provided in the arguments.
-  command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} --root='{{ drupal_core_path }}' pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
+  command: "{{ drush_path | default('drush') }} pm-updatestatus {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
   args:
     chdir: "{{ drupal_core_path }}"
   register: updates_available_result
@@ -71,7 +65,7 @@
 - name: Run `drush pm-updatecode`.
   # TODO: Is the `-l` option necessary with sites.php?
   # `chdir` isn't working as expected, so `--root` is provided in the arguments.
-  command: "{{ drush_path | default('drush') }} -l {{ config_site_directory }} --root='{{ drupal_core_path }}' pm-updatecode {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
+  command: "{{ drush_path | default('drush') }} pm-updatecode {{ drupal_update_projects | default('') }} --pipe {{ drupal_update_security_only | default(True) | bool | ternary('--security-only', '') }}"
   args:
     chdir: "{{ drupal_core_path }}"
   register: drupal_updates_download
