@@ -1,9 +1,6 @@
 # Ansible Role: WordPress
-[![Build Status](https://travis-ci.org/darthwade/ansible-role-wordpress.png)](https://travis-ci.org/darthwade/ansible-role-wordpress)
-[![Gittip](http://img.shields.io/gittip/darthwade.svg)](https://www.gittip.com/darthwade/)
-[![Flattr this git repo](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=darthwade&url=https://github.com/darthwade/ansible-role-wordpress&title=Ansible Role: WordPress&language=&tags=github&category=software)
 
-Ansible role that installs and configures WordPress.
+Ansible role that installs and configures WordPress, forked from https://github.com/chusiang/wordpress.ansible.role.
 
 Features include:
 - Installation of any WordPress version to specified directory
@@ -12,19 +9,9 @@ Features include:
 
 ## Installation
 
-Using `ansible-galaxy`:
-```shell
-$ ansible-galaxy install darthwade.wordpress
-```
-
-Using `arm` ([Ansible Role Manager](https://github.com/mirskytech/ansible-role-manager/)):
-```shell
-$ arm install darthwade.wordpress
-```
-
 Using `git`:
 ```shell
-$ git clone https://github.com/darthwade/ansible-role-wordpress.git
+$ git clone https://github.com/kentr/wordpress.ansible.role.git
 ```
 
 ## Requirements & Dependencies
@@ -32,14 +19,11 @@ $ git clone https://github.com/darthwade/ansible-role-wordpress.git
 - Curl
 
 ## Variables
-Here is a list of all the default variables for this role, which are also available in `defaults/main.yml`.
 
 ```yaml
 ---
 
 wp_version: 4.0
-# TODO: https://wordpress.org/download/release-archive/
-# wp_sha256sum: 8543e31d7c0a1b15f73dbb20f9161845f3d2bb8de3d7aef371cf32bba41747ee
 wp_install_dir: '/var/sites/awesome_wordpress_site'
 wp_db_name: 'database_name_here'
 wp_db_user: 'username_here'
@@ -49,6 +33,8 @@ wp_db_charset: 'utf8'
 wp_db_collate: ''
 wp_table_prefix: 'wp_'
 wp_debug: false
+wp_debug_log: true
+wp_debug_display: false
 
 wp_install_site: False
 wp_admin_user: 'admin'
@@ -92,13 +78,13 @@ workspace: /tmp
     wp_db_password: 'password_here'
     wp_db_host: 'localhost'
   roles:
-  - darthwade.wordpress
+  - kentr.wordpress
 ```
 
 ## Testing
 ```shell
-$ git clone https://github.com/darthwade/ansible-role-wordpress.git
-$ cd ansible-role-wordpress
+$ git clone https://github.com/kentr/wordpress.ansible.role.git
+$ cd wordpress.ansible.role
 $ vagrant up
 ```
 
