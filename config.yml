@@ -129,8 +129,6 @@ drupal_composer_install_dir: "{{ web_app_project_root }}"
 drush_version: "8.1.15"
 drush_keep_updated: false
 drush_composer_cli_options: "--prefer-dist --no-interaction"
-# Full drush command
-drush_path: "drush -l {{ config_site_directory }} --root='{{ drupal_core_path }}'"
 
 # Custom Drush alias tasks to insert just the local declaration into an existing
 # alias file.
