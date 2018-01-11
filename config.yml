@@ -235,6 +235,8 @@ apache_vhosts_ssl:
     certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
     extra_parameters: ''
 
+drupalvm_webserver_user: "{{ vagrant_user }}"
+
 # If a file named "config.php{{ php_version }}.yml" exists in the config
 # directory, it will be included automatically and override the variables in
 # this file.
