@@ -1,0 +1,20 @@
+---
+
+# Simple Apache envvars change.
+# For something more complex, use https://github.com/jheimbach/ansible-role-apache_envvars
+  
+- name: Set Apache user.
+  lineinfile:
+    path: /etc/apache2/envvars
+    regexp: '^export APACHE_RUN_USER='
+    line: "export APACHE_RUN_USER={{ drupalvm_webserver_user }}"
+  when: ansible_os_family == 'Debian'
+  notify: restart apache
+  
+- name: Set Apache group.
+  lineinfile:
+    path: /etc/apache2/envvars
+    regexp: '^export APACHE_RUN_GROUP='
+    line: "export APACHE_RUN_GROUP={{ drupalvm_webserver_user }}"
+  when: ansible_os_family == 'Debian'
+  notify: restart apache
