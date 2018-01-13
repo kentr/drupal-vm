@@ -25,10 +25,10 @@
   become: no
   blockinfile:
     dest: "~/.drush/{{ drush_alias_file_prefix | default(vagrant_machine_name) }}.aliases.drushrc.php"
-    marker: "// {mark} ANSIBLE MANAGED BLOCK: @{{ drush_alias_file_prefix | default(vagrant_machine_name) }}.loc"
+    marker: "// {mark} ANSIBLE MANAGED BLOCK: @{{ drush_alias_file_prefix | default(vagrant_machine_name) }}.local"
     state: present
     content: |
-      $aliases['loc'] = array(
+      $aliases['local'] = array(
         // vagrant_hostname
         'uri' => '{{ vagrant_hostname }}',
         // drupal_core_path
