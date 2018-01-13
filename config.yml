@@ -416,7 +416,9 @@ setup_hosting_account: True
 
 # Shims for backwards-compatibility.  It's preferable to set agnostic variables above.
 drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
-drush_rsync_mode: "{{ files_rsync_extra_args | default('') }}"
+# Drush automatically adds a single leading "-" to the rsync `mode`, so we have to remove
+# one leading hyphen here.
+drush_rsync_mode: "{{ files_rsync_extra_args | default('')  | regex_replace('^-', '') }}"
 drush_rsync_excludes: "{{ files_rsync_excludes | default([]) | join(':') }}"
 
 # Ensure vagrant plugins are installed.
