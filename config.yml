@@ -153,6 +153,7 @@ db_dump_exclude_tables: "'cache','cache_*','history','sessions','watchdog'"
 files_rsync_extra_args: '-avu --partial'
 # Patterns passed to `rsync` --exclude args when synchronizing files from prod.
 files_rsync_excludes:
+  - '*.flv'
   - '*.mov'
   - '*.mp3'
   - '*.mp4'
@@ -162,6 +163,10 @@ files_rsync_excludes:
   - '*.doc*'
   - '*.ppt*'
   - '*.psd'
+  - '*.sql*'
+  - '*.tar.*'
+  - '*.tbz'
+  - '*.tgz'
   - '*.xls*'
   - 'css/**'
   - 'js/**'
