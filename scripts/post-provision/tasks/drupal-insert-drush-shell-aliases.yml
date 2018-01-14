@@ -30,10 +30,10 @@
     content: |
       $local_files_dir = __DIR__ . '/{{ web_app_web_dir }}/{{ drupal_file_public_path }}/';
       $options['shell-aliases'] = array(
-        'pull-data' => '!drush sql-sync @{{ drush_alias_file_prefix }}.prod @{{ drush_alias_file_prefix }}.loc; \
+        'pull-data' => '!drush sql-sync @{{ drush_alias_file_prefix }}.prod @{{ drush_alias_file_prefix }}.local; \
                         drush rsync @{{ drush_alias_file_prefix }}.prod:%files/ ' . $local_files_dir . '; \
                         chmod -R 777 ' . $local_files_dir . '; \
-                        drush @{{ drush_alias_file_prefix }}.loc {{ "cc all" if drupal_major_version == 7 else "cr" }}',
+                        drush @{{ drush_alias_file_prefix }}.local {{ "cc all" if drupal_major_version == 7 else "cr" }}',
       );
   when: project_type == "drupal" and drush_insert_project_shell_aliases | default(false)
 
