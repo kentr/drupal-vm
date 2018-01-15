@@ -32,3 +32,14 @@
     target: "/tmp/{{ database_import_filename | basename }}"
   register: db_updated
   when: do_db_import and db_copy_result is defined and db_copy_result.state == "file"
+
+# TODO: Fix this hack.  Should be a handler or something.
+- name: Run `wp search-replace`
+  become: no
+  command: |
+    wp
+    --path='{{ web_app_web_root }}'
+    search-replace
+    '{{ prod_domain }}'
+    '{{ local_domain }}'
+  when: project_type == 'wordpress' and db_updated.changed | default(False)
