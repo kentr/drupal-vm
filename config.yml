@@ -150,9 +150,10 @@ cli_alias_file_prefix: "{{ client_server_username }}"
 db_dump_exclude_tables: "'cache','cache_*','history','sessions','watchdog'"
 
 # Extra args for `rsync` when synchronizing files from prod.
-files_rsync_extra_args: '-Pavu'
+files_rsync_extra_args: '-avu --partial'
 # Patterns passed to `rsync` --exclude args when synchronizing files from prod.
 files_rsync_excludes:
+  - '*.flv'
   - '*.mov'
   - '*.mp3'
   - '*.mp4'
@@ -162,6 +163,10 @@ files_rsync_excludes:
   - '*.doc*'
   - '*.ppt*'
   - '*.psd'
+  - '*.sql*'
+  - '*.tar.*'
+  - '*.tbz'
+  - '*.tgz'
   - '*.xls*'
   - 'css/**'
   - 'js/**'
@@ -454,7 +459,9 @@ setup_hosting_account: True
 
 # Shims for backwards-compatibility.  It's preferable to set agnostic variables above.
 drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
-drush_rsync_mode: "{{ files_rsync_extra_args | default('') }}"
+# Drush automatically adds a single leading "-" to the rsync `mode`, so we have to remove
+# one leading hyphen here.
+drush_rsync_mode: "{{ files_rsync_extra_args | default('')  | regex_replace('^-', '') }}"
 drush_rsync_excludes: "{{ files_rsync_excludes | default([]) | join(':') }}"
 
 # Ensure vagrant plugins are installed.
