@@ -163,7 +163,6 @@ files_rsync_excludes:
   - '*.doc*'
   - '*.ppt*'
   - '*.psd'
-  - '*.sql*'
   - '*.tar.*'
   - '*.tbz'
   - '*.tgz'
