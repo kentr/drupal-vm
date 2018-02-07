@@ -40,6 +40,6 @@
     wp
     --path='{{ web_app_web_root }}'
     search-replace
-    '{{ prod_domain }}'
-    '{{ local_domain }}'
+    '//{{ prod_domain }}'
+    '//{{ local_domain }}'
   when: project_type == 'wordpress' and db_updated.changed | default(False)

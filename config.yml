@@ -150,7 +150,7 @@ cli_alias_file_prefix: "{{ client_server_username }}"
 db_dump_exclude_tables: "'cache','cache_*','history','sessions','watchdog'"
 
 # Extra args for `rsync` when synchronizing files from prod.
-files_rsync_extra_args: '-avu --partial'
+files_rsync_extra_args: '--partial -avu'
 # Patterns passed to `rsync` --exclude args when synchronizing files from prod.
 files_rsync_excludes:
   - '*.flv'
@@ -163,7 +163,6 @@ files_rsync_excludes:
   - '*.doc*'
   - '*.ppt*'
   - '*.psd'
-  - '*.sql*'
   - '*.tar.*'
   - '*.tbz'
   - '*.tgz'
