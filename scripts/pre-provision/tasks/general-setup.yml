@@ -23,3 +23,14 @@
     mode: 0644
   become: no
   when: known_hosts_file.stat.exists
+
+# Set up vagrant MySQL credentials.
+# The criteria for this task are independent of the criteria for the setup in
+# `geerlingguy.mysql`.  That role may also be configured to write a `.my.cnf` file
+# for the vagrant user, in which case it will take precedence over this one.
+- name: Copy user-my.cnf file with password credentials.
+  template:
+    src: "{{ playbook_dir }}/../scripts/misc/templates/user-my.cnf.j2"
+    dest: "/home/{{ drupalvm_user }}/.my.cnf"
+    owner: "{{ drupalvm_user }}"
+    mode: 0600
