@@ -121,7 +121,7 @@
 
     - role: kentr.setup-drush
       become: no
-      when: drush_setup_drush | default(False)
+      when: drush_setup_drush | default(False) and 'drush' in installed_extras
       installations: "{{ instances | selectattr('type', 'equalto', 'drupal')  | list }}"
 
   tasks:
