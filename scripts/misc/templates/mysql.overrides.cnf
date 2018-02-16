@@ -4,3 +4,7 @@
 # Disabling `innodb_strict_mode` allows some operations to complete without error,
 # such as importing tables that would normally violate the `innodb` row size limits.
 innodb_strict_mode = OFF
+max_allowed_packet = 24M
+key_buffer_size = 32M
+
+query_cache_type = On

@@ -11,7 +11,9 @@
 #   drush_ssh_options: Required. Additional options that Drush should use for SSH (remote)
 #       operations.
 #
-#   root: Required. Absolute path to the item's root web folder.  No default.
+#   root: Optional. Absolute path to the item's root web folder.  No default.
+#       If a Pantheon site is detected, this property will be ignored.
+#       See https://github.com/drush-ops/drush/issues/313
 #
 #   env: Required. The environment for this installation.  Will be the ".xyz" suffix
 #       for the alias.  Typical value would be one of [dev | stage | prod].
@@ -40,6 +42,21 @@
 #
 #       Note that for aliases created on `localhost`, this value is ignored and all aliases
 #       are created as "remote" aliases
+#
+#   drush_structure_tables: Optional.  List of strings containing table names to be added
+#       as `structure-tables` options.
+#
+#   drush_path_aliases: Optional.  Dictionary of path aliases.
+#       Example:
+#       ```
+#       drush_path_aliases:
+#         '%files': 'sites/default/files'
+#         '%drush-script': 'drush'
+#       ```
+#
+#   drush_db_url: Optional. String database URL in the format expected by the Drush
+#       `--source-db-url` option.
+#       Will be added to the alias block as a `db-url` property.
 ##########################################################################################
 
 
@@ -89,6 +106,7 @@
 
 - name: Ensure local Drush alias file exists.
   delegate_to: 127.0.0.1
+  become: No
   template:
     # Don't overwrite existing file.
     force: no
@@ -101,7 +119,7 @@
 
 - name: Insert local Drush alias declarations.
   delegate_to: 127.0.0.1
-  become: no
+  become: No
   blockinfile:
     dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
     marker: "// {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
