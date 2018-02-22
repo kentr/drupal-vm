@@ -300,7 +300,7 @@ installed_extras:
   # - selenium
   # - solr
   # - varnish
-  - xdebug
+  # - xdebug
   # - xhprof
   # - wp-cli
 
