@@ -252,6 +252,44 @@ php_version: "5.6"
 # libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
 php_enable_php_fpm: False
 
+php_install_recommends: no
+php_packages:
+  - "php{{ php_version }}"
+  # See note about php_apc_enable_cli below.
+  - "php{{ php_version }}-apcu"
+  - "php{{ php_version }}-mcrypt"
+  - "php{{ php_version }}-cli"
+  - "php{{ php_version }}-common"
+  - "php{{ php_version }}-curl"
+  - "php{{ php_version }}-dev"
+  - "php{{ php_version }}-fpm"
+  - "php{{ php_version }}-gd"
+  - "php{{ php_version }}-sqlite3"
+  - "php{{ php_version }}-xml"
+  - "php{{ php_version }}-mbstring"
+  - libpcre3-dev
+php_conf_paths:
+  - "/etc/php/{{ php_version }}/fpm"
+  - "/etc/php/{{ php_version }}/apache2"
+  - "/etc/php/{{ php_version }}/cli"
+php_extension_conf_paths:
+  - "/etc/php/{{ php_version }}/fpm/conf.d"
+  - "/etc/php/{{ php_version }}/apache2/conf.d"
+  - "/etc/php/{{ php_version }}/cli/conf.d"
+php_fpm_daemon: "php{{ php_version }}-fpm"
+php_fpm_conf_path: "/etc/php/{{ php_version }}/fpm"
+php_fpm_pool_conf_path: "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
+php_mysql_package: "php{{ php_version }}-mysql"
+
+# "If you install `redis`:
+php_redis_package: "php{{ php_version }}-redis"
+
+# "If you install `memcached`:
+php_memcached_package: "php{{ php_version }}-memcached"
+
+# Enable APCu for CLI so that drush can enable the apc module and clear caches.
+php_apc_enable_cli: 1
+
 # Should be valid version at https://github.com/drush-ops/drush.
 # This can be the the literal string HEAD, a branch name, a tag name.
 # See http://docs.ansible.com/ansible/git_module.html#options.
