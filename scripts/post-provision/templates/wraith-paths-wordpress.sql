@@ -11,7 +11,7 @@ SELECT
       ORDER BY TYPE, path
       SEPARATOR "\n"
     )
-  ) AS `paths`
+  ) AS `paths:`
 FROM
   (
   SELECT
