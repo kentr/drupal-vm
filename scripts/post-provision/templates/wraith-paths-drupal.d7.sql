@@ -125,7 +125,7 @@ FROM (
   SELECT
     CONCAT(human_name, '..', display_title) AS `title`
     , 'view' AS `type`
-    , PREG_CAPTURE('/s:4:"path";s:\\d+:"(.*?)"/', display_options, 1) AS path
+    , PREG_CAPTURE('/}s:4:"path";s:\\d+:"(.*?)";/', display_options, 1) AS path
   FROM views_display
   JOIN views_view
     USING (vid)
