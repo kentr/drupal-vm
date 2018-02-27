@@ -356,7 +356,7 @@ php_xdebug_idekey: ECLIPSE_DBGP
 
 # Composer requires lots of memory.
 # See https://github.com/geerlingguy/drupal-vm/issues/547
-php_memory_limit: 1024M
+php_memory_limit: 256M
 
 # A list of files that should override the default global my.cnf.
 # Each item in the array requires a "src" parameter which is a path to a file.
