@@ -135,6 +135,8 @@
     wp
     --path='{{ web_app_web_root }}'
     search-replace
-    '{{ prod_domain }}'
+    '(?<!\.)(?<!@){{ prod_domain }}'
     '{{ local_domain }}'
+    --regex --all-tables
+    --skip-columns=autoload,comment_status,guid,option_name,path,ping_status,pinged,post_mime_type,post_name,post_password,post_status,post_type,to_ping
   when: project_type == 'wordpress' and db_updated.changed | default(False)
