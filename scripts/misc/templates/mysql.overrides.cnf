@@ -8,3 +8,4 @@ max_allowed_packet = 24M
 key_buffer_size = 32M
 
 query_cache_type = On
+log_timestamps = SYSTEM
