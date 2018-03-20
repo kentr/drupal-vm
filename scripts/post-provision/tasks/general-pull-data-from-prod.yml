@@ -93,6 +93,13 @@
   command: "rsync -au --partial -e 'ssh {{ prod_instance.drush_ssh_options | default('') }}' {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}:{{ database_dump_file }}.gz {{ database_dump_file_local }}"
   when: _db_do_sync
 
+- name: Delete remote SQL dump.
+  become: no
+  command: >
+    ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}
+    'rm {{ database_dump_file }}.gz'
+  when: _db_do_sync
+
 - name: Import dump file.
   become: no
   mysql_db:
