@@ -29,7 +29,7 @@
   delegate_to: localhost
   # Don't use 'become' for operations on localhost.
   become: no
-  command: |
+  command: >
     ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }} \
     'if [ ! -e '{{ db_remote_dump_directory }}' ]; then mkdir -p '{{ db_remote_dump_directory }}'; fi'
   when: _db_do_sync
