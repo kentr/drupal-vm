@@ -12,3 +12,10 @@
   include_role:
     name: kentr.wordpress
   when: project_type == "wordpress"
+
+- name: Include `kentr.setup-wp-cli` role to setup WP-CLI.
+  include_role:
+    name: kentr.setup-wp-cli
+  vars:
+    installations: "{{ instances }}"
+  when: (project_type == "wordpress" or "wp-cli" in installed_extras) and wp_setup_wp_cli | default(False)

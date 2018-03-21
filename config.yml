@@ -435,8 +435,9 @@ wp_lang: ''
 
 wp_core_owner: "{{ drupalvm_user }}"
 
-# wp_mysql_site_restore_saved_db: True
-# wp_database_backup: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/db-restore.sql"
+# Experimental role to set up WP-CLI alias locally and on remote.
+# Won't do much if project_type != 'wordpress'.
+wp_setup_wp_cli: True
 
 # Set `workspace` to take advantage of `vagrant-cachier`.
 workspace: /tmp/vagrant-cache/generic

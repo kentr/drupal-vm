@@ -1,0 +1,16 @@
+'@{{ item.wp_alias_prefix | default(wp_alias_prefix) }}.{{ item.env }}':
+  {#
+    SSH information for the alias is included unless:
+      - wp_all_aliases_remote is not True AND
+      - item.wp_alias_is_local_on_remote_node == True
+      - item.env in ['prod', 'stage']
+
+    @todo Make this cleaner with Vagrant.
+  #}
+  {%- if
+    wp_all_aliases_remote | default(False) or
+    not item.wp_alias_is_local_on_remote_node | default( item.env in ['prod', 'stage'] )
+  -%}
+  ssh: {{ item.ssh_user | default(ansible_user_id) }}@{{ item.ssh_host | default(inventory_hostname) }}:{{ item.ssh_port | default('22') }}
+  {% endif -%}
+  path: {{ item.root }}

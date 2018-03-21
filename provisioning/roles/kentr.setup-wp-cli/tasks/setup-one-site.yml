@@ -1,0 +1,71 @@
+---
+##########################################################################################
+# Sets up remote WP-CLI aliases for a site def.
+#
+# Expects parameter:
+# item:
+#   ssh_host: Required. Hostname that WP-CLI should use for SSH (remote) operations.
+#
+#   ssh_user: Required. User that WP-CLI should use for SSH (remote) operations.
+#
+#   ssh_port: Required. Port that
+#
+#   root: Required. Absolute path to the item's root web folder.  No default.
+#
+#   env: Required. The environment for this installation.  Will be the ".xyz" suffix
+#       for the alias.  Typical value would be one of [dev | stage | prod].
+#
+#   uri: Required. Full URI of site home page, including protocol (http / https).
+#
+#   wp_alias_prefix: Optional. Prefix for WP-CLI alias. Determines the
+#       prefix used in the site alias.  E.g., a value of "my-site" creates the aliases
+#       "@my-site", "@my-site.*".
+#       Defaults to the Ansible `inventory_hostname`.
+#
+#   wp_alias_include_on_remote_node: EXPERIMENTAL. Optional.  Default = True.  If True,
+#       an alias definition for this item will be on the remote node.
+#
+#   wp_alias_is_local_on_remote_node: Optional.  If True, the alias
+#       created for this item on the remote node will be configured as a "local" alias.
+#       It will not have SSH connection information, and WP-CLI will behave as though the
+#       site is on the machine on which WP-CLI is run.
+#
+#       Defaults:
+#         - True the `env` property is in ['prod', 'stage'].
+#         - False otherwise.
+#
+#       Note that for aliases created on `localhost`, this value is ignored and all aliases
+#       are created as "remote" aliases
+#
+##########################################################################################
+
+# ----------------------------------------------
+# REMOTE
+
+- name: Insert remote WP-CLI alias declarations.
+  become: no
+  blockinfile:
+    dest: "~/.wp-cli/config.yml"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: @{{ item.wp_alias_prefix | default(inventory_hostname) }}.{{ item.env }}"
+    state: present
+    content:  "{{ lookup('template', 'templates/single-alias-block.yml.j2') }}"
+    create: True
+  when: item.uri is defined and wp_aliases_remote | default(False)
+
+# ----------------------------------------------
+# LOCAL
+
+- name: Set `wp_all_aliases_remote`.
+  set_fact:
+    wp_all_aliases_remote: True
+
+- name: Insert local WP-CLI alias declarations.
+  delegate_to: 127.0.0.1
+  become: No
+  blockinfile:
+    dest: "~/.wp-cli/config.yml"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: @{{ item.wp_alias_prefix | default(inventory_hostname) }}.{{ item.env }}"
+    state: present
+    content:  "{{ lookup('template', 'templates/single-alias-block.yml.j2') }}"
+    create: True
+  when: item.uri is defined and wp_aliases_local | default(False)

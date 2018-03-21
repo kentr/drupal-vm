@@ -1,0 +1,18 @@
+---
+# tasks file for kentr.setup-wp-cli
+
+- name: Ensure remote WP-CLI directory exists.
+  become: No
+  file:
+    dest: "~/.wp-cli"
+    state: directory
+
+- name: Ensure local WP-CLI directory exists.
+  become: No
+  delegate_to: 127.0.0.1
+  file:
+    dest: "~/.wp-cli"
+    state: directory
+
+- include: setup-one-site.yml
+  with_items: "{{ installations }}"

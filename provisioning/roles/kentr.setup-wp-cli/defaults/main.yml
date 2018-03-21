@@ -1,0 +1,15 @@
+---
+# defaults file for kentr.setup-wp-cli
+
+# Enable insertion of local and remote WP-CLI aliases.
+# Values are taken from inventory values for host.
+wp_aliases_remote: True
+wp_aliases_local: True
+
+# Enable dated sql-dump result file.
+wp_enable_dated_result_file: True
+
+wp_alias_prefix: "{{ inventory_hostname }}"
+
+# Destination directory for SQL dump files.
+wp_sql_dump_dir: "/tmp"
