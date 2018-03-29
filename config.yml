@@ -351,6 +351,8 @@ php_xdebug_remote_enable: 0
 php_xdebug_remote_connect_back: 1
 php_xdebug_remote_autostart: 0
 php_xdebug_remote_host: 10.0.2.2
+# Drupal smart trim requires high max_nesting_level.
+php_xdebug_max_nesting_level: 512
 # Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
 php_xdebug_idekey: ECLIPSE_DBGP
 

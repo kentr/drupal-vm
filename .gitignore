@@ -16,7 +16,7 @@
 /.vagrant/
 vagrant_ansible_inventory_default
 
-# Drupal VM specific files.
+# DrupalVM specific files.
 local.config.yml
 # config.yml
 docker-compose.yml
@@ -28,6 +28,9 @@ Vagrantfile.local
 
 # Some roles include 'config.yml' files.
 !provisioning/roles/**/config.yml
+
+# Test playbooks
+provisioning/test-*.yml
 
 /node_modules/
 /bower_components/
