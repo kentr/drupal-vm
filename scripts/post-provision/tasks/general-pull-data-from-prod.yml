@@ -21,7 +21,7 @@
 
 - name: Set `_db_do_sync`.
   set_fact:
-    _db_do_sync: "{{ not do_db_import | default(False) and db_do_sync | default('once') != 'never' and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
+    _db_do_sync: "{{ db_do_sync | default('once') != 'never' and (db_do_sync | default('once') == 'always' or db_tables_output.stdout_lines | length == 0) }}"
 
 - name: Ensure prod SQL dump directory exists.
   # Delegate to localhost because we're performing an operation on prod, not on the
@@ -29,7 +29,7 @@
   delegate_to: localhost
   # Don't use 'become' for operations on localhost.
   become: no
-  command: |
+  command: >
     ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }} \
     'if [ ! -e '{{ db_remote_dump_directory }}' ]; then mkdir -p '{{ db_remote_dump_directory }}'; fi'
   when: _db_do_sync
@@ -93,6 +93,13 @@
   command: "rsync -au --partial -e 'ssh {{ prod_instance.drush_ssh_options | default('') }}' {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}:{{ database_dump_file }}.gz {{ database_dump_file_local }}"
   when: _db_do_sync
 
+- name: Delete remote SQL dump.
+  become: no
+  command: >
+    ssh {{ prod_instance.drush_ssh_options | default('') }} {{ prod_instance.ssh_user }}@{{ prod_instance.ssh_host }}
+    'rm {{ database_dump_file }}.gz'
+  when: _db_do_sync
+
 - name: Import dump file.
   become: no
   mysql_db:
@@ -135,6 +142,9 @@
     wp
     --path='{{ web_app_web_root }}'
     search-replace
-    '{{ prod_domain }}'
+    '(?<!\.)(?<!@)(www\.)?{{ prod_domain }}'
     '{{ local_domain }}'
+    'wp_blogs' 'wp_*options' 'wp_*posts' 'wp_*postmeta' 'wp_domain_mapping'
+    --regex --all-tables
+    --skip-columns=autoload,comment_status,guid,meta_key,option_name,path,ping_status,pinged,post_mime_type,post_name,post_password,post_status,post_type,to_ping
   when: project_type == 'wordpress' and db_updated.changed | default(False)

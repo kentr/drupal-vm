@@ -1,0 +1,33 @@
+{{ item.env }}:
+  uri: '{{ item.uri | default('default') }}'
+  root: '{{ item.root }}'
+  {#
+    SSH information for the alias is included unless:
+      - drush_all_aliases_remote is not True AND
+      - item.drush_alias_is_local_on_remote_node == True
+      - item.env in ['prod', 'stage']
+
+    @todo Make this cleaner with Vagrant.
+  #}
+  {%- if
+    drush_all_aliases_remote | default(False) or
+    not item.drush_alias_is_local_on_remote_node | default( item.env in ['prod', 'stage'] )
+  -%}
+  host: {{ item.ssh_host | default(inventory_hostname) }}
+  user: {{ item.ssh_user | default(ansible_user_id) }}
+  ssh:
+    options: '{{ item.drush_ssh_options | default(drush_ssh_options) }}'
+  {% endif -%}
+  options:
+    command-specific:
+      sql-dump:
+        structure-tables-key: common
+        gzip: '1'
+      archive-dump:
+        structure-tables-key: common
+      rsync:
+        mode: {{ drush_rsync_mode }}
+        exclude-paths: '{{ drush_rsync_excludes }}'
+    source-command-specific:
+      sql-sync:
+        structure-tables-key: common

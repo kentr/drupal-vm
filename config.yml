@@ -201,18 +201,94 @@ drupal_build_composer: false
 # are using Composer's create-project as a site deployment strategy.
 drupal_build_composer_project: false
 
+extra_packages:
+  - sqlite
+  - aptitude
+  - "libapache2-mod-php{{ php_version }}"
+
+# Apache VirtualHosts. Add one for each site you are running inside the VM. For
+# multisite deployments, you can point multiple servernames at one documentroot.
+# View the geerlingguy.apache Ansible Role README for more options.
+apache_vhosts:
+  - servername: "{{ drupal_domain }}"
+    serveralias: "www.{{ drupal_domain }}"
+    documentroot: "{{ drupal_core_path }}"
+    extra_parameters: ''
+
+  - servername: "adminer.{{ vagrant_hostname }}"
+    documentroot: "{{ adminer_install_dir }}"
+    extra_parameters: ''
+
+  - servername: "xhprof.{{ vagrant_hostname }}"
+    documentroot: "{{ php_xhprof_html_dir }}"
+    extra_parameters: ''
+
+  - servername: "pimpmylog.{{ vagrant_hostname }}"
+    documentroot: "{{ pimpmylog_install_dir }}"
+    extra_parameters: ''
+
+  - servername: "{{ vagrant_ip }}"
+    serveralias: "dashboard.{{ vagrant_hostname }}"
+    documentroot: "{{ dashboard_install_dir }}"
+    extra_parameters: ''
+
 apache_vhosts_ssl:
   - servername: "{{ local_domain }}"
     documentroot: "{{ web_app_web_root }}"
     certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
     certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
-    extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"
+    extra_parameters: ''
+
+drupalvm_webserver_user: "{{ vagrant_user }}"
 
 # If a file named "config.php{{ php_version }}.yml" exists in the config
 # directory, it will be included automatically and override the variables in
 # this file.
 # Configs for PHP 5.6 are in config.php5.6.yml
 php_version: "5.6"
+
+# Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
+# to instead use Apache + mod_php with an Ubuntu base box, make sure you add
+# libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
+php_enable_php_fpm: False
+
+php_install_recommends: no
+php_packages:
+  - "php{{ php_version }}"
+  # See note about php_apc_enable_cli below.
+  - "php{{ php_version }}-apcu"
+  - "php{{ php_version }}-mcrypt"
+  - "php{{ php_version }}-cli"
+  - "php{{ php_version }}-common"
+  - "php{{ php_version }}-curl"
+  - "php{{ php_version }}-dev"
+  - "php{{ php_version }}-fpm"
+  - "php{{ php_version }}-gd"
+  - "php{{ php_version }}-sqlite3"
+  - "php{{ php_version }}-xml"
+  - "php{{ php_version }}-mbstring"
+  - libpcre3-dev
+php_conf_paths:
+  - "/etc/php/{{ php_version }}/fpm"
+  - "/etc/php/{{ php_version }}/apache2"
+  - "/etc/php/{{ php_version }}/cli"
+php_extension_conf_paths:
+  - "/etc/php/{{ php_version }}/fpm/conf.d"
+  - "/etc/php/{{ php_version }}/apache2/conf.d"
+  - "/etc/php/{{ php_version }}/cli/conf.d"
+php_fpm_daemon: "php{{ php_version }}-fpm"
+php_fpm_conf_path: "/etc/php/{{ php_version }}/fpm"
+php_fpm_pool_conf_path: "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
+php_mysql_package: "php{{ php_version }}-mysql"
+
+# "If you install `redis`:
+php_redis_package: "php{{ php_version }}-redis"
+
+# "If you install `memcached`:
+php_memcached_package: "php{{ php_version }}-memcached"
+
+# Enable APCu for CLI so that drush can enable the apc module and clear caches.
+php_apc_enable_cli: 1
 
 # Should be valid version at https://github.com/drush-ops/drush.
 # This can be the the literal string HEAD, a branch name, a tag name.
@@ -262,7 +338,7 @@ installed_extras:
   # - selenium
   # - solr
   # - varnish
-  - xdebug
+  # - xdebug
   # - xhprof
   # - wp-cli
 
@@ -275,12 +351,14 @@ php_xdebug_remote_enable: 0
 php_xdebug_remote_connect_back: 1
 php_xdebug_remote_autostart: 0
 php_xdebug_remote_host: 10.0.2.2
+# Drupal smart trim requires high max_nesting_level.
+php_xdebug_max_nesting_level: 512
 # Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
 php_xdebug_idekey: ECLIPSE_DBGP
 
 # Composer requires lots of memory.
 # See https://github.com/geerlingguy/drupal-vm/issues/547
-php_memory_limit: 1024M
+php_memory_limit: 256M
 
 # A list of files that should override the default global my.cnf.
 # Each item in the array requires a "src" parameter which is a path to a file.

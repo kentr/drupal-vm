@@ -4,11 +4,11 @@
     path: /vagrant
   register: vagrant_directory
 
-- name: Create or restore site database
+- name: Create or restore site database.
   include: mysql.yml
   when: wp_mysql_enable
 
-- name: Ensure that installation directory exists
+- name: Ensure that installation directory exists.
   file:
     path: "{{wp_install_dir}}"
     state: directory
@@ -30,30 +30,21 @@
   include: tasks/download-wordpress.yml
   when: install_wordpress | default(False) and not wordpress_site_exists
 
-# TODO: Add 'creates' to keep this from running repeatedly
-- name: Fetch random salts for wp-config.php
+- name: Fetch random salts for `wp-config.php`l
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
+  creates: "{{ wp_install_dir }}/wp-config.php"
 
-- name: Copy wp-config.php file
+- name: Copy `wp-config.php` file.
   template:
     src: wp-config.php.j2
     dest: "{{wp_install_dir}}/wp-config.php"
 
-- name: Change ownership of installation directory
+- name: Change ownership of installation directory.
   file:
     path: "{{wp_install_dir}}"
     owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
-    mode: 0775
-    state: directory
-    recurse: yes
-
-- name: Change ownership of uploads directory
-  file:
-    path: "{{wp_install_dir}}/wp-content/uploads/"
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_group) }}"
     state: directory
     recurse: yes
 

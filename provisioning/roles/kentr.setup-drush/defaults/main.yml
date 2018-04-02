@@ -24,3 +24,10 @@ drush_ssh_options: "-o PasswordAuthentication=no -o LogLevel=quiet"
 drush_sql_dump_dir: "/home/{{ ansible_ssh_user }}/drush-backups/archive-dump"
 
 drush_rsync_excludes: ""
+
+drush_structure_tables:
+  - cache
+  - cache_*
+  - history
+  - sessions
+  - watchdog

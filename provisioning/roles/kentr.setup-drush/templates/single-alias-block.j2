@@ -1,41 +1,68 @@
-      $aliases['{{ item.env }}'] = array(
-        // base URL
-        'uri' => '{{ item.uri | default('default') }}',
-        // drupal_core_path.
-        'root' => '{{ item.root }}',
-        {#
-          SSH information for the alias is included unless:
+    $aliases['{{ item.env }}'] = array(
+      'uri' => '{{ item.uri | default('default') }}',
+      {% if not item.ssh_host | regex_search('.drush.in') -%}
+      'root' => '{{ item.root }}',
+      {% else -%}
+      // `root` is omitted because this appears to be a Pantheon site.
+      // @see https://github.com/drush-ops/drush/issues/313
+      {% endif %}
+      {#-
+        SSH information for the alias is included unless:
           - drush_all_aliases_remote is not True AND
-            - item.drush_alias_is_local_on_remote_node == True
-            - item.env in ['prod', 'stage']
+          - item.drush_alias_is_local_on_remote_node == True
+          - item.env in ['prod', 'stage']
 
-          @todo Make this cleaner with Vagrant.
-        #}
-        {% if
-          drush_all_aliases_remote | default(False) or
-          not item.drush_alias_is_local_on_remote_node | default( item.env in ['prod', 'stage'] )
-        -%}
-          'remote-host' => '{{ item.ssh_host | default(inventory_hostname) }}',
-          'remote-user' => '{{ item.ssh_user | default(ansible_user_id) }}',
-          'ssh-options' => '{{ item.drush_ssh_options | default(drush_ssh_options) }}',
-        {% endif %}
+        @todo Make this cleaner with Vagrant.
+      -#}
+      {% if
+        drush_all_aliases_remote | default(False) or
+        not item.drush_alias_is_local_on_remote_node | default( item.env in ['prod', 'stage'] )
+      -%}
+      'remote-host' => '{{ item.ssh_host | default(inventory_hostname) }}',
+      'remote-user' => '{{ item.ssh_user | default(ansible_user_id) }}',
+      'ssh-options' => '{{ item.drush_ssh_options | default(drush_ssh_options) }}',
 
-        'source-command-specific' => array (
-          'sql-sync' => array (
-            'structure-tables-key' => 'common',
-          ),
+      {% endif -%}
+
+      {% if item.drush_db_url | default(None) -%}
+      'db-url' => '{{ item.drush_db_url }}',
+
+      {% endif -%}
+
+      {% if item['drush_path_aliases'] | default(None)  -%}
+      'path-aliases' => array(
+        {% for alias in item['drush_path_aliases'] | list -%}
+        '{{ alias }}' => '{{ item['drush_path_aliases'][alias] }}',
+        {% endfor -%}
+      ),
+
+      {% endif -%}
+
+      'source-command-specific' => array (
+        'sql-sync' => array (
+          'structure-tables-key' => 'common',
+          {% if item.drush_structure_tables|default(drush_structure_tables) -%}
+          'structure-tables-list' => '{{ item.drush_structure_tables|default(drush_structure_tables)|join(",") }}',
+          {% endif -%}
         ),
-        'command-specific' => array (
-          'sql-dump' => array (
-            'structure-tables-key' => 'common',
-            'gzip' => '1',
-          ),
-          'archive-dump' => array (
-            'structure-tables-key' => 'common',
-          ),
-          'rsync' => array (
-            'mode' => '{{ drush_rsync_mode }}',
-            'exclude-paths' => '{{ drush_rsync_excludes }}',
-          ),
+      ),
+      'command-specific' => array (
+        'sql-dump' => array (
+          'structure-tables-key' => 'common',
+          'gzip' => '1',
+          {% if item.drush_structure_tables|default(drush_structure_tables) -%}
+          'structure-tables-list' => '{{ item.drush_structure_tables|default(drush_structure_tables)|join(",") }}',
+          {% endif -%}
         ),
-      );
+        'archive-dump' => array (
+          'structure-tables-key' => 'common',
+          {% if item.drush_structure_tables|default(drush_structure_tables) -%}
+          'structure-tables-list' => '{{ item.drush_structure_tables|default(drush_structure_tables)|join(",") }}',
+          {% endif -%}
+        ),
+        'rsync' => array (
+          'mode' => '{{ drush_rsync_mode }}',
+          'exclude-paths' => '{{ drush_rsync_excludes }}',
+        ),
+      ),
+    );
