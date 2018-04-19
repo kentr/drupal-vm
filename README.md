@@ -1,8 +1,21 @@
 ![Drupal VM Logo](https://raw.githubusercontent.com/geerlingguy/drupal-vm/master/docs/images/drupal-vm-logo.png)
 
-[![Build Status](https://travis-ci.org/geerlingguy/drupal-vm.svg?branch=master)](https://travis-ci.org/geerlingguy/drupal-vm) [![Documentation Status](https://readthedocs.org/projects/drupal-vm/badge/?version=latest)](http://docs.drupalvm.com) [![Packagist](https://img.shields.io/packagist/v/geerlingguy/drupal-vm.svg)](https://packagist.org/packages/geerlingguy/drupal-vm) [![Docker Automated build](https://img.shields.io/docker/automated/geerlingguy/drupal-vm.svg?maxAge=2592000)](https://hub.docker.com/r/geerlingguy/drupal-vm/) [![](https://images.microbadger.com/badges/image/geerlingguy/drupal-vm.svg)](https://microbadger.com/images/geerlingguy/drupal-vm "Get your own image badge on microbadger.com")
-
 [Drupal VM](https://www.drupalvm.com/) is A VM for Drupal, built with Ansible.
+
+## This branch
+
+This branch adds:
+
+  - Support for WordPress
+  - Support for [WP-CLI](https://wp-cli.org)
+  - Presets for select DrupalVM and Vagrant configuration
+  - Additional provisioning tasks for setting up projects from preexisting codebases
+  - Additional support for the `vagrant-cachier` plugin
+  - Experimental support for AWS provisioning
+  - Experimental dev tools:
+    - `drush pull-data` command for quickly pulling database and files from the live site
+    - Visual regression testing with [Wraith](https://github.com/BBC-News/wraith/)
+    - Tasks for pulling database & files from live site during provisioning
 
 Drupal VM makes building Drupal development environments quick and easy, and introduces developers to the wonderful world of Drupal development on virtual machines or Docker containers (instead of crufty old MAMP/WAMP-based development).
 
