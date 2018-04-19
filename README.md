@@ -1,7 +1,3 @@
-![Drupal VM Logo](https://raw.githubusercontent.com/geerlingguy/drupal-vm/master/docs/images/drupal-vm-logo.png)
-
-[Drupal VM](https://www.drupalvm.com/) is A VM for Drupal, built with Ansible.
-
 ## This branch
 
 This branch adds:
@@ -16,6 +12,10 @@ This branch adds:
     - `drush pull-data` command for quickly pulling database and files from the live site
     - Visual regression testing with [Wraith](https://github.com/BBC-News/wraith/)
     - Tasks for pulling database & files from live site during provisioning
+    
+![Drupal VM Logo](https://raw.githubusercontent.com/geerlingguy/drupal-vm/master/docs/images/drupal-vm-logo.png)
+
+[Drupal VM](https://www.drupalvm.com/) is A VM for Drupal, built with Ansible.
 
 Drupal VM makes building Drupal development environments quick and easy, and introduces developers to the wonderful world of Drupal development on virtual machines or Docker containers (instead of crufty old MAMP/WAMP-based development).
 
