@@ -10,7 +10,7 @@
 
 - name: Ensure that installation directory exists.
   file:
-    path: "{{wp_install_dir}}"
+    path: "{{ wp_install_dir }}"
     state: directory
 
 - name: Deploy WordPress if configured.
@@ -30,19 +30,42 @@
   include: tasks/download-wordpress.yml
   when: install_wordpress | default(False) and not wordpress_site_exists
 
-- name: Fetch random salts for `wp-config.php`l
+- name: Fetch random salts for `wp-config.php`.
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
   register: 'wp_salt'
   creates: "{{ wp_install_dir }}/wp-config.php"
 
+- name: Block access to `debug.log`.
+  blockinfile:
+    path: "{{ wp_install_dir }}/wp-content/.htaccess"
+    create: yes
+    mode: u=r,g=r,o=
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Block access to `debug.log`"
+    block: |
+      <Files "debug.log">
+         deny from all
+      </Files>
+  when: wp_debug_log
+
+- name: Block access to `wp-config.php`.
+  blockinfile:
+    path: "{{ wp_install_dir }}/wp-content/.htaccess"
+    create: yes
+    mode: u=r,g=r,o=
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Block access to `wp-config.php`"
+    block: |
+      <Files "wp-config.php">
+         deny from all
+      </Files>
+
 - name: Copy `wp-config.php` file.
   template:
     src: wp-config.php.j2
-    dest: "{{wp_install_dir}}/wp-config.php"
+    dest: "{{ wp_install_dir }}/wp-config.php"
 
 - name: Change ownership of installation directory.
   file:
-    path: "{{wp_install_dir}}"
+    path: "{{ wp_install_dir }}"
     owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
     group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_group) }}"
     state: directory
