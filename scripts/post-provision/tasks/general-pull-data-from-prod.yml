@@ -75,6 +75,7 @@
   when: _db_do_sync
 
 - name: Ensure SQL dump destination directory exists.
+  become: no
   file:
     path: "{{ db_local_dump_directory | default('/tmp') }}"
     state: directory
