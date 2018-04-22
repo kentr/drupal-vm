@@ -104,7 +104,11 @@
   become: no
   mysql_db:
     login_user: "{{ db_user }}"
-    login_password: "{{ db_password }}"
+    # `login_password` is omitted due to security concerns and
+    # problems importing gzipped dumpfile in some cases.
+    # Therefore, this task depends on the existence of a `.my.cnf`
+    # file in the Ansible user's home directory.
+    # See https://github.com/ansible/ansible/issues/20196
     name: "{{ db_name }}"
     state: import
     # '.gz' extension is handled automatically.
