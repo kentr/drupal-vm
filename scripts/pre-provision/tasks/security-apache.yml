@@ -1,0 +1,15 @@
+---
+
+- name: Generate Apache password file for admin tools.
+  command: >
+    htpasswd -cbB {{ security_admin_tools_apache_passwd_file }}
+    admin
+    {{ lookup('password', playbook_dir + '/../' + random_passwords_dir | default('') + 'pwd_http_admin_tools' length=24 chars=ascii_letters,digits,hexdigits) }}
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
+
+- name: Add Apache authentication to admin tools.
+  set_fact:
+    apache_vhosts_extra_parameters_admin_tools: |
+      {{ apache_vhosts_extra_parameters_admin_tools | default('') }}
+      {{ apache_vhosts_extra_parameter_admin_tools_auth }}
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
