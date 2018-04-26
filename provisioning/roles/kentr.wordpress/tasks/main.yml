@@ -1,8 +1,10 @@
 ---
-- name: Register information about the /vagrant directory.
+- name: Register information about the `wp_install_dir` directory.
   stat:
-    path: /vagrant
-  register: vagrant_directory
+    path: "{{ wp_install_dir }}"
+    get_checksum: no
+
+  register: wp_install_dir_info
 
 - name: Create or restore site database.
   include: mysql.yml
@@ -66,10 +68,15 @@
 - name: Change ownership of installation directory.
   file:
     path: "{{ wp_install_dir }}"
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_group) }}"
+    owner: "{{ wp_core_owner }}"
+    group: "{{ wp_core_group }}"
     state: directory
     recurse: yes
+  # If `group_name` == "vagrant_group", we assume this an NFS or SSHFS mount
+  # under DrupalVM.
+  # See drupalvm.www/tasks/main.yml
+  # TODO: Correct this to be independent of DrupalVM.
+  when: wp_install_dir_info.stat.gr_name != 'vagrant_group'
 
 - name: Install WordPress site if configured.
   include: tasks/install-site.yml
