@@ -16,6 +16,11 @@
 #
 # See config.yml for more information.
 
+# Install Wraith itself.  Assumes that dependencies are already installed.
+- include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
+  become: no
+  when: wraith_testing_framework.install | default(False) or wraith_install | default(False)
+
 - name: Check for existing wraith installation.
   find:
     paths: "{{ wraith_testing_framework.install_dir }}"

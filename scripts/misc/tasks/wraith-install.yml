@@ -1,4 +1,6 @@
 ---
+# Installs BBC Wraith for visual regression testing.
+# See https://github.com/BBC-News/wraith/
 
 - name: Install imagemagick.
   become: Yes
@@ -6,11 +8,14 @@
     name: imagemagick
     state: present
 
-- name: Install configured gems.
-  gem: "name={{ item }} state=present"
-  with_items:
-    - wraith
-  when: wraith_testing_framework.install | default(False)
+# Nokogiri (wraith dependency) requires zlib.
+# See https://github.com/flapjack/omnibus-flapjack/issues/72#issuecomment-73689368
+- name: Install `zlib1g-dev`.
+  become: Yes
+  package:
+    name: zlib1g-dev
+    state: present
+  when: ansible_os_family == 'Debian'
 
 - name: Check gems path.
   command: ruby -rubygems -e 'puts Gem.user_dir'
@@ -23,13 +28,39 @@
     gems_path: "{{ gems_path_check.stdout }}"
   when: gems_path is undefined
 
-# Add gems path to .bashrc for convenience when testing.
-- name: Add gems path to .bashrc
+# Add npm and gem executables to $PATH.
+# See https://help.ubuntu.com/community/EnvironmentVariables
+# In spite of `geerlingguy.ruby` adding the gems path to `/etc/profile.d`,
+# it wasn't working correctly.
+- name: Add gems path to `.profile`.
   blockinfile:
-    path: ~/.bashrc
+    path: ~/.profile
     backup: True
     insertafter: EOF
     content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path }}/bin:$PATH"
+
+- name: Install configured gems.
+  gem: "name={{ item }} state=present"
+  with_items:
+    - wraith
+  register: wraith_install_result
+
+- name: Get wraith gem directory for patch.
+  command: "find {{ gems_path }} -name wraith-* -type d"
+  register: wraith_gem_dir_check
+
+- name: Set wraith gem directory for patch.
+  set_fact:
+    wraith_gem_dir: "{{ wraith_gem_dir_check.stdout }}"
+
+- name: Apply wraith patches.
+  patch:
+    backup: yes
+    basedir: "{{ wraith_gem_dir }}"
+    strip: 1
+    src: "{{ item }}"
+  with_fileglob:
+    - "{{ playbook_dir }}/../scripts/misc/patches/wraith/*.*"
 
 - name: Add Wraith npm dependencies.
   npm:
@@ -45,4 +76,3 @@
   with_items:
     - name: phantomjs
     - name: casperjs
-  when: wraith_testing_framework.install | default(False)
