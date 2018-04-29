@@ -307,6 +307,7 @@ apache_vhosts:
           Order allow,deny
           Allow from all
       </Location>
+      {{ apache_vhosts_extra_parameters_redirect_ssl }}
 
 # Copy all `apache_vhosts` to `apache_vhosts_ssl` for SSL versions.
 apache_vhosts_ssl: "{{ apache_vhosts }}"
