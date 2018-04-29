@@ -287,8 +287,37 @@ apache_vhosts:
     certificate_key_file: "{{ ssl_certificate_key_file }}"
     extra_parameters: "{{ apache_vhosts_extra_parameters_admin_tools }}"
 
+  # Special vhost that's only a proxy for mailhog.
+  - servername: "mailhog.{{ vagrant_hostname }}"
+    # DocumentRoot isn't required for a proxy, but omitting this causes the
+    # Apache role to choke.
+    documentroot: "{{ web_app_web_root }}"
+    certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+    certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
+    extra_parameters: |
+      ProxyRequests Off
+      <Proxy *>
+          Order deny,allow
+          Allow from all
+      </Proxy>
+
+      ProxyPass / http://127.0.0.1:8025/
+      ProxyPassReverse / http://127.0.0.1:8025/
+      <Location />
+          Order allow,deny
+          Allow from all
+      </Location>
+
 # Copy all `apache_vhosts` to `apache_vhosts_ssl` for SSL versions.
 apache_vhosts_ssl: "{{ apache_vhosts }}"
+
+apache_mods_enabled:
+  - expires.load
+  - ssl.load
+  - rewrite.load
+  - proxy.load
+  - proxy_fcgi.load
+  - proxy_http.load
 
 # If a file named "config.php{{ php_version }}.yml" exists in the config
 # directory, it will be included automatically and override the variables in
