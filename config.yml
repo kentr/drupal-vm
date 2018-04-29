@@ -239,7 +239,7 @@ apache_vhosts_extra_parameters_redirect_ssl: |
 security_protect_admin_tools: False
 
 # File path for Apache Basic Auth password file.
-security_admin_tools_apache_passwd_file: '/etc/apache2/.htpasswd'
+security_admin_tools_apache_passwd_file: "{{ apache_conf_path }}/.htpasswd"
 
 # Apache vhost extra parameters to add Basic Auth protection for admin tools.
 apache_vhosts_extra_parameter_admin_tools_auth: |
