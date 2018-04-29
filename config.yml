@@ -255,6 +255,7 @@ apache_vhosts_extra_parameter_admin_tools_auth: |
 apache_vhosts_extra_parameters_admin_tools: |
   {{ apache_vhosts_extra_parameters_redirect_ssl }}
   {{ apache_vhosts_extra_parameters_global | default('') }}
+  {{ apache_vhosts_extra_parameter_admin_tools_auth }}
 
 apache_vhosts:
   - servername: "{{ vagrant_hostname }}"
