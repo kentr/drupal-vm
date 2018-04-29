@@ -217,9 +217,6 @@ drupalvm_webserver_user: "{{ vagrant_user }}"
 # multisite deployments, you can point multiple servernames at one documentroot.
 # View the geerlingguy.apache Ansible Role README for more options.
 
-# Remove the default Vhost installed by Apache on Debian.
-apache_remove_default_vhost: True
-
 # Ubuntu Snakeoil Certificates
 ssl_certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
 ssl_certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
