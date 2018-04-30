@@ -290,6 +290,10 @@ php_memcached_package: "php{{ php_version }}-memcached"
 # Enable APCu for CLI so that drush can enable the apc module and clear caches.
 php_apc_enable_cli: 1
 
+# Enable all errors.
+# See https://secure.php.net/manual/en/migrating5.errorrep.php
+php_error_reporting: "E_ALL | E_STRICT"
+
 # Should be valid version at https://github.com/drush-ops/drush.
 # This can be the the literal string HEAD, a branch name, a tag name.
 # See http://docs.ansible.com/ansible/git_module.html#options.
