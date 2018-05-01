@@ -11,6 +11,7 @@
     path: "/root/php{{ php_version }}"
   register: php_workspace_directory
   ignore_errors: true
+  tags: ['php', 'xdebug']
 
 - name: Ensure PHP version -specific workspace directory exists.
   file:
