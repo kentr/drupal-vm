@@ -1,0 +1,17 @@
+---
+
+- name: DEBUG SORTED
+  debug:
+    msg: "{{ lookup('fileglob','./sorted/*.yml').split(',') }}"
+
+- name: DEBUG SORTED
+  debug:
+    msg: "{{ lookup('fileglob','./sorted/*.yml').split(',') | sort }}"
+
+- name: Include sorted post-provision tasks.
+  include_tasks: "{{ outer_item_sorted }}"
+  loop_control:
+    loop_var: outer_item_sorted
+  with_list: "{{ lookup('fileglob','./sorted/*.yml').split(',') | sort }}"
+
+#   with_list: "{{ lookup('fileglob','./sorted/_*.yml') | sorted }}"
