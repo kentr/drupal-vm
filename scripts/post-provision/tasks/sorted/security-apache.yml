@@ -25,10 +25,6 @@
   tags:
     - webserver
 
-- name: DEBUG apache_vhosts_ssl
-  debug:
-    msg: "{{ apache_vhosts_ssl }}"
-
 - name: Run Apache role after changing vhost extra parameters.
   include_role:
     name: geerlingguy.apache
