@@ -232,10 +232,28 @@ apache_vhosts_extra_parameters_redirect_ssl: |
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=302]
   </IfModule>
 
-# Protect admin tools with Apache Basic Authentication.
+# Protect admin tools with Apache Basic Authentication and firewall.
 security_protect_admin_tools: False
 
-# File path for Apache Basic Auth password file.
+# Local directory for storage of files that contain randomly-generated passwords.
+# These passwords are used for the MySQL user and the Apache Basic Authentication
+# on the admin / dev tools.
+# The value should be relative to the DrupalVM root directory (aka, the
+# "vagrant" directory).
+#
+# WARNING: This system is inherently insecure, as the passwords are stored in
+# plaintext on the host machine. It's only slightly better than using default
+# or hard-coded passwords.  These are just dev / test boxes, right?
+# Choose this directory carefully.  If you put it within the web project
+# directory, the passwords might be copied to the remote machine and be visible
+# in plaintext via the browser or by any process running on the remote machine.
+#
+# For more information about how these passwords are generated, see:
+# https://docs.ansible.com/ansible/2.5/plugins/lookup/password.html
+random_passwords_dir: 'ansible_random_passwords'
+
+# File path for generic Apache Basic Auth password file on the remote machine.
+# The password in this file will be bcrypted.
 security_admin_tools_apache_passwd_file: "{{ apache_conf_path }}/.htpasswd"
 
 # Apache vhost extra parameters to add Basic Auth protection for admin tools.
@@ -249,10 +267,10 @@ apache_vhosts_extra_parameter_admin_tools_auth: |
   </Location>
 
 # Full Apache vhost extra parameters for admin tools vhosts.
+# Note: This may be modified by tasks.
 apache_vhosts_extra_parameters_admin_tools: |
   {{ apache_vhosts_extra_parameters_redirect_ssl }}
   {{ apache_vhosts_extra_parameters_global }}
-  {{ apache_vhosts_extra_parameter_admin_tools_auth }}
 
 apache_vhosts:
   - servername: "{{ vagrant_hostname }}"
@@ -303,8 +321,7 @@ apache_vhosts:
 
       ProxyPass / http://127.0.0.1:8025/
       ProxyPassReverse / http://127.0.0.1:8025/
-      {{ apache_vhosts_extra_parameters_redirect_ssl }}
-      {{ apache_vhosts_extra_parameter_admin_tools_auth }}
+      {{ apache_vhosts_extra_parameters_admin_tools }}
 
 # Copy all `apache_vhosts` to `apache_vhosts_ssl` for SSL versions.
 apache_vhosts_ssl: "{{ apache_vhosts }}"
@@ -314,7 +331,7 @@ apache_mods_enabled:
   - ssl.load
   - rewrite.load
   - proxy.load
-  - proxy_fcgi.load
+#  - proxy_fcgi.load
   - proxy_http.load
 
 # If a file named "config.php{{ php_version }}.yml" exists in the config

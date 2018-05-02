@@ -21,5 +21,13 @@
       {{ apache_vhosts_extra_parameters_admin_tools | default('') }}
       {{ apache_vhosts_extra_parameter_admin_tools_auth }}
   when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
+  register: apache_add_admin_auth
+  tags:
+    - webserver
+
+- name: Run Apache role after changing vhost extra parameters.
+  include_role:
+    name: geerlingguy.apache
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
   tags:
     - webserver
