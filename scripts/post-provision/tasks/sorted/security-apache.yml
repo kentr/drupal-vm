@@ -1,0 +1,33 @@
+---
+- name: Set `random_passwords_dir`.
+  set_fact:
+    random_passwords_dir: 'ansible_random_passwords'
+  when: random_passwords_dir is not defined
+  tags:
+    - webserver
+
+- name: Generate Apache password file for admin tools.
+  command: >
+    htpasswd -cbB {{ security_admin_tools_apache_passwd_file | default(apache_conf_path + '/.htpasswd') }}
+    admin
+    {{ lookup('password', playbook_dir + '/../' + random_passwords_dir + '/pwd_http_admin_tools length=24 chars=ascii_letters,digits,hexdigits') }}
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
+  tags:
+    - webserver
+
+- name: Add Apache authentication to admin tools.
+  set_fact:
+    apache_vhosts_extra_parameters_admin_tools: |
+      {{ apache_vhosts_extra_parameters_admin_tools | default('') }}
+      {{ apache_vhosts_extra_parameter_admin_tools_auth }}
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
+  register: apache_add_admin_auth
+  tags:
+    - webserver
+
+- name: Run Apache role after changing vhost extra parameters.
+  include_role:
+    name: geerlingguy.apache
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'
+  tags:
+    - webserver
