@@ -5,6 +5,8 @@
   include_role:
     name: mychiara.wp-cli
   when: project_type == "wordpress" or "wp-cli" in installed_extras
+  tags:
+    - wordpress
 
 # Call the existing `kentr.wordpress` role with pre-existing values
 # for `wp_install` or `wp_deploy`.
@@ -12,3 +14,5 @@
   include_role:
     name: kentr.wordpress
   when: project_type == "wordpress"
+  tags:
+    - wordpress

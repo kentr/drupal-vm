@@ -92,6 +92,7 @@
 						"Y" : 8
 					},
 					"IP"       : 12,
+					"Module"   :  9,
 					"Log"      : 14,
 					"Severity" : 10,
 					"Referer"  : 16
@@ -104,7 +105,8 @@
 					"Referer"  : "link"
 				},
 				"exclude": {
-					"Log": ["\/PHP Stack trace:\/", "\/PHP *[0-9]*\\. \/"]
+					"Log": ["\/PHP Stack trace:\/", "\/PHP *[0-9]*\\. \/"],
+					"Module": ["\/php.*\/"]
 				}
 			}
 		},
