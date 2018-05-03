@@ -251,6 +251,7 @@ php_version: "5.6"
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
 # libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
 php_enable_php_fpm: False
+apache_vhost_php_fpm_parameters: ""
 
 php_install_recommends: no
 php_packages:
@@ -293,6 +294,8 @@ php_apc_enable_cli: 1
 # Enable all errors.
 # See https://secure.php.net/manual/en/migrating5.errorrep.php
 php_error_reporting: "E_ALL | E_STRICT"
+
+php_xdebug_version: 2.6.0
 
 # Should be valid version at https://github.com/drush-ops/drush.
 # This can be the the literal string HEAD, a branch name, a tag name.
