@@ -38,6 +38,7 @@
   become: no
   command: |
     wp
+    --skip-plugins
     --path='{{ web_app_web_root }}'
     search-replace
     '(?<!\.)(?<!@)(www\.)?{{ prod_domain }}'
