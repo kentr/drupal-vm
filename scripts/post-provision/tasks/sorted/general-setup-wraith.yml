@@ -167,7 +167,8 @@
   become: no
   copy:
     dest: "{{ wraith_paths_file }}"
-    # MySQL output currently replaces strings that matche the DB password with "********",
+    # MySQL output currently replaces strings in the query output that match
+    # the DB password with "********",
     # so we restore the strings before writing to the file.
     content: "{{ wraith_paths_query.msg | regex_replace('\\\\n', '\n') | replace('********', db_password ) }}"
   creates: "{{ wraith_paths_file }}"
