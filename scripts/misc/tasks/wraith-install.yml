@@ -2,6 +2,18 @@
 # Installs BBC Wraith for visual regression testing.
 # See https://github.com/BBC-News/wraith/
 
+- name: Add `ruby` and `nodejs` to `installed_extras`.
+  set_fact:
+    installed_extras: "{{ installed_extras | default([]) + ['nodejs', 'ruby'] }}"
+
+- name: Install `nodejs`.
+  include_role:
+    name: "geerlingguy.nodejs"
+
+- name: Install `ruby`.
+  include_role:
+    name: "geerlingguy.ruby"
+
 - name: Install imagemagick.
   become: Yes
   package:
