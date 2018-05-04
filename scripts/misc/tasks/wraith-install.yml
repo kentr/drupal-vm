@@ -7,10 +7,12 @@
     installed_extras: "{{ installed_extras | default([]) + ['nodejs', 'ruby'] }}"
 
 - name: Install `nodejs`.
+  become: Yes
   include_role:
     name: "geerlingguy.nodejs"
 
 - name: Install `ruby`.
+  become: Yes
   include_role:
     name: "geerlingguy.ruby"
 
