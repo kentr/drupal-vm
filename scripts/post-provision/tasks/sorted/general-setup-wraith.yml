@@ -182,20 +182,19 @@
     content: "{{ lookup('file', wraith_paths_file) }}"
   when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined and wraith_paths_file_result.changed
 
-- name: Symlink to wraith shots directory.
+- name: Create wraith shots directory.
   become: no
   file:
-    src: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots_local') }}"
-    path: "{{ wraith_testing_framework.web_dir | default(web_app_web_root + '/vr-shots') }}"
-    state: link
+    path: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots') }}"
+    state: directory
     force: yes
   when: wraith_testing_framework.install | default(False)
 
-- name: Symlink to wraith `gallery.html`.
+- name: Symlink from webroot to wraith shots directory.
   become: no
   file:
-    src: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots_local') }}/gallery.html"
-    path: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots_local') }}/index.html"
+    src: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots') }}"
+    path: "{{ wraith_testing_framework.web_dir | default(web_app_web_root + '/vr-shots') }}"
     state: link
     force: yes
   when: wraith_testing_framework.install | default(False)
