@@ -102,3 +102,5 @@
   version: master
   name: kentr.wordpress
 - src: mychiara.wp-cli
+- src: tersmitten.swapfile
+  version: 2.0.4
