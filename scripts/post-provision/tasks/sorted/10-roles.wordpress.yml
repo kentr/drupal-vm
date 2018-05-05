@@ -23,3 +23,5 @@
   vars:
     installations: "{{ instances }}"
   when: (project_type == "wordpress" or "wp-cli" in installed_extras) and wp_setup_wp_cli | default(False)
+  tags:
+    - wordpress
