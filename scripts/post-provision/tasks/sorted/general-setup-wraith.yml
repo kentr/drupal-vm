@@ -199,3 +199,5 @@
     state: link
     force: yes
   when: wraith_testing_framework.install | default(False)
+  tags:
+    - wraith-install
