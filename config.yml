@@ -605,3 +605,9 @@ vagrant_plugins:
   - name: vagrant-vbguest
   - name: vagrant-hostsupdater
   - name: vagrant-cachier
+
+# Add swap to the server? (Debian only)
+# Defaults to `False`
+swapfile_add: False
+# Size of swapfile.
+swapfile_size: 512K
