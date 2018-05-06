@@ -12,6 +12,7 @@
   command: drush init -y
   args:
     creates: ~/.drush/drush.bashrc
+    chdir: "{{ drupal_core_path }}"
 
 - name: Enable `structure-tables-key, common`.
   become: no
@@ -52,5 +53,5 @@
     state: directory
   when: drush_9_or_higher
 
-- include: setup-one-site.yml
+- include_tasks: setup-one-site.yml
   with_items: "{{ installations }}"
