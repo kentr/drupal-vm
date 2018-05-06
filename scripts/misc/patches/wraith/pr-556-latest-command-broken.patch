@@ -1,0 +1,24 @@
+From a2cc00bfe36f81f88f2b7958f8df7dbfcd6a2b84 Mon Sep 17 00:00:00 2001
+From: Ernesto Buenrostro <neto.buenrostro@gmail.com>
+Date: Tue, 23 Jan 2018 00:06:14 -0800
+Subject: [PATCH] The 'latest' command is broken
+
+The ``latest`` command is trying to save the images to a non existing directory.
+
+It is necessary to create the directory structure before start saving the images.
+---
+ lib/wraith/cli.rb | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/lib/wraith/cli.rb b/lib/wraith/cli.rb
+index 5c74452..844faf5 100644
+--- a/lib/wraith/cli.rb
++++ b/lib/wraith/cli.rb
+@@ -155,6 +155,7 @@ def latest(config)
+     within_acceptable_limits do
+       logger.info Wraith::Validate.new(config).validate("latest")
+       reset_shots(config)
++      setup_folders(config)
+       save_images(config, true)
+       copy_base_images(config)
+       crop_images(config)
