@@ -1,0 +1,6 @@
+---
+
+- name: DEBUG Fail
+  fail:
+    msg: "Stopping as requested"
+  when: true or lets_encrypt_domains is defined
