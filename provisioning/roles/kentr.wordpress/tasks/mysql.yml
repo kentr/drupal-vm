@@ -5,7 +5,7 @@
     name={{ wp_db_name }}
     state=present
     login_host={{ wp_db_host }}
-    login_user={{ wp_db_user}}
+    login_user={{ wp_db_user }}
     login_password={{ wp_db_password }}
   register: wp_mysql_db_create
 
@@ -21,7 +21,7 @@
     state=import
     target=/tmp/{{ wp_site_name }}.sql.gz
     login_host={{ wp_db_host }}
-    login_user={{ wp_db_user}}
+    login_user={{ wp_db_user }}
     login_password={{ wp_db_password }}
   when: wp_mysql_site_restore_saved_db|bool
 

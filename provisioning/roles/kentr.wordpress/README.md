@@ -36,11 +36,14 @@ wp_debug: false
 wp_debug_log: true
 wp_debug_display: false
 
+wp_add_siteurl_to_wp_config: False
+
 wp_install_site: False
 wp_admin_user: 'admin'
 wp_admin_password: ''
 wp_admin_email: ''
 wp_site_title: 'My Great WordPress Site'
+wp_siteurl: undefined
 
 wp_fs_method: 'direct'
 wp_lang: ''
