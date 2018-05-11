@@ -177,7 +177,23 @@
     - pull-data
 
 # TODO: Fix this hack.  Should be a handler or something.
-- name: Run `wp search-replace`
+# Replace cases where the protocol is included and is different
+# from the prod URI.
+- name: Run `wp search-replace` on full URIs.
+  become: no
+  command: |
+    wp
+    --skip-plugins
+    --path='{{ web_app_web_root }}'
+    search-replace
+    '{{ prod_uri }}'
+    '{{ local_uri }}'
+    'wp_blogs' 'wp_*options' 'wp_*posts' 'wp_*postmeta' 'wp_domain_mapping'
+    --all-tables
+    --skip-columns=autoload,comment_status,guid,meta_key,option_name,path,ping_status,pinged,post_mime_type,post_name,post_password,post_status,post_type,to_ping
+  when: project_type == 'wordpress' and db_updated.changed | default(False) and local_uri is defined and prod_uri is defined
+
+- name: Run `wp search-replace` on domains only.
   become: no
   command: |
     wp
