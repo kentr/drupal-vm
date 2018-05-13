@@ -1,34 +1,10 @@
 ---
 
-- name: Set `temporary_document_root`.
-  set_fact:
-    temporary_document_root: "{{ (apache_vhosts | selectattr('servername', 'equalto', local_domain) | list)[0]['documentroot'] }}"
-
-- name: Ensure `temporary_document_root` exists.
-  file:
-    path: "{{ temporary_document_root }}"
-    state: directory
-    mode: 0755
-  become: no
-
-- name: Add temporary `index.html`.
-  lineinfile:
-    path: "{{ temporary_document_root }}/index.html"
-    create: yes
-    mode: 0644
-    line: 'It works!'
-    state: present
-  become: no
-
-- name: Set temporary Apache vhosts.
-  set_fact:
-    lets_encrypt_vhosts: "{{ lets_encrypt_vhosts | default([]) + [{'servername': item.servername, 'documentroot': temporary_document_root, 'certificate_file': item.certificate_file, 'certificate_key_file': item.certificate_key_file}] }}"
-  with_items: "{{ apache_vhosts }}"
-
 - include_role:
     name: drupalvm.hostname
   when: hostname_configure
 
+# Run firewall and security roles here to get them into place earlier.
 - include_role:
     name: geerlingguy.firewall
   when: firewall_enabled
@@ -37,9 +13,22 @@
     name: geerlingguy.security
   when: extra_security_enabled
 
-- include_role:
-    name: geerlingguy.apache
+- name: Set `lets_encrypt_domains`.
+  set_fact:
+    lets_encrypt_domains: >
+      {{ lets_encrypt_domains | default([]) +
+      [
+        (item.servername | ipaddr) | ternary(item.serveralias, item.servername)
+      ] }}
+  with_items: "{{ apache_vhosts }}"
+
+- name: Include certbot role.
+  include_role:
+    name: geerlingguy.certbot
   vars:
-    apache_vhosts: "{{ lets_encrypt_vhosts }}"
-    apache_vhosts_ssl: "{{ lets_encrypt_vhosts }}"
-  when: drupalvm_webserver == 'apache'
+    certbot_certs: >
+      {{ [
+        {
+          'domains': lets_encrypt_domains
+        }
+      ] }}
