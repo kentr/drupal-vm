@@ -1,13 +1,13 @@
 ---
 
-- include_role:
-    name: drupalvm.hostname
-  when: hostname_configure
+#- include_role:
+#    name: drupalvm.hostname
+#  when: hostname_configure
 
 # Run firewall and security roles here to get them into place earlier.
-- include_role:
-    name: geerlingguy.firewall
-  when: firewall_enabled
+#- include_role:
+#    name: geerlingguy.firewall
+#  when: firewall_enabled
 
 - include_role:
     name: geerlingguy.security
@@ -21,6 +21,13 @@
         (item.servername | ipaddr) | ternary(item.serveralias, item.servername)
       ] }}
   with_items: "{{ apache_vhosts }}"
+
+- name: Set `certbot_create_standalone_stop_services`.
+  debug:
+    msg: >
+      {{ certbot_create_standalone_stop_services | default ([]) + [
+        apache_service | default(Omit)
+      ] }}
 
 - name: Include certbot role.
   include_role:
