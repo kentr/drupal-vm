@@ -59,6 +59,7 @@
             'documentroot': item.documentroot,
             'certificate_file': '/etc/letsencrypt/live/' + (lets_encrypt_domains | first) + '/cert.pem',
             'certificate_key_file': '/etc/letsencrypt/live/' + (lets_encrypt_domains | first) + '/privkey.pem',
+            'certificate_chain_file': '/etc/letsencrypt/live/' + (lets_encrypt_domains | first) + '/chain.pem',
             'extra_parameters': item.extra_parameters | default('')
           }
         ]
