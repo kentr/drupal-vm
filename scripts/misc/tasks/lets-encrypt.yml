@@ -1,18 +1,5 @@
 ---
 
-#- include_role:
-#    name: drupalvm.hostname
-#  when: hostname_configure
-
-# Run firewall and security roles here to get them into place earlier.
-#- include_role:
-#    name: geerlingguy.firewall
-#  when: firewall_enabled
-
-- include_role:
-    name: geerlingguy.security
-  when: extra_security_enabled
-
 - name: Set `lets_encrypt_domains`.
   set_fact:
     lets_encrypt_domains: >
@@ -22,12 +9,24 @@
       ] }}
   with_items: "{{ apache_vhosts }}"
 
-- name: Set `certbot_create_standalone_stop_services`.
-  debug:
-    msg: >
-      {{ certbot_create_standalone_stop_services | default ([]) + [
-        apache_service | default(Omit)
-      ] }}
+# Note: `apache_service` is defined in `geerlingguy.apache`.
+- name: Add Apache to `certbot_create_standalone_stop_services`.
+  set_fact:
+    certbot_create_standalone_stop_services: >
+      {{
+        certbot_create_standalone_stop_services | default ([])
+        | union([ apache_service | default('apache2') ])
+      }}
+  when: drupalvm_webserver == 'apache'
+
+- name: Add Nginx to `certbot_create_standalone_stop_services`.
+  set_fact:
+    certbot_create_standalone_stop_services: >
+      {{
+        certbot_create_standalone_stop_services | default ([])
+        | union([ 'nginx' ])
+      }}
+  when: drupalvm_webserver == 'nginx'
 
 - name: Include certbot role.
   include_role:
@@ -39,3 +38,38 @@
           'domains': lets_encrypt_domains
         }
       ] }}
+
+# Initialized to empty list to ensure that next task is starting from
+# clean slate
+- name: Intialize `lets_encrypt_vhosts`.
+  set_fact:
+    lets_encrypt_vhosts: []
+
+- name: Substitute Let's Encrypt certs into vhost definitions.
+  set_fact:
+    # The name of the cert file will be taken from the first item
+    # in `lets_encrypt_domains`.
+    lets_encrypt_vhosts: >
+      {{
+        lets_encrypt_vhosts | default([])
+        + [
+          {
+            'servername': item.servername,
+            'serveralias': item.serveralias | default(''),
+            'documentroot': item.documentroot,
+            'certificate_file': '/etc/letsencrypt/live/' + (lets_encrypt_domains | first) + '/cert.pem',
+            'certificate_key_file': '/etc/letsencrypt/live/' + (lets_encrypt_domains | first) + '/privkey.pem',
+            'extra_parameters': item.extra_parameters | default('')
+          }
+        ]
+      }}
+  with_items: "{{ apache_vhosts }}"
+
+# This should happen after the certbot role, so that the certs are in place
+- name: Reconfigure Apache with Let's Encrypt vhost definitions.
+  include_role:
+    name: geerlingguy.apache
+  vars:
+    apache_vhosts: "{{ lets_encrypt_vhosts }}"
+    apache_vhosts_ssl: "{{ lets_encrypt_vhosts }}"
+    apache_state: "stopped"
