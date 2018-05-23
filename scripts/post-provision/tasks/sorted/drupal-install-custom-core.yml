@@ -54,6 +54,15 @@
     force: No
   when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
 
+- name: Ensure config directory exists and is writable.
+  file:
+    path: "{{ drupal_config_directory }}"
+    state: directory
+    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
+    mode: 0774
+  when: project_type == 'drupal'
+
 - name: Ensure config sync directory.
   file:
     path: "{{ drupal_config_sync_directory }}"
