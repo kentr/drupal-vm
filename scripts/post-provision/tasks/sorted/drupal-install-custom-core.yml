@@ -68,7 +68,7 @@
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/default.settings.php.d{{ drupal_major_version }}.j2"
-    dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.php"
+    dest: "{{ drupal_core_path }}/{{ drupal_config_directory }}/settings.php"
     mode: 0440
     force: no
     owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
@@ -79,7 +79,7 @@
   template:
     # Src is relative to provisioning directory.
     src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
-    dest: "{{ drupal_core_path }}/sites/{{ config_site_directory | default('default') }}/settings.local.php"
+    dest: "{{ drupal_core_path }}/{{ drupal_config_directory }}/settings.local.php"
     mode: 0440
     owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupal_core_owner) }}"
     group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, drupalvm_webserver_user) }}"
