@@ -3,21 +3,31 @@
   stat:
     path: "{{ wp_install_dir }}"
     get_checksum: no
-
-  register: wp_install_dir_info
+  register: wp_install_dir_check
 
 - name: Create or restore site database.
-  include: mysql.yml
+  include_tasks: mysql.yml
   when: wp_mysql_enable
 
-- name: Ensure that installation directory exists.
-  file:
-    path: "{{ wp_install_dir }}"
-    state: directory
-
 - name: Deploy WordPress if configured.
-  include: tasks/deploy.yml
+  include_tasks: deploy.yml
   when: wp_deploy
+
+- name: Ensure that installation directory exists.
+  block:
+    # If it's a link, check target.
+    - stat:
+        path: "{{ wp_install_dir_check.stat.lnk_source }}"
+        get_checksum: no
+      when: wp_install_dir_check.stat.exists and wp_install_dir_check.stat.islnk
+      register: wp_install_dir_target_check
+      failed_when: wp_install_dir_target_check is defined and not wp_install_dir_target_check.stat.isdir
+    - file:
+        path: "{{ wp_install_dir }}"
+        state: directory
+        owner: "{{ wp_core_owner }}"
+        group: "{{ wp_core_group }}"
+      when: not wp_install_dir_check.stat.exists
 
 - name: Get information about index.php.
   stat:
@@ -29,13 +39,15 @@
     wordpress_site_exists: "{{ index_file.stat.exists|default(false) }}"
 
 - name: Download WordPress if configured.
-  include: tasks/download-wordpress.yml
+  include_tasks: download-wordpress.yml
   when: install_wordpress | default(False) and not wordpress_site_exists
 
 - name: Fetch random salts for `wp-config.php`.
   command: curl https://api.wordpress.org/secret-key/1.1/salt/
-  register: 'wp_salt'
   creates: "{{ wp_install_dir }}/wp-config.php"
+  # `no_log` is set to hide database credentials, salts, etc.
+  no_log: True
+  register: 'wp_salt'
 
 - name: Block access to `debug.log`.
   blockinfile:
@@ -61,27 +73,17 @@
       </Files>
 
 - name: Copy `wp-config.php` file.
+  # `no_log` is set to hide database credentials, salts, etc.
+  no_log: True
   template:
     src: wp-config.php.j2
     dest: "{{ wp_install_dir }}/wp-config.php"
-
-- name: Change ownership of installation directory.
-  file:
-    path: "{{ wp_install_dir }}"
-    owner: "{{ wp_core_owner }}"
-    group: "{{ wp_core_group }}"
-    state: directory
-    recurse: yes
-  # If `group_name` == "vagrant_group", we assume this an NFS or SSHFS mount
-  # under DrupalVM.
-  # See drupalvm.www/tasks/main.yml
-  # TODO: Correct this to be independent of DrupalVM.
-  when: wp_install_dir_info.stat.gr_name != 'vagrant_group'
+    mode: "ug=r,o="
 
 - name: Install WordPress site if configured.
-  include: tasks/install-site.yml
+  include_tasks: install-site.yml
   when: wp_install_site
 
 - name: Install dummy data if configured.
-  include: tasks/install-dummy-data.yml
+  include_tasks: install-dummy-data.yml
   when: wp_install_dummy_data
