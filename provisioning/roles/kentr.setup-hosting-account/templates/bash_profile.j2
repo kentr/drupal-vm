@@ -2,76 +2,7 @@
 # The section between "ANSIBLE MANAGED BLOCK" markers is managed automatically.
 # Changes to this section will be overwritten.
 ##########################################################################################
-source ~/.bashrc
-
-# LS colors
-export TERM="xterm-color"
-export CLICOLOR="true"
-export LSCOLORS='gxfxcxdxBxegedaBagaBad'
-
-export EDITOR=/bin/nano
-export SVN_EDITOR=vi
-
-#####################################
-# Aliases
-#####################################
-
-# -----------------------------------
-# Misc utilities
-
-alias ll='ls -lahF'
-alias grep='grep -I --color=auto'
-
-alias e=$EDITOR
-
-#####################################
-# Git stuff
-#####################################
-
-if [ -f /opt/local/share/git/git-prompt.sh ]
-  then
-  . /opt/local/share/git/git-prompt.sh
-  export PS1="\n\[\e]2;LOCAL\a\]\[\e[1;31m\]\u\[\e[m\]\[\e[0;34m\]@\h:\[\e[m\]\[\e[0;31m\]\w\[\e[m\] \n\$(__git_ps1 | sed -e 's/^[[:space:]]*//')\$ "
-fi
-
-alias 'g'='git'
-alias 'add'='git add'
-alias 'br'='git branch'
-alias 'checkout'='git checkout'
-alias 'cpick'='git cherry-pick -x -Xignore-space-change --no-commit'
-alias 'co'='git checkout'
-alias 'ci'='git commit'
-alias 'diff'='git diff --ignore-space-change'
-alias 'fetch'='git fetch'
-alias 'log'="git log --graph --pretty=format:'%Cred%h%Creset %C(cyan)%an%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative"
-alias 'merge'='git merge -Xignore-space-change'
-alias 'mergetool'='git mergetool'
-alias 'pull'='git pull'
-alias 'push'='git push'
-alias 'ppush'='git pull; git push origin HEAD'
-alias 'show'='git show'
-alias 'stash'='git stash'
-alias 'status'='git status'
-alias 'tag'='git tag'
-alias 'tagnow'='TAGNAME=$(date "+%Y%m%d-%H%M.$(whoami)") && git tag $TAGNAME && echo "Tag created: $TAGNAME"'
-alias 'gitroot'='cd "$(git rev-parse --show-toplevel)"'
-
-if [ -f /usr/local/share/git-core/contrib/completion/git-completion.bash ]
-  then
-  . /usr/local/share/git-core/contrib/completion/git-completion.bash
-
-  # complete -o default -o nospace -F _git_branch br
-  __git_complete br _git_branch
-  # complete -o default -o nospace -F _git_checkout co
-  __git_complete co _git_checkout
-  # complete -o default -o nospace -F _git_push push
-  __git_complete push _git_push
-  # complete -o default -o nospace -F _git_push pull
-  __git_complete pull _git_pull
-  # complete -o default -o nospace -F _git_merge merge
-  __git_complete merge _git_merge
-  # complete -o default -o nospace -F _git_fetch fetch
-  __git_complete fetch _git_fetch
-  # complete -o default -o nospace -F _git_log log
-  __git_complete log _git_log
+# Include .bashrc.
+if [ -f "$HOME/.bashrc" ] ; then
+  source $HOME/.bashrc
 fi
