@@ -104,6 +104,8 @@
 - src: mychiara.wp-cli
 - src: tersmitten.swapfile
   version: 2.0.4
+- src: geerlingguy.certbot
+  version: 3.0.0
 - src: https://github.com/kentr/ansible-role-setup-wp-cli.git
   scm: git
   name: kentr.setup-wp-cli
