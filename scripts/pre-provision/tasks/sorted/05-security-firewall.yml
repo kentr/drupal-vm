@@ -1,0 +1,8 @@
+---
+
+# Close MailHog port.
+# A later task will add an Apache reverse proxy for https://mailhog.*
+- name: Remove MailHog from open firewall ports.
+  set_fact:
+    firewall_allowed_tcp_ports: "{{ firewall_allowed_tcp_ports | difference(['8025']) }}"
+  when: security_protect_admin_tools | default(True) and drupalvm_webserver == 'apache'

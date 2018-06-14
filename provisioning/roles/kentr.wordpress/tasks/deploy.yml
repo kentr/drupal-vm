@@ -4,17 +4,24 @@
     path: "{{ wp_deploy_dir }}"
     state: directory
     mode: 0775
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group') | ternary(omit, wp_core_owner) }}"
+    owner: "{{ wp_core_owner }}"
+    group: "{{ wp_core_group }}"
 
 - name: Check out WordPress to the docroot.
   git:
-    repo: "{{ wp_deploy_repo }}"
-    version: "{{ wp_deploy_version }}"
-    update: "{{ wp_deploy_update }}"
-    force: yes
-    dest: "{{ wp_deploy_dir }}"
     accept_hostkey: "{{ wp_deploy_accept_hostkey }}"
-  register: wp_deploy_repo_updated
-  notify: clear opcache
+    depth: "{{ wp_deploy_clone_depth | default(omit) }}"
+    dest: "{{ wp_deploy_dir }}"
+    force: yes
+    repo: "{{ wp_deploy_repo }}"
+    update: "{{ wp_deploy_update }}"
+    version: "{{ wp_deploy_version }}"
+  # Add TMP directories to environment to work around
+  # https://github.com/ansible/ansible/issues/30064
   become: no
+  environment:
+    TMPDIR: "{{ ansible_env.HOME }}/.ansible/tmp"
+    TMP: "{{ ansible_env.HOME }}/.ansible/tmp"
+    TEMP: "{{ ansible_env.HOME }}/.ansible/tmp"
+  notify: clear opcache
+  register: wp_deploy_repo_updated

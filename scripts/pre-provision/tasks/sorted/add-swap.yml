@@ -1,0 +1,7 @@
+---
+# Adds swap space for Debian.
+# See: https://galaxy.ansible.com/tersmitten/swapfile/
+
+- include_role:
+    name: tersmitten.swapfile
+  when: swapfile_add | default(False) and ansible_os_family == 'Debian'

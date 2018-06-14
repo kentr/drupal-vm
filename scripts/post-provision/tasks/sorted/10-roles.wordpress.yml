@@ -5,10 +5,19 @@
   include_role:
     name: mychiara.wp-cli
   when: project_type == "wordpress" or "wp-cli" in installed_extras
+  tags:
+    - wordpress
 
 # Call the existing `kentr.wordpress` role with pre-existing values
 # for `wp_install` or `wp_deploy`.
 - name: Include `kentr.wordpress` role to setup WordPress.
   include_role:
     name: kentr.wordpress
+  vars:
+    wp_add_siteurl_to_wp_config: True
+    wp_mysql_db_create: false
+    wp_mysql_db_create_users: false
+    wp_siteurl: "{{ local_uri }}"
   when: project_type == "wordpress"
+  tags:
+    - wordpress

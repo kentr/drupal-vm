@@ -38,6 +38,10 @@ domain_name: client.org
 prod_domain: "{{ domain_name }}"
 stage_domain: "stage.{{ domain_name }}"
 local_domain: "local.{{ domain_name }}"
+
+local_uri: "http://{{ local_domain }}"
+prod_uri: "http://{{ prod_domain }}"
+
 vagrant_hostname: "{{ local_domain }}"
 
 # Username for the client account on the prod server.
@@ -90,19 +94,24 @@ drupal_deploy_repo: "{{ project_repo }}"
 drupal_deploy_force: "{{ web_app_deploy_force | default(False) }}"
 
 # Directory under "sites/" that holds settings.php, etc.
+# TODO: Rename this to `drupal_config_site_directory`.
 config_site_directory: "default"
+# Full path of Drupal site directory, relative to web root.
+# Most likely, this shouldn't be changed.
+# Change `config_site_directory` instead.
+drupal_config_directory: "sites/{{ config_site_directory }}"
 
 # Public / private files directories.  If your Drupal root directory is different from
 # that on prod, then you'll want to set this to match your local site to override the
 # values in the prod database.
 # These should match what is in your Drush alias file, if you have set a value there.
 # Public file directory is relative to web root.
-drupal_file_public_path: "sites/{{ config_site_directory }}/files"
+drupal_file_public_path: "{{ drupal_config_directory }}/files"
 # Private file path is absolute, since they may be outside the webroot.
 drupal_file_private_path: ""
 
 # Directory where contrib modules live, relative to site root.
-drupal_modules_contrib_path: "sites/all/modules"
+drupal_modules_contrib_path: "{{ drupal_config_directory }}/modules"
 
 # The default type for synced folders when `type` isn't specified in the config
 # for the individual folder.
@@ -206,40 +215,133 @@ extra_packages:
   - aptitude
   - "libapache2-mod-php{{ php_version }}"
 
+################################################################################
+# APACHE
+################################################################################
+
+# Use the standard user as Apache user for standard.
+drupalvm_webserver_user: "{{ vagrant_user }}"
+
 # Apache VirtualHosts. Add one for each site you are running inside the VM. For
 # multisite deployments, you can point multiple servernames at one documentroot.
 # View the geerlingguy.apache Ansible Role README for more options.
+
+# Ubuntu Snakeoil Certificates
+ssl_certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+ssl_certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
+
+# Apache vhost global extra parameters, applied to all vhosts.
+apache_vhosts_extra_parameters_global: ''
+
+# Apache vhost extra parameters to force redirect to https version.
+apache_vhosts_extra_parameters_redirect_ssl: |
+  <IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=302]
+  </IfModule>
+
+# Protect admin tools with Apache Basic Authentication and firewall.
+security_protect_admin_tools: False
+
+# Local directory for storage of files that contain randomly-generated passwords.
+# These passwords are used for the MySQL user and the Apache Basic Authentication
+# on the admin / dev tools.
+# The value should be relative to the DrupalVM root directory (aka, the
+# "vagrant" directory).
+#
+# WARNING: This system is inherently insecure, as the passwords are stored in
+# plaintext on the host machine. It's only slightly better than using default
+# or hard-coded passwords.  These are just dev / test boxes, right?
+# Choose this directory carefully.  If you put it within the web project
+# directory, the passwords might be copied to the remote machine and be visible
+# in plaintext via the browser or by any process running on the remote machine.
+#
+# For more information about how these passwords are generated, see:
+# https://docs.ansible.com/ansible/2.5/plugins/lookup/password.html
+random_passwords_dir: 'ansible_random_passwords'
+
+# File path for generic Apache Basic Auth password file on the remote machine.
+# The password in this file will be bcrypted.
+security_admin_tools_apache_passwd_file: "{{ apache_conf_path }}/.htpasswd"
+
+# Apache vhost extra parameters to add Basic Auth protection for admin tools.
+apache_vhosts_extra_parameter_admin_tools_auth: |
+  # Basic authentication.
+  <Location />
+      AuthType Basic
+      AuthName "Restricted Content"
+      AuthUserFile {{ security_admin_tools_apache_passwd_file }}
+      Require valid-user
+  </Location>
+
+# Full Apache vhost extra parameters for admin tools vhosts.
+# Note: This may be modified by tasks.
+apache_vhosts_extra_parameters_admin_tools: |
+  {{ apache_vhosts_extra_parameters_redirect_ssl }}
+  {{ apache_vhosts_extra_parameters_global }}
+
 apache_vhosts:
-  - servername: "{{ drupal_domain }}"
-    serveralias: "www.{{ drupal_domain }}"
-    documentroot: "{{ drupal_core_path }}"
-    extra_parameters: ''
+  - servername: "{{ vagrant_hostname }}"
+    serveralias: "www.{{ vagrant_hostname }}"
+    documentroot: "{{ web_app_web_root }}"
+    certificate_file: "{{ ssl_certificate_file }}"
+    certificate_key_file: "{{ ssl_certificate_key_file }}"
+    extra_parameters: "{{ apache_vhosts_extra_parameters_global }}"
 
   - servername: "adminer.{{ vagrant_hostname }}"
     documentroot: "{{ adminer_install_dir }}"
-    extra_parameters: ''
+    certificate_file: "{{ ssl_certificate_file }}"
+    certificate_key_file: "{{ ssl_certificate_key_file }}"
+    extra_parameters: "{{ apache_vhosts_extra_parameters_admin_tools }}"
 
   - servername: "xhprof.{{ vagrant_hostname }}"
     documentroot: "{{ php_xhprof_html_dir }}"
-    extra_parameters: ''
+    certificate_file: "{{ ssl_certificate_file }}"
+    certificate_key_file: "{{ ssl_certificate_key_file }}"
+    extra_parameters: "{{ apache_vhosts_extra_parameters_admin_tools }}"
 
   - servername: "pimpmylog.{{ vagrant_hostname }}"
     documentroot: "{{ pimpmylog_install_dir }}"
-    extra_parameters: ''
+    certificate_file: "{{ ssl_certificate_file }}"
+    certificate_key_file: "{{ ssl_certificate_key_file }}"
+    extra_parameters: "{{ apache_vhosts_extra_parameters_admin_tools }}"
 
   - servername: "{{ vagrant_ip }}"
     serveralias: "dashboard.{{ vagrant_hostname }}"
     documentroot: "{{ dashboard_install_dir }}"
-    extra_parameters: ''
+    certificate_file: "{{ ssl_certificate_file }}"
+    certificate_key_file: "{{ ssl_certificate_key_file }}"
+    extra_parameters: "{{ apache_vhosts_extra_parameters_admin_tools }}"
 
-apache_vhosts_ssl:
-  - servername: "{{ local_domain }}"
+  # Special vhost that's only a proxy for mailhog.
+  - servername: "mailhog.{{ vagrant_hostname }}"
+    # DocumentRoot isn't required for a proxy, but omitting this causes the
+    # Apache role to choke.
     documentroot: "{{ web_app_web_root }}"
     certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
     certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
-    extra_parameters: ''
+    extra_parameters: |
+      ProxyRequests Off
+      <Proxy *>
+          Order deny,allow
+          Allow from all
+      </Proxy>
 
-drupalvm_webserver_user: "{{ vagrant_user }}"
+      ProxyPass / http://127.0.0.1:8025/
+      ProxyPassReverse / http://127.0.0.1:8025/
+      {{ apache_vhosts_extra_parameters_admin_tools }}
+
+# Copy all `apache_vhosts` to `apache_vhosts_ssl` for SSL versions.
+apache_vhosts_ssl: "{{ apache_vhosts }}"
+
+apache_mods_enabled:
+  - expires.load
+  - ssl.load
+  - rewrite.load
+  - proxy.load
+#  - proxy_fcgi.load
+  - proxy_http.load
 
 # If a file named "config.php{{ php_version }}.yml" exists in the config
 # directory, it will be included automatically and override the variables in
@@ -289,6 +391,10 @@ php_memcached_package: "php{{ php_version }}-memcached"
 
 # Enable APCu for CLI so that drush can enable the apc module and clear caches.
 php_apc_enable_cli: 1
+
+# Enable all errors.
+# See https://secure.php.net/manual/en/migrating5.errorrep.php
+php_error_reporting: "E_ALL | E_STRICT"
 
 # Should be valid version at https://github.com/drush-ops/drush.
 # This can be the the literal string HEAD, a branch name, a tag name.
@@ -434,11 +540,11 @@ wp_table_prefix: "wp_"
 wp_fs_method: 'direct'
 wp_lang: ''
 
-
 wp_core_owner: "{{ drupalvm_user }}"
 
-# wp_mysql_site_restore_saved_db: True
-# wp_database_backup: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/db-restore.sql"
+# EXPERIMENTAL: Set up WP-CLI aliases locally and on remote?
+# Won't do much if project_type != 'wordpress'.
+wp_setup_wp_cli: True
 
 # Set `workspace` to take advantage of `vagrant-cachier`.
 workspace: /tmp/vagrant-cache/generic
@@ -508,3 +614,9 @@ vagrant_plugins:
   - name: vagrant-vbguest
   - name: vagrant-hostsupdater
   - name: vagrant-cachier
+
+# Add swap to the server? (Debian only)
+# Defaults to `False`
+swapfile_add: False
+# Size of swapfile.
+swapfile_size: 512K

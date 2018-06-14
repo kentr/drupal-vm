@@ -11,8 +11,14 @@ Assumes that the account exists.
 Role Variables
 --------------
 
-# Text for begin / end markers in ~/.bash_profile
+# Text for begin / end markers in `~/.bash_profile`
 bash_profile_marker_text: "ANSIBLE MANAGED BLOCK: Standard .bash_profile"
+
+# Text for begin / end markers in `~/.bashrc`
+bashrc_marker_text: "ANSIBLE MANAGED BLOCK: Standard .bashrc"
+
+# Default editor.
+env_editor: vim
 
 # Full path to git-core installation directory on server.
 git_core_dir: /usr/local/share/git-core
@@ -23,7 +29,7 @@ git_completion_path: "{{ git_core_dir }}/contrib/completion/git-completion.bash"
 
 # Full path to existing git-prompt.sh.
 # This will be used in `.bash_profile` to enable git prompt.
-git_prompt_dir: "{{ git_core_dir }}/contrib/completion/git-prompt.sh"
+git_prompt_path: "{{ git_core_dir }}/contrib/completion/git-prompt.sh"
 
 Dependencies
 ------------
