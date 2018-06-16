@@ -233,6 +233,9 @@ ssl_certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
 # Apache vhost global extra parameters, applied to all vhosts.
 apache_vhosts_extra_parameters_global: ''
 
+# Apache vhost extra parameters, applied to the primary project site vhost.
+apache_vhosts_extra_parameters_site: ''
+
 # Apache vhost extra parameters to force redirect to https version.
 apache_vhosts_extra_parameters_redirect_ssl: |
   <IfModule mod_rewrite.c>
@@ -287,7 +290,9 @@ apache_vhosts:
     documentroot: "{{ web_app_web_root }}"
     certificate_file: "{{ ssl_certificate_file }}"
     certificate_key_file: "{{ ssl_certificate_key_file }}"
-    extra_parameters: "{{ apache_vhosts_extra_parameters_global }}"
+    extra_parameters: |
+      {{ apache_vhosts_extra_parameters_global }}
+      {{ apache_vhosts_extra_parameters_site }}
 
   - servername: "adminer.{{ vagrant_hostname }}"
     documentroot: "{{ adminer_install_dir }}"
