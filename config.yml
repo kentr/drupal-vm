@@ -541,7 +541,7 @@ wp_db_password: "{{ db_password }}"
 wp_db_charset: "{{ db_charset }}"
 wp_db_collate: "{{ db_collate }}"
 # Prefix cannot be empty.
-wp_table_prefix: "wp_"
+wp_table_prefix: "{{ db_table_prefix | default('wp_') }}"
 wp_fs_method: 'direct'
 wp_lang: ''
 
