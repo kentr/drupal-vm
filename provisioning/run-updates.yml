@@ -29,102 +29,28 @@
 
 - hosts: all
   become: No
-  vars:
-    # Wraith requirement.  For simplicity, using default version of geerlingguy.ruby.
-    ruby_min_version: 2.3.0
-    npm_min_version: 3.10.10
-
-    # Set the version of Node.js to install ("0.10", "0.12", "4.x", "5.x", "6.x").
-    # Version numbers from Nodesource: https://github.com/nodesource/distributions
-    nodejs_version: "6.x"
-
-    # The user for whom the npm packages will be installed.
-    nodejs_install_npm_user: "{{ ansible_user }}"
-
-    # The directory for global installations.
-    npm_config_prefix: "~/.npm-global"
-
-    # Set to true to suppress the UID/GID switching when running package scripts. If set explicitly to false, then installing as a non-root user will fail.
-    npm_config_unsafe_perm: "true"
-
-    # The path of a package.json file used to install packages globally.
-    nodejs_package_json_path: ""
-
 
   vars_files:
     - vars/main.yml
     - ../default.config.yml
 
   pre_tasks:
-    - name: Include OS-specific variables.
-      include_vars: "{{ ansible_os_family }}.yml"
-
-    - name: Define config_dir.
-      set_fact:
-        config_dir: "{{ playbook_dir }}/.."
-      when: config_dir is not defined
+    - include: tasks/config.yml
       tags: ['always']
-
-    # config.yml is imported first b/c the PHP version switching wasn't working
-    # with all items in one list.
-    - include_vars: "{{ item }}"
-      with_fileglob:
-        - "{{ config_dir }}/config.yml"
-      tags: ['always']
-
-    - include_vars: "{{ item }}"
-      with_fileglob:
-        - "{{ config_dir }}/config.php{{ php_version }}.yml"
-        - "{{ config_dir }}/local.config.yml"
-        - "{{ config_dir }}/{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
-      tags: ['always']
-
-    - name: Get ruby version.
-      command: "ruby -e 'puts RUBY_VERSION'"
-      ignore_errors: True
-      register: ruby_current_version
-
-    - name: Set `ruby_install`.
-      set_fact:
-        ruby_install: "{{ ruby_current_version.failed | default(False) or ruby_current_version.stdout < ruby_min_version }}"
-
-    # TODO: proper check if npm is installed.
-    - name: Get npm version.
-      command: "npm -v"
-      ignore_errors: True
-      register: npm_current_version
-
-    - name: Set `npm_install`.
-      set_fact:
-        npm_install: "{{ npm_current_version.failed | default(False) or npm_current_version.stdout < npm_min_version }}"
 
   roles:
-
-    # Install Ruby for Wraith testing
-    - role: geerlingguy.ruby
-      ruby_install_from_source: true
-      workspace: /root
-      become: Yes
-      when: ruby_install | default(False) and wraith_testing_framework.install | default(False)
-
-    - role: geerlingguy.nodejs
-      become: Yes
-      when: npm_install and wraith_testing_framework.install | default(False)
-
-    # Deploy Drupal if necessary.
-    # Todo: Add git repo and clone variables.
-    - role: kentr.drupal
-      tags: ['drupal']
 
   tasks:
 
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/do-updates.yml"
 
-  - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
-    when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
+  - name: Run wraith smoke test.
+    block:
+      - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
+        when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
 
-  - include_tasks: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
-    when: drupal_updated | default(False) and wraith_testing_framework.install | default(False)
+      - include_tasks: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
+        when: drupal_updated | default(False) and wraith_testing_framework.install | default(False)
 
-  - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
-    when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
+      - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
+        when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
