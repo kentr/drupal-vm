@@ -42,6 +42,10 @@
 # ----------------------------------------------
 # REMOTE
 
+- name: Set `wp_all_aliases_remote`.
+  set_fact:
+    wp_all_aliases_remote: False
+
 - name: Insert remote WP-CLI alias declarations.
   become: no
   blockinfile:

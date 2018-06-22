@@ -1,7 +1,7 @@
 '@{{ item.wp_alias_prefix | default(wp_alias_prefix) }}.{{ item.env }}':
   {#
     SSH information for the alias is included unless:
-      - wp_all_aliases_remote is not True AND
+      - wp_all_aliases_remote != True AND
       - item.wp_alias_is_local_on_remote_node == True
       - item.env in ['prod', 'stage']
 
