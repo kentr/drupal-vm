@@ -1,17 +1,19 @@
 ---
 
-# EXPERIMENTAL Run Drupal update process for drupal-composer projects
+# EXPERIMENTAL Run Drupal / WordPress update process for projects
 # within Drupal-VM environment.
 #   - Performs code update.
-#   - Calls kentr.drupal post-update tasks.
+#   - Calls kentr.drupal post-update tasks (Drupal-only).
 #   - Installs Wraith (with dependencies).
 #   - Sets up project-specific Wraith configuration.
 #   - Runs Wraith smoke test on updated code.
 #
 # Prerequisites:
 #   - VM is already set up to run Drupal.
-#   - Drupal code exists.
-#   - The repo containing the Drupal code has a clean working directory (no local modifications).
+#   - Drupal / WordPress code exists.
+#   - The repo containing the Drupal code has a clean working directory
+#     (no local modifications).
+#   - There is no local branch named `updates`.
 #   - Drupal-VM configuration files are present and correct.
 #
 # Usage:
@@ -24,8 +26,9 @@
 #     as for `drush pm-updatestatus`.  Default = '' (update all projects).
 #
 # TODO:
-#   - Support non-composer projects.
-#   - Move Wraith installation to role.
+#   - Move playbook to `scripts` directory.
+#   - Support non-composer Drupal projects.
+#   - Move Wraith tasks to role.
 
 - hosts: all
   become: No
