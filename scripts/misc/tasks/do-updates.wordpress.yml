@@ -30,3 +30,16 @@
         chdir: "{{ web_app_web_root }}"
       register: wp_theme_update_results
   become: No
+
+- name: WordPress core updates.
+  block:
+    - command: >
+        wp
+        --skip-plugins
+        --skip-themes
+        --skip-packages
+        core update
+      args:
+        chdir: "{{ web_app_web_root }}"
+      register: wp_theme_update_results
+  become: No
