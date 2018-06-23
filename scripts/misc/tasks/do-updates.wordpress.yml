@@ -15,3 +15,18 @@
         chdir: "{{ web_app_web_root }}"
       register: wp_plugin_update_results
   become: No
+
+- name: WordPress theme updates.
+  block:
+    - command: >
+        wp
+        --skip-plugins
+        --skip-themes
+        --skip-packages
+        theme update
+        --all
+        --format=json
+      args:
+        chdir: "{{ web_app_web_root }}"
+      register: wp_theme_update_results
+  become: No
