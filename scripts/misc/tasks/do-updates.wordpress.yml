@@ -14,3 +14,4 @@
       args:
         chdir: "{{ web_app_web_root }}"
       register: wp_plugin_update_results
+  become: No
