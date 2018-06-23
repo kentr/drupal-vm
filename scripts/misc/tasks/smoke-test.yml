@@ -1,0 +1,14 @@
+---
+# Runs pre-configured visual regression test with Wraith.
+# Attempts to install Wraith if it is not installed.
+
+- name: Run wraith smoke test.
+  block:
+    - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
+      when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
+
+    - include_tasks: "{{ playbook_dir }}/../scripts/post-provision/tasks/general-setup-wraith.yml"
+      when: drupal_updated | default(False) and wraith_testing_framework.install | default(False)
+
+    - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-smoke-test.yml"
+      when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
