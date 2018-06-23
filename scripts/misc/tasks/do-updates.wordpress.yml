@@ -3,6 +3,12 @@
 
 - name: WordPress plugin updates.
   block:
+    # Plugin updates are done as a loop because in some cases the `--all`
+    # option is not actually updating all plugins in the first pass.
+    # One example of this is Formidable Forms Pro.  In repeated cases,
+    # the Formidable Forms Pro update did not appear until the free version
+    # of Formidable Forms was updated.
+    # @see https://community.formidableforms.com/help-desk/formidable-pro-not-appearing-in-updates-available/
     - command: >
         wp
         --skip-plugins
@@ -14,6 +20,9 @@
       args:
         chdir: "{{ web_app_web_root }}"
       register: wp_plugin_update_results
+      until: wp_plugin_update_results.stdout_lines | length == 0
+      retries: 5
+      delay: 5
   become: No
 
 - name: WordPress theme updates.
