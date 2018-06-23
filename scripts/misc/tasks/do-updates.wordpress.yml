@@ -1,8 +1,6 @@
 ---
 # Tasks to perform WordPress code updates.
 
-# git checkout -f HEAD -- public_html/wp-content/plugins; git clean -df -- public_html/wp-content/plugins
-
 - name: WordPress plugin updates.
   block:
     - command: >
