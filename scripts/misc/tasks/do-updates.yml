@@ -1,7 +1,7 @@
 # Tasks to perform code updates.
 
 - name: Create `updates` Git branch if necessary.
-  command: "git checkout --track -B updates origin/master"
+  command: "git checkout --no-track -b updates origin/master"
   args:
     chdir: "{{ web_app_project_root }}"
 
