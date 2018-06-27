@@ -1,0 +1,11 @@
+---
+
+- name: Add ruby to `installed_extras`.
+  set_fact:
+    installed_extras: "{{ installed_extras | default([]) + ['ruby'] }}"
+  when: dev_dependencies is defined and dev_dependencies.ruby_gems is defined
+
+- name: Add ruby gems from `dev_dependencies`.
+  set_fact:
+    ruby_install_gems: "{{ (ruby_install_gems | default([])) + dev_dependencies.ruby_gems }}"
+  when: dev_dependencies is defined and dev_dependencies.ruby_gems is defined

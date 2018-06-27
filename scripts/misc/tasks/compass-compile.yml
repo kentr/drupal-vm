@@ -1,0 +1,23 @@
+---
+# Simple task file to run `compass compile` command.
+
+- name: Check gems path.
+  command: ruby -rubygems -e 'puts Gem.user_dir'
+  become: No
+  register: gems_path_check
+  when: gems_path is undefined
+
+- name: Set gems path.
+  set_fact:
+    gems_path: "{{ gems_path_check.stdout }}"
+  when: gems_path is undefined
+
+- name: Run `compass compile`.
+  command: "compass compile"
+  args:
+    chdir: "{{ task_chdir | default(omit) }}"
+  become: No
+  environment:
+    PATH: "{{ gems_path }}/bin:{{ ansible_env.PATH }}:$PATH"
+  register: cmd_compass_compile_results
+  changed_when: cmd_compass_compile_results.stdout_lines | length > 0
