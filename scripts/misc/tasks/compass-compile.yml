@@ -13,7 +13,7 @@
   when: gems_path is undefined
 
 - name: Run `compass compile`.
-  command: "compass compile"
+  command: "compass compile --boring"
   args:
     chdir: "{{ task_chdir | default(omit) }}"
   become: No

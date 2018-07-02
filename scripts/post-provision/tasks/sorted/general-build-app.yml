@@ -1,0 +1,11 @@
+---
+# Experimental tasks to "build" the app, such as compiling CSS.
+
+- name: Run app build steps.
+  include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/{{ build_step.name }}.yml"
+  vars:
+    task_chdir: "{{ build_step.chdir | default(omit) }}"
+  with_items: "{{ build_steps }}"
+  loop_control:
+    loop_var: build_step
+  when: build_steps is defined and web_app_build | default(True)
