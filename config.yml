@@ -520,6 +520,7 @@ wp_version: latest
 wp_deploy: "{{ web_app_deploy }}"
 wp_deploy_repo: "{{ project_repo }}"
 wp_domain: "{{ local_domain }}"
+wp_deploy_dir: "{{ web_app_project_root }}"
 wp_install_dir: "{{ web_app_web_root }}"
 
 # Initialize blank WordPress site after installing code?
