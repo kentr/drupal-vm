@@ -1,0 +1,8 @@
+---
+
+- name: Include sorted pre-provision tasks.
+  include_tasks: "{{ outer_item_sorted }}"
+  loop_control:
+    loop_var: outer_item_sorted
+  with_list: "{{ lookup('fileglob','./sorted/*.yml').split(',') | sort }}"
+

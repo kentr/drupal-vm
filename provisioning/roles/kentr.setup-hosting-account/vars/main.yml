@@ -1,2 +1,3 @@
 ---
-# vars file for kentr.shared-hosting-account
+
+git_core_dir: /usr/local/share/git-core
