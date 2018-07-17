@@ -1,6 +1,19 @@
 ---
 
 - block:
+    - name: Set local instance.
+      set_fact:
+        local_instance: "{{ (instances | selectattr('env', 'equalto', 'local') | list)[0] }}"
+
+    - name: Set local URI.
+      set_fact:
+        local_uri: "{{ local_instance.uri }}"
+
+- block:
     - name: Set prod instance.
       set_fact:
         prod_instance: "{{ (instances | selectattr('env', 'equalto', 'prod') | list)[0] }}"
+
+    - name: Set prod URI.
+      set_fact:
+        prod_uri: "{{ prod_instance.uri }}"
