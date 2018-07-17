@@ -1,0 +1,6 @@
+---
+
+- block:
+    - name: Set prod instance.
+      set_fact:
+        prod_instance: "{{ (instances | selectattr('env', 'equalto', 'prod') | list)[0] }}"
