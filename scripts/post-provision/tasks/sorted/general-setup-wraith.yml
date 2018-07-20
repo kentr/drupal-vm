@@ -59,11 +59,6 @@
         - "{{ instances }}"
       when: wraith_testing_framework.install | default(False)
 
-    - name: Get prod URI.
-      command: echo "{{ instances | selectattr('env', 'equalto', 'prod') | map(attribute='uri') | join }}"
-      register: prod_uri
-      when: wraith_testing_framework.install | default(False)
-
     # Replace the URI for prod environment.
     # Searches config files for lines starting with "  prod: " or "  base: ".
     - name: Change Wraith environment config URLs (prod).
@@ -71,7 +66,7 @@
         dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
         regexp: "^  (base|prod): "
         backrefs: yes
-        line: '  \1: "{{ prod_uri.stdout }}"'
+        line: '  \1: "{{ prod_uri }}"'
         state: present
       with_items:
         - "{{ instances }}"

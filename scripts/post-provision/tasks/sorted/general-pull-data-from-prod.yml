@@ -4,21 +4,12 @@
 
 - name: Pull data from prod.
   block:
-
     - name: Sync DB.
       block:
         - name: Register information about the /vagrant directory.
           stat:
             path: /vagrant
           register: vagrant_directory
-
-        - name: Get prod instances.
-          set_fact:
-            prod_instances: "{{ instances | selectattr('env', 'equalto', 'prod') | list }}"
-
-        - name: Set prod instance.
-          set_fact:
-            prod_instance: "{{ prod_instances[0] }}"
 
         - name: Get current table list.
           command: "mysql --batch --skip-column-names -e 'SHOW TABLES;' {{ db_name }}"
@@ -123,7 +114,7 @@
           register: db_updated
       when: db_do_sync != 'never'
 
-    - name: Sync files
+    - name: Sync files.
       block:
         - name: Set `files_sync_command`, Drupal.
           set_fact:
