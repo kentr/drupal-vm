@@ -19,3 +19,6 @@
       set_fact:
         prod_uri: "{{ prod_instance.uri }}"
       when: prod_uri is not defined
+  rescue:
+    - debug:
+        msg: '[ERROR] Failed to determine `prod_instance` and `prod_uri`.'
