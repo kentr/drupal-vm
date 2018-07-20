@@ -8,6 +8,7 @@
     - name: Set local URI.
       set_fact:
         local_uri: "{{ local_instance.uri }}"
+      when: local_uri is not defined
 
 - block:
     - name: Set prod instance.
@@ -17,3 +18,4 @@
     - name: Set prod URI.
       set_fact:
         prod_uri: "{{ prod_instance.uri }}"
+      when: prod_uri is not defined
