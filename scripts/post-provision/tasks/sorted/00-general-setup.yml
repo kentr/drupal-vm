@@ -22,3 +22,16 @@
   rescue:
     - debug:
         msg: '[ERROR] Failed to determine `prod_instance` and `prod_uri`.'
+
+- block:
+    - name: Set stage instance.
+      set_fact:
+        stage_instance: "{{ (instances | selectattr('env', 'equalto', 'stage') | list)[0] }}"
+
+    - name: Set stage URI.
+      set_fact:
+        stage_uri: "{{ stage_instance.uri }}"
+      when: stage_uri is not defined
+  rescue:
+    - debug:
+        msg: '[ERROR] Failed to determine `stage_instance` and `stage_uri`.'
