@@ -165,11 +165,6 @@
       register: wraith_paths_query
       when: wraith_testing_framework.install | default(False) and wraith_paths_sql_file is defined
 
-    - name: Set `wraith_paths_file`.
-      set_fact:
-        wraith_paths_file: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_NOTES/wraith/paths.txt"
-      when: wraith_testing_framework.install | default(False)
-
     - name: Ensure parent directory for `wraith_paths_file` exists.
       delegate_to: localhost
       become: no
