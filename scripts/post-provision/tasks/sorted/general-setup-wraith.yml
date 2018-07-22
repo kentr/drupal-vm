@@ -197,7 +197,7 @@
         insertafter: EOF
         marker: "# {mark} ANSIBLE MANAGED BLOCK paths"
         content: "{{ lookup('file', wraith_paths_file) }}"
-      when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined
+      when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined and wraith_paths_file_check.stat.exists
 
 - name: Set up shots directory.
   block:
