@@ -114,7 +114,7 @@
   block:
     - name: Set `wraith_paths_file`.
       set_fact:
-        wraith_paths_file: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_NOTES/wraith/paths.txt"
+        wraith_paths_file: "{{ wraith_testing_framework.paths_file }}"
       when: wraith_testing_framework.install | default(False)
 
     - name: Check if `wraith_paths_file` exists.
