@@ -216,4 +216,5 @@
         path: "{{ wraith_testing_framework.web_dir | default(web_app_web_root + '/vr-shots') }}"
         state: link
         force: yes
+      ignore_errors: True
       when: wraith_testing_framework.install | default(False)
