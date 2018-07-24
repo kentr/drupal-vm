@@ -231,16 +231,7 @@ ssl_certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
 apache_vhosts_extra_parameters_global: ''
 
 # Apache vhost extra parameters, applied to the primary project site vhost.
-apache_vhosts_extra_parameters_site: |
-  <IfModule mod_rewrite.c>
-  RewriteEngine on
-  # Attempt to load files from production if
-  # they're not in our local version
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule wp-content/uploads/(.*) \
-    {{ prod_uri }}/wp-content/uploads/$1 [NC,L]
-  </IfModule>
+apache_vhosts_extra_parameters_site: ''
 
 # Apache vhost extra parameters to force redirect to https version.
 apache_vhosts_extra_parameters_redirect_ssl: |
