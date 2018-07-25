@@ -33,6 +33,11 @@ web_app_deploy: False
 # If True, local modifications to web project files may be discarded.
 web_app_deploy_force: True
 
+# Should the Git PS1 prompt show a dirty repo?
+# See https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh.
+# Note: Enabling this can make the shell prompt pretty slow.
+drush_git_ps1_showdirtystate: False
+
 # The domain name for the local installation
 domain_name: client.org
 prod_domain: "{{ domain_name }}"
