@@ -1,0 +1,26 @@
+---
+
+- name: Add Apache redirect for missing files (WordPress).
+  set_fact:
+    # Apache vhost extra parameters to force redirect to https version.
+    apache_vhosts_extra_parameters_site: |
+      {{ apache_vhosts_extra_parameters_site | default('') }}
+      <IfModule mod_rewrite.c>
+      RewriteEngine on
+      # Attempt to load files from production if
+      # they're not in our local version
+      RewriteCond %{REQUEST_FILENAME} !-d
+      RewriteCond %{REQUEST_FILENAME} !-f
+      RewriteRule wp-content/uploads/(.*) \
+        {{ prod_uri }}/wp-content/uploads/$1 [NC,L]
+      </IfModule>
+  when: apache_redirect_missing_files | default(False) and drupalvm_webserver == 'apache' and project_type == 'wordpress'
+  tags:
+    - webserver
+
+- name: Run Apache role after changing vhost extra parameters.
+  include_role:
+    name: geerlingguy.apache
+  when: apache_redirect_missing_files | default(False) and drupalvm_webserver == 'apache'
+  tags:
+    - webserver
