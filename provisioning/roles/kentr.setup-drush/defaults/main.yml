@@ -31,3 +31,8 @@ drush_structure_tables:
   - history
   - sessions
   - watchdog
+
+# Should the Git PS1 prompt show a dirty repo?
+# See https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh.
+# Note: Enabling this can make the shell prompt pretty slow.
+drush_git_ps1_showdirtystate: True
