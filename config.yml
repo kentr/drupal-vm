@@ -232,6 +232,12 @@ drupalvm_webserver_user: "{{ vagrant_user }}"
 ssl_certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
 ssl_certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
 
+# Add an Apache redirect for user-upload files that aren't on the local site?
+# This feature attempts to reduce the need for copying user-upload files
+# from the prod site by automatically redirecting the browser to the live site
+# for any user-upload files that are missing on the local site.
+apache_redirect_missing_files: True
+
 # Apache vhost global extra parameters, applied to all vhosts.
 apache_vhosts_extra_parameters_global: ''
 
