@@ -45,27 +45,34 @@
     updates_available: "{{ updates_available_result.stdout_lines }}"
   when: _drush_version | version_compare('9', '<')
 
-- name: Find updates, Drush 9.x, all updates.
-  composer:
-    command: "show"
-    arguments: "--outdated --format=json drupal/*"
-    working_dir: "{{ web_app_project_root }}"
-  register: updates_available_result
+- block:
+  - name: Find updates, Drush 9.x, all updates.
+    composer:
+      command: "show"
+      arguments: "--outdated --format=json drupal/*"
+      working_dir: "{{ web_app_project_root }}"
+    register: updates_available_result
+
+  - name: Set `updates_available`, Drush 9.x, all updates.
+    set_fact:
+      # Though it's silly to strip out "drupal/" only to replace it later, we have to
+      # allow for a list from other sources, such as from `drush pm:sec`.
+      updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
   when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
 
-- name: Set `updates_available`, Drush 9.x, all updates.
-  set_fact:
-    # Though it's silly to strip out "drupal/" only to replace it later, we have to
-    # allow for a list from other sources, such as from `drush pm:sec`.
-    updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
-  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
+- block:
+  - name: Find updates, Drush 9.x, security-only.
+    command: "{{ drush_path | default('drush') }} sec --format=json"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: updates_available_result
+    failed_when: "{{ '[error]' in updates_available_result.stderr }}"
 
-- name: Find updates, Drush 9.x, security-only.
-  command: "{{ drush_path | default('drush') }} sec --format=json"
-  args:
-    chdir: "{{ drupal_core_path }}"
-  register: updates_available_result
-  failed_when: "{{ '[error]' in updates_available_result.stderr }}"
+  - name: Set `updates_available`, Drush 9.x, security-only.
+    set_fact:
+      updates_available: "{{ updates_available | default([]) + [item.key] }}"
+    with_dict: "{{ (updates_available_result.stdout | from_json) }}"
+
   when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
 
 # For consistency with composer-managed projects, database updates are performed later.
