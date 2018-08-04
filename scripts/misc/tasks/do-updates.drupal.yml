@@ -7,13 +7,13 @@
   when: drupal_update_security_only is not defined
 
 - name: Get drush version.
-  command: "{{ drush_path }} status --fields=drush-version"
+  command: "{{ drush_path | default('drush') }} status --fields=drush-version"
   args:
     chdir: "{{ drupal_core_path }}"
   register: drush_version_result
 
 - name: Get drush status.
-  command: "{{ drush_path }} status --format=yaml"
+  command: "{{ drush_path | default('drush') }} status --format=yaml"
   args:
     chdir: "{{ drupal_core_path }}"
   register: drush_status_result
@@ -61,7 +61,7 @@
   when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
 
 - name: Find updates, Drush 9.x, security-only.
-  command: "{{ drush_path }} sec --format=json"
+  command: "{{ drush_path | default('drush') }} sec --format=json"
   args:
     chdir: "{{ drupal_core_path }}"
   register: updates_available_result
