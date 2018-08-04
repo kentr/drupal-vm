@@ -65,6 +65,7 @@
   args:
     chdir: "{{ drupal_core_path }}"
   register: updates_available_result
+  failed_when: "{{ '[error]' in updates_available_result.stderr }}"
   when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
 
 # For consistency with composer-managed projects, database updates are performed later.
