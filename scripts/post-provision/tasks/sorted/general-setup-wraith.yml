@@ -16,163 +16,205 @@
 #
 # See config.yml for more information.
 
-- name: Check for existing wraith installation.
-  find:
-    paths: "{{ wraith_testing_framework.install_dir }}"
-    hidden: True
-    file_type: any
-  register: wraith_find
-  when: wraith_testing_framework.install | default(False)
-
-- name: Clone wraith project directory.
-  git:
-    repo: "{{ wraith_testing_framework.repo }}"
-    dest: "{{ wraith_testing_framework.install_dir }}"
-    accept_hostkey: True
+# Install Wraith itself.  Assumes that dependencies are already installed.
+- include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
   become: no
-  when: wraith_testing_framework.install | default(False) and wraith_testing_framework.repo is defined
+  when: wraith_testing_framework.install | default(False) or wraith_install | default(False)
+  tags:
+    - wraith-install
 
-- name: Create blank Wraith shared config.
-  command: "cp example.smoke.common.yml smoke.common.yml"
-  args:
-    chdir: "{{ wraith_testing_framework.install_dir }}/configs"
-    creates: "smoke.common.yml"
-  become: no
-  when: wraith_testing_framework.install | default(False)
+- name: Install wraith shell configuration.
+  block:
+    - name: Check for existing wraith installation.
+      find:
+        paths: "{{ wraith_testing_framework.install_dir }}"
+        hidden: True
+        file_type: any
+      register: wraith_find
+      when: wraith_testing_framework.install | default(False)
 
-- name: Create blank Wraith environment configs.
-  command: "cp example.smoke.{{ item.env }}.yml smoke.{{ item.env }}.yml"
-  args:
-    chdir: "{{ wraith_testing_framework.install_dir }}/configs"
-    creates: "smoke.{{ item.env }}.yml"
-  become: no
-  with_items:
-    - "{{ instances }}"
-  when: wraith_testing_framework.install | default(False)
+    - name: Clone wraith project directory.
+      git:
+        repo: "{{ wraith_testing_framework.repo }}"
+        dest: "{{ wraith_testing_framework.install_dir }}"
+        accept_hostkey: True
+      become: no
+      when: wraith_testing_framework.install | default(False) and wraith_testing_framework.repo is defined
 
-- name: Get prod URI.
-  command: echo "{{ instances | selectattr('env', 'equalto', 'prod') | map(attribute='uri') | join }}"
-  register: prod_uri
-  when: wraith_testing_framework.install | default(False)
+    - name: Create blank Wraith shared config.
+      command: "cp example.smoke.common.yml smoke.common.yml"
+      args:
+        chdir: "{{ wraith_testing_framework.install_dir }}/configs"
+        creates: "smoke.common.yml"
+      become: no
+      when: wraith_testing_framework.install | default(False)
 
-# Replace the URI for prod environment.
-# Searches config files for lines starting with "  prod: " or "  base: ".
-- name: Change Wraith environment config URLs (prod).
-  lineinfile:
-    dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
-    regexp: "^  (base|prod): "
-    backrefs: yes
-    line: '  \1: "{{ prod_uri.stdout }}"'
-    state: present
-  with_items:
-    - "{{ instances }}"
-  when: wraith_testing_framework.install | default(False)
+    - name: Create blank Wraith environment configs.
+      command: "cp example.smoke.{{ item.env }}.yml smoke.{{ item.env }}.yml"
+      args:
+        chdir: "{{ wraith_testing_framework.install_dir }}/configs"
+        creates: "smoke.{{ item.env }}.yml"
+      become: no
+      with_items:
+        - "{{ instances }}"
+      when: wraith_testing_framework.install | default(False)
 
-# Replace the URI for non-prod environments.
-# Searches config files for lines starting with "  {{ item.env }}: ".
-- name: Change Wraith environment config URLs (other).
-  lineinfile:
-    dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
-    regexp: "^  {{ item.env }}: "
-    line: '  {{ item.env }}: "{{ item.uri }}"'
-    state: present
-  with_items:
-    # Skip "prod" instance so that it doesn't add a line starting with "  prod:..."
-    # in smoke.prod.yml
-    - "{{ instances | rejectattr('env', 'equalto', 'prod') | list }}"
-  when: wraith_testing_framework.install | default(False)
+    # Replace the URI for prod environment.
+    # Searches config files for lines starting with "  prod: " or "  base: ".
+    - name: Change Wraith environment config URLs (prod).
+      lineinfile:
+        dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
+        regexp: "^  (base|prod): "
+        backrefs: yes
+        line: '  \1: "{{ prod_uri }}"'
+        state: present
+      with_items:
+        - "{{ instances }}"
+      when: wraith_testing_framework.install | default(False)
 
-- name: Create Wraith script config.
-  command: "cp example.config.sh config.sh"
-  args:
-    chdir: "{{ wraith_testing_framework.install_dir }}/scripts"
-    creates: "config.sh"
-  become: no
-  when: wraith_testing_framework.install | default(False)
+    # Replace the URI for non-prod environments.
+    # Searches config files for lines starting with "  {{ item.env }}: ".
+    - name: Change Wraith environment config URLs (other).
+      lineinfile:
+        dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
+        regexp: "^  {{ item.env }}: "
+        line: '  {{ item.env }}: "{{ item.uri }}"'
+        state: present
+      with_items:
+        # Skip "prod" instance so that it doesn't add a line starting with "  prod:..."
+        # in smoke.prod.yml
+        - "{{ instances | rejectattr('env', 'equalto', 'prod') | list }}"
+      when: wraith_testing_framework.install | default(False)
 
-- name: Set WRAITH_RSYNC_DEST_HOST.
-  lineinfile:
-    dest: "{{ wraith_testing_framework.install_dir }}/scripts/config.sh"
-    regexp: "^export WRAITH_RSYNC_DEST_HOST="
-    line: "export WRAITH_RSYNC_DEST_HOST={{ wraith_testing_framework.rsync_dest_host }}"
-    state: present
-  when: wraith_testing_framework.install | default(False)
+    - name: Create Wraith script config.
+      command: "cp example.config.sh config.sh"
+      args:
+        chdir: "{{ wraith_testing_framework.install_dir }}/scripts"
+        creates: "config.sh"
+      become: no
+      when: wraith_testing_framework.install | default(False)
 
-- name: Set WRAITH_RSYNC_DEST_DIR.
-  lineinfile:
-    dest: "{{ wraith_testing_framework.install_dir }}/scripts/config.sh"
-    regexp: "^export WRAITH_RSYNC_DEST_DIR="
-    line: "export WRAITH_RSYNC_DEST_DIR={{ wraith_testing_framework.rsync_dest_dir }}/"
-    state: present
-  when: wraith_testing_framework.install | default(False)
+    - name: Set WRAITH_RSYNC_DEST_HOST.
+      lineinfile:
+        dest: "{{ wraith_testing_framework.install_dir }}/scripts/config.sh"
+        regexp: "^export WRAITH_RSYNC_DEST_HOST="
+        line: "export WRAITH_RSYNC_DEST_HOST={{ wraith_testing_framework.rsync_dest_host }}"
+        state: present
+      when: wraith_testing_framework.install | default(False)
 
-- name: Check for `page_manager` table.
-  command: >
-    mysql --batch --skip-column-names -e 'SHOW TABLES LIKE "page_manager";' {{ db_name }}
-  register: db_page_manager_query_result
-  when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
+    - name: Set WRAITH_RSYNC_DEST_DIR.
+      lineinfile:
+        dest: "{{ wraith_testing_framework.install_dir }}/scripts/config.sh"
+        regexp: "^export WRAITH_RSYNC_DEST_DIR="
+        line: "export WRAITH_RSYNC_DEST_DIR={{ wraith_testing_framework.rsync_dest_dir }}/"
+        state: present
+      when: wraith_testing_framework.install | default(False)
 
-- name: Set `db_page_manager_table_exists`.
-  set_fact:
-    db_page_manager_table_exists: "{{ db_page_manager_query_result.stdout == 'page_manager' }}"
-  when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
+- name: Generate wraith paths.
+  block:
+    - name: Set `wraith_paths_file`.
+      set_fact:
+        wraith_paths_file: "{{ wraith_testing_framework.paths_file }}"
+      when: wraith_testing_framework.install | default(False)
 
-- name: Set `wraith_paths_sql_file`, Drupal.
-  set_fact:
-    wraith_paths_sql_file: "wraith-paths-drupal.d{{ drupal_major_version }}.sql"
-  when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
+    - name: Check if `wraith_paths_file` exists.
+      stat:
+        path: "{{ wraith_paths_file }}"
+        get_checksum: no
+      delegate_to: localhost
+      become: no
+      register: wraith_paths_file_check
+      when: wraith_testing_framework.install | default(False)
+      failed_when: wraith_paths_file_check.stat.exists
 
-- name: Set `wraith_paths_sql_file`, WordPress.
-  set_fact:
-    wraith_paths_sql_file: "wraith-paths-wordpress.sql"
-  when: wraith_testing_framework.install | default(False) and project_type == 'wordpress'
+    - name: Check for `page_manager` table.
+      command: >
+        mysql --batch --skip-column-names -e 'SHOW TABLES LIKE "page_manager";' {{ db_name }}
+      register: db_page_manager_query_result
+      when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
 
-- name: Copy `wraith_paths_sql_file` file.
-  template:
-    dest: /tmp/wraith-paths.sql
-    src: "{{ post_provision_tasks_dir | dirname }}/../templates/{{ wraith_paths_sql_file }}"
-  register: paths
-  when: wraith_testing_framework.install | default(False) and wraith_paths_sql_file is defined
+    - name: Set `db_page_manager_table_exists`.
+      set_fact:
+        db_page_manager_table_exists: "{{ db_page_manager_query_result.stdout == 'page_manager' }}"
+      when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
 
-- name: Run wraith paths SQL.
-  mysql_db:
-    login_user: "{{ db_user }}"
-    login_password: "{{ db_password }}"
-    name: "{{ db_name }}"
-    state: import
-    target: /tmp/wraith-paths.sql
-  register: wraith_paths_query
-  when: wraith_testing_framework.install | default(False) and wraith_paths_sql_file is defined
+    - name: Set `wraith_paths_sql_file`, Drupal.
+      set_fact:
+        wraith_paths_sql_file: "wraith-paths-drupal.d{{ drupal_major_version }}.sql"
+      when: wraith_testing_framework.install | default(False) and project_type == 'drupal'
 
-- name: Set `wraith_paths_file`.
-  set_fact:
-    wraith_paths_file: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_NOTES/wraith/paths.txt"
-  when: wraith_testing_framework.install | default(False)
+    - name: Set `wraith_paths_sql_file`, WordPress.
+      set_fact:
+        wraith_paths_sql_file: "wraith-paths-wordpress.sql"
+      when: wraith_testing_framework.install | default(False) and project_type == 'wordpress'
 
-- name: Ensure parent directory for `wraith_paths_file` exists.
-  delegate_to: localhost
-  become: no
-  file:
-    path: "{{ wraith_paths_file | dirname }}"
-    state: directory
-  when: wraith_testing_framework.install | default(False)
+    - name: Copy `wraith_paths_sql_file` file.
+      template:
+        dest: /tmp/wraith-paths.sql
+        src: "{{ post_provision_tasks_dir | dirname }}/../templates/{{ wraith_paths_sql_file }}"
+      register: paths
+      when: wraith_testing_framework.install | default(False) and wraith_paths_sql_file is defined
 
-- name: Create `paths.txt` file.
-  delegate_to: localhost
-  become: no
-  copy:
-    dest: "{{ wraith_paths_file }}"
-    # MySQL output currently replaces strings that matche the DB password with "********",
-    # so we restore the strings before writing to the file.
-    content: "{{ wraith_paths_query.msg | regex_replace('\\\\n', '\n') | replace('********', db_password ) }}"
-  creates: "{{ wraith_paths_file }}"
-  register: wraith_paths_file_result
-  when: wraith_testing_framework.install | default(False) and wraith_paths_query.msg is defined
+    - name: Run wraith paths SQL.
+      mysql_db:
+        login_user: "{{ db_user }}"
+        login_password: "{{ db_password }}"
+        name: "{{ db_name }}"
+        state: import
+        target: /tmp/wraith-paths.sql
+      register: wraith_paths_query
+      when: wraith_testing_framework.install | default(False) and wraith_paths_sql_file is defined
 
-- name: Add paths from file.
-  blockinfile:
-    path: "{{ wraith_testing_framework.install_dir }}/configs/smoke.common.yml"
-    insertafter: EOF
-    marker: "# {mark} ANSIBLE MANAGED BLOCK paths"
-    content: "{{ lookup('file', wraith_paths_file) }}"
-  when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined and wraith_paths_file_result.changed
+    - name: Ensure parent directory for `wraith_paths_file` exists.
+      delegate_to: localhost
+      become: no
+      file:
+        path: "{{ wraith_paths_file | dirname }}"
+        state: directory
+      when: wraith_testing_framework.install | default(False)
+
+    - name: Create `paths.txt` file.
+      delegate_to: localhost
+      become: no
+      copy:
+        dest: "{{ wraith_paths_file }}"
+        # MySQL output currently replaces strings in the query output that match
+        # the DB password with "********",
+        # so we restore the strings before writing to the file.
+        content: "{{ wraith_paths_query.msg | regex_replace('\\\\n', '\n') | replace('********', db_password ) }}"
+      creates: "{{ wraith_paths_file }}"
+      register: wraith_paths_file_result
+      when: wraith_testing_framework.install | default(False) and wraith_paths_query.msg is defined
+
+  rescue:
+    - debug:
+        msg: 'Existing wraith paths detected.  Using those.'
+
+  always:
+    - name: Add paths from file.
+      blockinfile:
+        path: "{{ wraith_testing_framework.install_dir }}/configs/smoke.common.yml"
+        insertafter: EOF
+        marker: "# {mark} ANSIBLE MANAGED BLOCK paths"
+        content: "{{ lookup('file', wraith_paths_file) }}"
+      when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined and wraith_paths_file_check.stat.exists
+
+- name: Set up shots directory.
+  block:
+    - name: Create wraith shots directory.
+      become: no
+      file:
+        path: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots') }}"
+        state: directory
+        force: yes
+      when: wraith_testing_framework.install | default(False)
+
+    - name: Symlink from webroot to wraith shots directory.
+      become: no
+      file:
+        src: "{{ wraith_testing_framework.shots_dir | default(wraith_testing_framework.install_dir + '/shots') }}"
+        path: "{{ wraith_testing_framework.web_dir | default(web_app_web_root + '/vr-shots') }}"
+        state: link
+        force: yes
+      ignore_errors: True
+      when: wraith_testing_framework.install | default(False)

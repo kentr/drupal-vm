@@ -36,20 +36,28 @@ wp_debug: false
 wp_debug_log: true
 wp_debug_display: false
 
+wp_add_siteurl_to_wp_config: False
+
 wp_install_site: False
 wp_admin_user: 'admin'
 wp_admin_password: ''
 wp_admin_email: ''
 wp_site_title: 'My Great WordPress Site'
+wp_siteurl: undefined
+
+wp_install_dummy_data: False
 
 wp_fs_method: 'direct'
 wp_lang: ''
 
 wp_mysql_enable: true
 wp_mysql_db_create: true
+wp_mysql_db_create_users: true
 wp_mysql_site_restore_saved_db: false
 wp_backup_local_path: "{{ playbook_dir }}/_private/backup"
-wp_database_backup: "{{ wp_backup_local_path }}/{{ wp_site_name }}.sql"
+# Local path to database dump file.
+# File must be gzipped.
+wp_database_backup: "{{ wp_backup_local_path }}/{{ wp_site_name }}.sql.gz"
 wp_site_name: "{{ wp_apache_hostname | default('example') }}"
 
 # Set this to 'true' and specify a Git repository if you want to deploy WordPress

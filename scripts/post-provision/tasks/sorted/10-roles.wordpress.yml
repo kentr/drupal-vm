@@ -13,6 +13,11 @@
 - name: Include `kentr.wordpress` role to setup WordPress.
   include_role:
     name: kentr.wordpress
+  vars:
+    wp_add_siteurl_to_wp_config: True
+    wp_mysql_db_create: false
+    wp_mysql_db_create_users: false
+    wp_siteurl: "{{ local_uri }}"
   when: project_type == "wordpress"
   tags:
     - wordpress

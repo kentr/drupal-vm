@@ -14,6 +14,28 @@
     creates: ~/.drush/drush.bashrc
     chdir: "{{ drupal_core_path }}"
 
+- block:
+  - block:
+    - name: Enable `GIT_PS1_SHOWDIRTYSTATE`.
+      become: no
+      lineinfile:
+        backrefs: yes
+        dest: "~/.drush/drush.prompt.sh"
+        regexp: '^(\s*)#?\s*?GIT_PS1_SHOWDIRTYSTATE\b.*$'
+        line: '\1GIT_PS1_SHOWDIRTYSTATE=true'
+        state: present
+      when: drush_git_ps1_showdirtystate
+
+    - name: Disable `GIT_PS1_SHOWDIRTYSTATE`.
+      become: no
+      lineinfile:
+        backrefs: yes
+        dest: "~/.drush/drush.prompt.sh"
+        regexp: '^(\s*)GIT_PS1_SHOWDIRTYSTATE\b.*$'
+        line: '\1GIT_PS1_SHOWDIRTYSTATE='
+        state: present
+      when: not drush_git_ps1_showdirtystate
+
 - name: Enable `structure-tables-key, common`.
   become: no
   lineinfile:
