@@ -68,10 +68,18 @@
     register: updates_available_result
     failed_when: "{{ '[error]' in updates_available_result.stderr }}"
 
+  # Extract the dict in a separate step to work around ansible errors
+  # when updates_available_result.stdout is not defined
+  - name: Set `_updates_available`.
+    set_fact:
+      _updates_available: "{{ (updates_available_result.stdout | from_json) }}"
+    when: updates_available_result.stdout is defined and updates_available_result.stdout != ""
+
   - name: Set `updates_available`, Drush 9.x, security-only.
     set_fact:
       updates_available: "{{ updates_available | default([]) + [item.key] }}"
-    with_dict: "{{ (updates_available_result.stdout | from_json) }}"
+    with_dict: '{{ _updates_available }}'
+    when: _updates_available is defined
 
   when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
 
@@ -83,7 +91,7 @@
   args:
     chdir: "{{ drupal_core_path }}"
   register: drupal_updates_download
-  when: drupal_deploy_composer_file.stat.exists == False and updates_available | length > 0
+  when: drupal_deploy_composer_file.stat.exists == False and updates_available|default([]) | length > 0
 
 - name: Set `drupal_updated`, drush update.
   set_fact:
@@ -103,7 +111,7 @@
     working_dir: "{{ web_app_project_root }}"
   # with_items: "{{ updates_available }}"
   register: drupal_updates_download
-  when: drupal_deploy_composer_file.stat.exists == True and updates_available | length > 0
+  when: drupal_deploy_composer_file.stat.exists == True and updates_available|default([]) | length > 0
 
 - name: Set `drupal_updated`, composer update.
   set_fact:
