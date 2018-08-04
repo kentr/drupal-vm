@@ -95,7 +95,7 @@
     command: "update"
     # Substitutes "core" for "drupal".
     # Todo: make this substitution smarter, based on what's actually installed.
-    arguments: "--with-dependencies {{ updates_available | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+    arguments: "--with-dependencies {{ updates_available | join(' ') }}"
     optimize_autoloader: True
     # By default, Drupal composer projects install dev dependencies.
     # We want to follow that behavior here.
