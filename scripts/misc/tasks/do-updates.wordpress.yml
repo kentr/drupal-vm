@@ -13,7 +13,6 @@
         plugin update
         --all
         --format=json
-        --dry-run
       args:
         chdir: "{{ web_app_web_root }}"
       register: wp_plugin_update_results
