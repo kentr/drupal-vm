@@ -1,7 +1,9 @@
 # Tasks to perform code updates.
 
 - name: Create `updates` Git branch if necessary.
-  command: "git --git-dir={{ web_app_project_root }}/.git/ --work-tree={{ web_app_project_root }} checkout --track -B updates origin/master"
+  command: "git checkout --track -B updates origin/master"
+  args:
+    chdir: "{{ web_app_project_root }}"
 
 - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/do-updates.{{ project_type }}.yml"
   when: project_type == 'drupal' or project_type == 'wordpress'
