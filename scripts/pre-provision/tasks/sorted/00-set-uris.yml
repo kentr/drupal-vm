@@ -1,0 +1,37 @@
+---
+
+- block:
+    - name: Set local instance.
+      set_fact:
+        local_instance: "{{ (instances | selectattr('env', 'equalto', 'local') | list)[0] }}"
+
+    - name: Set local URI.
+      set_fact:
+        local_uri: "{{ local_instance.uri }}"
+      when: local_uri is not defined
+
+- block:
+    - name: Set prod instance.
+      set_fact:
+        prod_instance: "{{ (instances | selectattr('env', 'equalto', 'prod') | list)[0] }}"
+
+    - name: Set prod URI.
+      set_fact:
+        prod_uri: "{{ prod_instance.uri }}"
+      when: prod_uri is not defined
+  rescue:
+    - debug:
+        msg: '[ERROR] Failed to determine `prod_instance` and `prod_uri`.'
+
+- block:
+    - name: Set stage instance.
+      set_fact:
+        stage_instance: "{{ (instances | selectattr('env', 'equalto', 'stage') | list)[0] }}"
+
+    - name: Set stage URI.
+      set_fact:
+        stage_uri: "{{ stage_instance.uri }}"
+      when: stage_uri is not defined
+  rescue:
+    - debug:
+        msg: '[ERROR] Failed to determine `stage_instance` and `stage_uri`.'
