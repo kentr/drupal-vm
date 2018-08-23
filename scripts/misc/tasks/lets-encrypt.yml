@@ -45,7 +45,7 @@
   set_fact:
     lets_encrypt_vhosts: []
 
-- name: Substitute Let's Encrypt certs into vhost definitions.
+- name: Build new vhost definitions with Let's Encrypt certs.
   set_fact:
     # The name of the cert file will be taken from the first item
     # in `lets_encrypt_domains`.
@@ -66,11 +66,17 @@
       }}
   with_items: "{{ apache_vhosts }}"
 
+- name: Replace `apache_vhosts` with `lets_encrypt_vhosts`.
+  set_fact:
+    apache_vhosts: "{{ lets_encrypt_vhosts }}"
+
+- name: Replace `apache_vhosts_ssl` with `lets_encrypt_vhosts`.
+  set_fact:
+    apache_vhosts_ssl: "{{ lets_encrypt_vhosts }}"
+
 # This should happen after the certbot role, so that the certs are in place
 - name: Reconfigure Apache with Let's Encrypt vhost definitions.
   include_role:
     name: geerlingguy.apache
   vars:
-    apache_vhosts: "{{ lets_encrypt_vhosts }}"
-    apache_vhosts_ssl: "{{ lets_encrypt_vhosts }}"
     apache_state: "started"
