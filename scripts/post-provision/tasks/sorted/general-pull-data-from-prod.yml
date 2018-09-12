@@ -151,7 +151,11 @@
             search-replace
             '{{ prod_uri }}'
             '{{ local_uri }}'
-            'wp_blogs' 'wp_*options' 'wp_*posts' 'wp_*postmeta' 'wp_domain_mapping'
+            '{{ db_table_prefix }}blogs'
+            '{{ db_table_prefix }}*options'
+            '{{ db_table_prefix }}*posts'
+            '{{ db_table_prefix }}*postmeta'
+            '{{ db_table_prefix }}domain_mapping'
             --all-tables
             --skip-columns=autoload,comment_status,guid,meta_key,option_name,path,ping_status,pinged,post_mime_type,post_name,post_password,post_status,post_type,to_ping
           when: project_type == 'wordpress' and db_updated.changed | default(False) and local_uri is defined and prod_uri is defined
@@ -165,7 +169,11 @@
             search-replace
             '(?<!\.)(?<!@)(www\.)?{{ prod_domain }}'
             '{{ local_domain }}'
-            'wp_blogs' 'wp_*options' 'wp_*posts' 'wp_*postmeta' 'wp_domain_mapping'
+            '{{ db_table_prefix }}blogs'
+            '{{ db_table_prefix }}*options'
+            '{{ db_table_prefix }}*posts'
+            '{{ db_table_prefix }}*postmeta'
+            '{{ db_table_prefix }}domain_mapping'
             --regex --all-tables
             --skip-columns=autoload,comment_status,guid,meta_key,option_name,path,ping_status,pinged,post_mime_type,post_name,post_password,post_status,post_type,to_ping
           when: project_type == 'wordpress' and db_updated.changed | default(False)
