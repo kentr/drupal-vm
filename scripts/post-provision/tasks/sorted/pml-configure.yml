@@ -1,0 +1,9 @@
+# Adds preset PimpMyLog configuration.
+
+- name: Copy PimpMyLog configuration file.
+  template:
+    dest: "/usr/share/php/pimpmylog/config.user.php"
+    src: "../../templates/pml.config.user.php.j2"
+    mode: "ugo+rx"
+  when: '"pimpmylog" in installed_extras'
+  #when: True
