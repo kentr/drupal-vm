@@ -59,11 +59,6 @@
         - "{{ instances }}"
       when: wraith_testing_framework.install | default(False)
 
-    - name: Get prod URI.
-      command: echo "{{ instances | selectattr('env', 'equalto', 'prod') | map(attribute='uri') | join }}"
-      register: prod_uri
-      when: wraith_testing_framework.install | default(False)
-
     # Replace the URI for prod environment.
     # Searches config files for lines starting with "  prod: " or "  base: ".
     - name: Change Wraith environment config URLs (prod).
@@ -71,7 +66,7 @@
         dest: "{{ wraith_testing_framework.install_dir }}/configs/smoke.{{ item.env }}.yml"
         regexp: "^  (base|prod): "
         backrefs: yes
-        line: '  \1: "{{ prod_uri.stdout }}"'
+        line: '  \1: "{{ prod_uri }}"'
         state: present
       with_items:
         - "{{ instances }}"
@@ -119,7 +114,7 @@
   block:
     - name: Set `wraith_paths_file`.
       set_fact:
-        wraith_paths_file: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_NOTES/wraith/paths.txt"
+        wraith_paths_file: "{{ wraith_testing_framework.paths_file }}"
       when: wraith_testing_framework.install | default(False)
 
     - name: Check if `wraith_paths_file` exists.
@@ -170,11 +165,6 @@
       register: wraith_paths_query
       when: wraith_testing_framework.install | default(False) and wraith_paths_sql_file is defined
 
-    - name: Set `wraith_paths_file`.
-      set_fact:
-        wraith_paths_file: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_NOTES/wraith/paths.txt"
-      when: wraith_testing_framework.install | default(False)
-
     - name: Ensure parent directory for `wraith_paths_file` exists.
       delegate_to: localhost
       become: no
@@ -207,7 +197,7 @@
         insertafter: EOF
         marker: "# {mark} ANSIBLE MANAGED BLOCK paths"
         content: "{{ lookup('file', wraith_paths_file) }}"
-      when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined
+      when: wraith_testing_framework.install | default(False) and wraith_paths_file is defined and wraith_paths_file_check.stat.exists
 
 - name: Set up shots directory.
   block:
@@ -226,4 +216,5 @@
         path: "{{ wraith_testing_framework.web_dir | default(web_app_web_root + '/vr-shots') }}"
         state: link
         force: yes
+      ignore_errors: True
       when: wraith_testing_framework.install | default(False)

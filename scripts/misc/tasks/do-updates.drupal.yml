@@ -7,13 +7,13 @@
   when: drupal_update_security_only is not defined
 
 - name: Get drush version.
-  command: "{{ drush_path }} status --fields=drush-version"
+  command: "{{ drush_path | default('drush') }} status --fields=drush-version"
   args:
     chdir: "{{ drupal_core_path }}"
   register: drush_version_result
 
 - name: Get drush status.
-  command: "{{ drush_path }} status --format=yaml"
+  command: "{{ drush_path | default('drush') }} status --format=yaml"
   args:
     chdir: "{{ drupal_core_path }}"
   register: drush_status_result
@@ -45,26 +45,42 @@
     updates_available: "{{ updates_available_result.stdout_lines }}"
   when: _drush_version | version_compare('9', '<')
 
-- name: Find updates, Drush 9.x, all updates.
-  composer:
-    command: "show"
-    arguments: "--outdated --format=json drupal/*"
-    working_dir: "{{ web_app_project_root }}"
-  register: updates_available_result
+- block:
+  - name: Find updates, Drush 9.x, all updates.
+    composer:
+      command: "show"
+      arguments: "--outdated --format=json drupal/*"
+      working_dir: "{{ web_app_project_root }}"
+    register: updates_available_result
+
+  - name: Set `updates_available`, Drush 9.x, all updates.
+    set_fact:
+      # Though it's silly to strip out "drupal/" only to replace it later, we have to
+      # allow for a list from other sources, such as from `drush pm:sec`.
+      updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
   when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
 
-- name: Set `updates_available`, Drush 9.x, all updates.
-  set_fact:
-    # Though it's silly to strip out "drupal/" only to replace it later, we have to
-    # allow for a list from other sources, such as from `drush pm:sec`.
-    updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
-  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
+- block:
+  - name: Find updates, Drush 9.x, security-only.
+    command: "{{ drush_path | default('drush') }} sec --format=json"
+    args:
+      chdir: "{{ drupal_core_path }}"
+    register: updates_available_result
+    failed_when: "{{ '[error]' in updates_available_result.stderr }}"
 
-- name: Find updates, Drush 9.x, security-only.
-  command: "{{ drush_path }} sec --format=json"
-  args:
-    chdir: "{{ drupal_core_path }}"
-  register: updates_available_result
+  # Extract the dict in a separate step to work around ansible errors
+  # when updates_available_result.stdout is not defined
+  - name: Set `_updates_available`.
+    set_fact:
+      _updates_available: "{{ (updates_available_result.stdout | from_json) }}"
+    when: updates_available_result.stdout is defined and updates_available_result.stdout != ""
+
+  - name: Set `updates_available`, Drush 9.x, security-only.
+    set_fact:
+      updates_available: "{{ updates_available | default([]) + [item.key] }}"
+    with_dict: '{{ _updates_available }}'
+    when: _updates_available is defined
+
   when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
 
 # For consistency with composer-managed projects, database updates are performed later.
@@ -75,7 +91,7 @@
   args:
     chdir: "{{ drupal_core_path }}"
   register: drupal_updates_download
-  when: drupal_deploy_composer_file.stat.exists == False and updates_available | length > 0
+  when: drupal_deploy_composer_file.stat.exists == False and updates_available|default([]) | length > 0
 
 - name: Set `drupal_updated`, drush update.
   set_fact:
@@ -87,7 +103,7 @@
     command: "update"
     # Substitutes "core" for "drupal".
     # Todo: make this substitution smarter, based on what's actually installed.
-    arguments: "{{ updates_available | map('regex_replace', '^drupal$', 'core') | map('regex_replace', '^(.*)$', 'drupal/\\1') | join(' ') }}"
+    arguments: "--with-dependencies {{ updates_available | join(' ') }}"
     optimize_autoloader: True
     # By default, Drupal composer projects install dev dependencies.
     # We want to follow that behavior here.
@@ -95,7 +111,7 @@
     working_dir: "{{ web_app_project_root }}"
   # with_items: "{{ updates_available }}"
   register: drupal_updates_download
-  when: drupal_deploy_composer_file.stat.exists == True and updates_available | length > 0
+  when: drupal_deploy_composer_file.stat.exists == True and updates_available|default([]) | length > 0
 
 - name: Set `drupal_updated`, composer update.
   set_fact:
