@@ -15,6 +15,10 @@ Drush installed on remote machine.
 Role Variables
 --------------
 
+---
+# defaults file for kentr.setup-drush
+
+
 # Enable the "common" structure-tables-key.
 # See https://raw.githubusercontent.com/drush-ops/drush/master/examples/example.drushrc.php
 drush_enable_structure_tables_key_common: True
@@ -23,7 +27,6 @@ drush_enable_structure_tables_key_common: True
 # Values are taken from inventory values for host.
 drush_aliases_remote: True
 drush_aliases_local: True
-
 
 # Enable dated sql-dump result file.
 drush_enable_dated_result_file: True
@@ -36,6 +39,20 @@ drush_ssh_options: "-o PasswordAuthentication=no -o LogLevel=quiet"
 
 # Destination directory for SQL dump files.
 drush_sql_dump_dir: "/home/{{ ansible_ssh_user }}/drush-backups/archive-dump"
+
+drush_rsync_excludes: ""
+
+drush_structure_tables:
+  - cache
+  - cache_*
+  - history
+  - sessions
+  - watchdog
+
+# Should the Git PS1 prompt show a dirty repo?
+# See https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh.
+# Note: Enabling this can make the shell prompt pretty slow.
+drush_git_ps1_showdirtystate: True
 
 Dependencies
 ------------

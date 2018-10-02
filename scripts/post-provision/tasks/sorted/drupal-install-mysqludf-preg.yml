@@ -1,51 +1,71 @@
 ---
+# Tasks for installing `mysqludf_preg`.
+#
+# `mysqludf_preg` is used to generate Wraith paths for Drupal sites.
 
-# @todo: Check if already installed
-# mysql -e "SELECT name FROM mysql.func WHERE name='preg_replace'" --batch --skip-column-names
+- name: Check for existing `mysqludf_preg` installation.
+  command: >
+    mysql --defaults-file=/root/.my.cnf -e "SELECT COUNT(*) FROM mysql.func WHERE name='preg_replace'" --batch --skip-column-names
+  register: mysqludf_preg_check
+  when: wraith_testing_framework.install | default(False)
 
-- name: Define workspace if not already defined.
-  set_fact:
-    workspace: '/root'
-  when: workspace is not defined
+- block:
+    - block:
+        # `mysqludf_preg` is for generating Wraith paths file.
+        # We can skip if Wraith paths file already exists.
+        - name: Check if Wraith paths file exists.
+          stat:
+            path: "{{ wraith_testing_framework.paths_file }}"
+            get_checksum: no
+          delegate_to: localhost
+          become: no
+          register: wraith_paths_file_check
 
-- name: Clone mysqludf_preg repo.
-  git:
-    depth: 1
-    update: Yes
-    repo: https://github.com/mysqludf/lib_mysqludf_preg.git
-    dest: "{{ workspace }}/lib_mysqludf_preg"
-    force: Yes
-  when: project_type == "drupal"
+        - name: Set `mysqludf_preg_install`.
+          set_fact:
+            mysqludf_preg_install: "{{ not wraith_paths_file_check.stat.exists }}"
+          when: mysqludf_preg_install is not defined
 
-- name: Ensure libmysqlclient-dev is installed.
-  package:
-    name: libmysqlclient-dev
-    state: present
-  when: project_type == "drupal"
+    - block:
+        - name: Define workspace if not already defined.
+          set_fact:
+            workspace: '/root'
+          when: workspace is not defined
 
-# See http://stackoverflow.com/questions/3096989/libtool-version-mismatch-error
-- name: Fix libtool version mismatch.
-  command: autoreconf --force --install
-  args:
-    chdir: "{{ workspace }}/lib_mysqludf_preg"
-  when: project_type == "drupal"
+        - name: Clone mysqludf_preg repo.
+          git:
+            depth: 1
+            update: Yes
+            repo: https://github.com/mysqludf/lib_mysqludf_preg.git
+            dest: "{{ workspace }}/lib_mysqludf_preg"
+            force: Yes
 
-- name: Configure mysqludf_preg.
-  command: ./configure
-  args:
-    chdir: "{{ workspace }}/lib_mysqludf_preg"
-    creates: Makefile
-  when: project_type == "drupal"
+        - name: Ensure libmysqlclient-dev is installed.
+          package:
+            name: libmysqlclient-dev
+            state: present
 
-- name: Make install mysqludf_preg.
-  command: make install
-  args:
-    chdir: "{{ workspace }}/lib_mysqludf_preg"
-    creates: /usr/lib/mysql/plugin/lib_mysqludf_preg.so
-  when: project_type == "drupal"
+        # See http://stackoverflow.com/questions/3096989/libtool-version-mismatch-error
+        - name: Fix libtool version mismatch.
+          command: autoreconf --force --install
+          args:
+            chdir: "{{ workspace }}/lib_mysqludf_preg"
 
-- name: Make installdb mysqludf_preg.
-  command: make installdb
-  args:
-    chdir: "{{ workspace }}/lib_mysqludf_preg"
-  when: project_type == "drupal"
+        - name: Configure mysqludf_preg.
+          command: ./configure
+          args:
+            chdir: "{{ workspace }}/lib_mysqludf_preg"
+            creates: Makefile
+
+        - name: Make install mysqludf_preg.
+          command: make install
+          args:
+            chdir: "{{ workspace }}/lib_mysqludf_preg"
+            creates: /usr/lib/mysql/plugin/lib_mysqludf_preg.so
+
+        - name: Make installdb mysqludf_preg.
+          command: make installdb
+          args:
+            chdir: "{{ workspace }}/lib_mysqludf_preg"
+      when: mysqludf_preg_install | default(False)
+  when: mysqludf_preg_check.stdout is defined and mysqludf_preg_check.stdout != "1"
