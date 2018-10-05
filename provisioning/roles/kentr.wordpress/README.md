@@ -21,8 +21,6 @@ $ git clone https://github.com/kentr/wordpress.ansible.role.git
 ## Variables
 
 ```yaml
----
-
 wp_version: 4.0
 wp_install_dir: '/var/sites/awesome_wordpress_site'
 wp_db_name: 'database_name_here'
@@ -43,7 +41,6 @@ wp_admin_user: 'admin'
 wp_admin_password: ''
 wp_admin_email: ''
 wp_site_title: 'My Great WordPress Site'
-wp_siteurl: undefined
 
 wp_install_dummy_data: False
 
@@ -63,6 +60,9 @@ wp_site_name: "{{ wp_apache_hostname | default('example') }}"
 # Set this to 'true' and specify a Git repository if you want to deploy WordPress
 # to your server from an existing repository.
 wp_deploy: false
+wp_deploy_clone_depth: 20
+# Should the clone be a single-branch repo?
+wp_deploy_clone_single_branch: False
 wp_deploy_repo: ""
 wp_deploy_version: master
 wp_deploy_update: true
