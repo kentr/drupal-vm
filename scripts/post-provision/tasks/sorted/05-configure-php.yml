@@ -1,0 +1,9 @@
+# Misc extra PHP configuration that's not covered elsewhere.
+# Currently only supports `mod_apache`
+
+- name: Configure PHP `error_log`.
+  lineinfile:
+    line: "error_log = '{{ php_error_log }}'"
+    path: "/etc/php/{{ php_version }}/apache2/php.ini"
+  notify: restart apache
+  when: not php_enable_php_fpm and php_log_errors | default(True) and php_error_log is defined
