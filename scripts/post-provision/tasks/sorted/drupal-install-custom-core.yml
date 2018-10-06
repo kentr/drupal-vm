@@ -6,6 +6,19 @@
 # file owner / group.
 # Checks parent folder instead of `/vagrant` because `/vagrant`
 # may not exist.
+#
+# From `drupalvm.www` role:
+# ---
+# When using NFS the group id of a folder will be identical to that of the host
+# machine, but the groupname will differ or not exist. For the latter case
+# we create a group called `vagrant_group`.
+#
+# In Ansible 2.3+ the gr_name will be set if the GID is mapped to an existing
+# group. If the GID doesn't exist, gr_name will be undefined.
+# ---
+# The above quote implies that in some cases Ansible 2.3+, `gr_name`
+# will be undefined or set to a value corresponding to an existing group.
+# For me, that value has consistently been `dialout`.
 - name: Set `drupal_core_owner`, `drupal_core_group`.
   block:
     - stat:
@@ -19,7 +32,7 @@
       - set_fact:
           drupal_core_group: "{{ web_app_deploy_dir_parent_check.stat.gr_name }}"
 
-      when: web_app_deploy_dir_parent_check.stat.exists and web_app_deploy_dir_parent_check.stat.gr_name == 'vagrant_group'
+      when: web_app_deploy_dir_parent_check.stat.exists and (web_app_deploy_dir_parent_check.stat.gr_name == 'vagrant_group' or web_app_deploy_dir_parent_check.stat.gr_name == 'dialout' or web_app_deploy_dir_parent_check.stat.gr_name is undefined)
 
 - name: Custom core - Ensure web_app_project_root directory exists.
   file:
