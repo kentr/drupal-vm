@@ -78,7 +78,7 @@
       # Though it's silly to strip out "drupal/" only to replace it later, we have to
       # allow for a list from other sources, such as from `drush pm:sec`.
       updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
-  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
+  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only | bool
 
 - block:
   - name: Find updates, Drush 9.x, security-only.
@@ -101,7 +101,7 @@
     with_dict: '{{ _updates_available }}'
     when: _updates_available is defined
 
-  when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
+  when: _drush_version | version_compare('9', '>=') and drupal_update_security_only | bool
 
 # For consistency with composer-managed projects, database updates are performed later.
 - name: Run `drush pm-updatecode`.
