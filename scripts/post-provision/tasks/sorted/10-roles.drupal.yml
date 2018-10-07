@@ -1,0 +1,11 @@
+---
+
+- name: Set up drush.
+  include_role:
+    name: kentr.setup-drush
+  vars:
+    installations: "{{ instances | selectattr('type', 'equalto', 'drupal')  | list }}"
+  when: project_type == "drupal" and drush_setup_drush | default(False) and 'drush' in installed_extras
+  tags:
+    - drupal
+    - drush

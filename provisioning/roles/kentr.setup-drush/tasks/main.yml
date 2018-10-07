@@ -7,11 +7,13 @@
     path: "~/.bashrc"
     state: touch
 
+# `drush init` is inherently idempotent.  It won't copy files that
+# already exist, and it won't add to `.bash_profile` if the additions
+# are already there.
 - name: Run `drush init`.
   become: no
   command: drush init -y
   args:
-    creates: ~/.drush/drush.bashrc
     chdir: "{{ drupal_core_path }}"
 
 - block:
