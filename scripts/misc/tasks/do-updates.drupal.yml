@@ -139,5 +139,7 @@
   when: drupal_deploy_composer_file.stat.exists == True
 
 - name: Run Drupal post-update tasks.
-  include_tasks: "{{ playbook_dir }}/roles/kentr.drupal/tasks/update.yml"
-  when: drupal_updated | default(false)
+  include_role:
+    name: kentr.drupal
+    tasks_from: update
+  when: drupal_updated
