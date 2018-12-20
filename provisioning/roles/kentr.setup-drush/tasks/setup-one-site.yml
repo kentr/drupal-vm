@@ -67,9 +67,10 @@
 
 # Create wrapper php file for aliases if needed.
 - name: Ensure remote Drush alias file exists.
+  become: No
   template:
     # Don't overwrite existing file.
-    force: no
+    force: No
     dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
     src: templates/drush.aliases.drushrc.php.j2
   when: not drush_9_or_higher
@@ -89,7 +90,7 @@
   when: drush_9_or_higher
 
 - name: Insert remote Drush alias declarations.
-  become: no
+  become: No
   blockinfile:
     dest: "{{ drush_remote_alias_file }}"
     marker: "# {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
@@ -109,7 +110,7 @@
   become: No
   template:
     # Don't overwrite existing file.
-    force: no
+    force: No
     dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
     src: templates/drush.aliases.drushrc.php.j2
 
