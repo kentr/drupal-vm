@@ -51,7 +51,7 @@ gulp.task('css', function() {
       includePaths: config.css.includePaths
     }))
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
-    .pipe(sourcemaps.write('./'))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
     .pipe(browserSync.reload({ stream: true, match: '**/*.css' }));
 });
