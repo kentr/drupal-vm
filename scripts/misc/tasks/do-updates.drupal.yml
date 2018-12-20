@@ -1,6 +1,26 @@
 ---
 # Tasks to perform Drupal code updates.
 
+
+- name: Set `drush_path`.
+  block:
+  # Borrowed from `geerlingguy.drupal`
+  - name: Define drush_path if it's not already defined.
+    set_fact:
+      drush_path: drush
+    when: drush_path is not defined
+
+  # Set Drush variables.
+  - name: Check if a project specific Drush binary exists.
+    stat: "path={{ web_app_project_root }}/vendor/drush/drush/drush"
+    register: drush_vendor_bin
+    ignore_errors: true
+
+  - name: Use project specific Drush if available.
+    set_fact:
+      drush_path: "{{ web_app_project_root }}/vendor/drush/drush/drush"
+    when: drush_vendor_bin.stat.exists
+
 - name: Set `drupal_update_security_only` if it's not already defined.
   set_fact:
     drupal_update_security_only: True
@@ -58,7 +78,7 @@
       # Though it's silly to strip out "drupal/" only to replace it later, we have to
       # allow for a list from other sources, such as from `drush pm:sec`.
       updates_available: "{{ (updates_available_result.stdout | from_json)['installed'] | map(attribute='name') | map('regex_replace', '^drupal/', '') | list }}"
-  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only
+  when: _drush_version | version_compare('9', '>=') and not drupal_update_security_only | bool
 
 - block:
   - name: Find updates, Drush 9.x, security-only.
@@ -81,7 +101,7 @@
     with_dict: '{{ _updates_available }}'
     when: _updates_available is defined
 
-  when: _drush_version | version_compare('9', '>=') and drupal_update_security_only
+  when: _drush_version | version_compare('9', '>=') and drupal_update_security_only | bool
 
 # For consistency with composer-managed projects, database updates are performed later.
 - name: Run `drush pm-updatecode`.
@@ -103,7 +123,7 @@
     command: "update"
     # Substitutes "core" for "drupal".
     # Todo: make this substitution smarter, based on what's actually installed.
-    arguments: "--with-dependencies {{ updates_available | join(' ') }}"
+    arguments: "--with-dependencies {{ updates_available | map('regex_replace', '^', 'drupal/') | join(' ') }}"
     optimize_autoloader: True
     # By default, Drupal composer projects install dev dependencies.
     # We want to follow that behavior here.
@@ -119,5 +139,7 @@
   when: drupal_deploy_composer_file.stat.exists == True
 
 - name: Run Drupal post-update tasks.
-  include_tasks: "{{ playbook_dir }}/roles/kentr.drupal/tasks/update.yml"
-  when: drupal_updated | default(false)
+  include_role:
+    name: kentr.drupal
+    tasks_from: update
+  when: drupal_updated

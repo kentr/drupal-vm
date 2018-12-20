@@ -76,9 +76,11 @@
   # `no_log` is set to hide database credentials, salts, etc.
   no_log: True
   template:
-    src: wp-config.php.j2
     dest: "{{ wp_install_dir }}/wp-config.php"
     mode: "ug=r,o="
+    owner: "{{ wp_core_owner }}"
+    group: "{{ wp_core_group }}"
+    src: wp-config.php.j2
 
 - name: Install WordPress site if configured.
   include_tasks: install-site.yml

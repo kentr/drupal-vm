@@ -47,4 +47,12 @@
 
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/do-updates.yml"
 
+  - name: Run wraith smoke test.
+    block:
+      - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/wraith-install.yml"
+        when: drupal_updated | default(false) and wraith_testing_framework.install | default(False)
+
+      - include_tasks: "{{ playbook_dir }}/../scripts/post-provision/tasks/sorted/general-setup-wraith.yml"
+        when: drupal_updated | default(False) and wraith_testing_framework.install | default(False)
+
   - include_tasks: "{{ playbook_dir }}/../scripts/misc/tasks/smoke-test.yml"

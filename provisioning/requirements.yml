@@ -21,12 +21,8 @@
   version: 2.2.2
 - src: geerlingguy.drupal-console
   version: 1.1.0
-# - src: geerlingguy.drush
-#   version: 2.0.1
-- src: git@github.com:kentr/ansible-role-drush.git
-  scm: git
-  version: dev-vagrant-cachier
-  name: kentr.drush
+- src: geerlingguy.drush
+  version: 3.0.0
 - src: geerlingguy.elasticsearch
   version: 2.1.3
 - src: geerlingguy.firewall
@@ -93,6 +89,7 @@
   name: kentr.drupal
 - src: https://github.com/kentr/ansible-role-setup-drush.git
   scm: git
+  version: 0.1.0
   name: kentr.setup-drush
 - src: ssh://git@bitbucket.org/kentr/ansible-role-setup-hosting-account.git
   scm: git
