@@ -31,13 +31,15 @@ provisioner = vconfig['force_ansible_local'] ? :ansible_local : vagrant_provisio
 if provisioner == :ansible
   playbook = "#{host_drupalvm_dir}/provisioning/playbook.yml"
   config_dir = host_config_dir
+
+  # Verify Ansible version requirement.
+  require_ansible_version ">= #{vconfig['drupalvm_ansible_version_min']}"
 else
   playbook = "#{guest_drupalvm_dir}/provisioning/playbook.yml"
   config_dir = guest_config_dir
 end
 
-# Verify version requirements.
-require_ansible_version ">= #{vconfig['drupalvm_ansible_version_min']}"
+# Verify Vagrant version requirement.
 Vagrant.require_version ">= #{vconfig['drupalvm_vagrant_version_min']}"
 
 ensure_plugins(vconfig['vagrant_plugins'])
@@ -115,14 +117,17 @@ Vagrant.configure('2') do |config|
     end
   end
 
-  config.vm.provision provisioner do |ansible|
+  config.vm.provision 'drupalvm', type: provisioner do |ansible|
+    ansible.compatibility_mode = '2.0'
     ansible.playbook = playbook
-      ansible.extra_vars = {
+    ansible.extra_vars = {
       config_dir: config_dir,
-        drupalvm_env: drupalvm_env
-      }
-      ansible.raw_arguments = ENV['DRUPALVM_ANSIBLE_ARGS']
+      drupalvm_env: drupalvm_env
+    }
+    ansible.raw_arguments = Shellwords.shellsplit(ENV['DRUPALVM_ANSIBLE_ARGS']) if ENV['DRUPALVM_ANSIBLE_ARGS']
     ansible.tags = ENV['DRUPALVM_ANSIBLE_TAGS']
+    # Use pip to get the latest Ansible version when using ansible_local.
+    provisioner == :ansible_local && ansible.install_mode = 'pip'
   end
 
   # VMware Fusion.
@@ -160,6 +165,7 @@ Vagrant.configure('2') do |config|
     config.cache.scope = :box
     config.cache.auto_detect = false
     config.cache.enable :apt
+    # Cache the composer directory.
     config.cache.enable :generic, {
       # Composer cache bin.
       "composer" => { cache_dir: '/home/vagrant/.composer/cache' },
@@ -169,7 +175,8 @@ Vagrant.configure('2') do |config|
       "generic" => { cache_dir: '/home/vagrant/.cache' },
     }
     config.cache.synced_folder_opts = {
-      type: vconfig['vagrant_synced_folder_default_type']
+      type: vconfig['vagrant_synced_folder_default_type'],
+      nfs_udp: false
     }
   end
 

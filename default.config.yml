@@ -1,27 +1,24 @@
 ---
-# `vagrant_box` can also be set to geerlingguy/centos6, geerlingguy/centos7,
-# geerlingguy/debian8, geerlingguy/ubuntu1404, geerlingguy/ubuntu1204, etc.
-vagrant_box: geerlingguy/ubuntu1604
+# Available `vagrant_box` values include:
+#   - beet/box (pre-provisioned, based on Ubuntu 16.04)
+#   - geerlingguy/drupal-vm (pre-provisioned, based on Ubuntu 16.04)
+#   - geerlingguy/centos7
+#   - geerlingguy/centos6
+#   - geerlingguy/debian9
+#   - geerlingguy/debian8
+#   - geerlingguy/ubuntu1804
+#   - geerlingguy/ubuntu1604
+vagrant_box: geerlingguy/drupal-vm
+
 vagrant_user: vagrant
 vagrant_synced_folder_default_type: nfs
 vagrant_gui: false
 
 # If you need to run multiple instances of Drupal VM, set a unique hostname,
 # machine name, and IP address for each instance.
-vagrant_hostname: drupalvm.dev
+vagrant_hostname: drupalvm.test
 vagrant_machine_name: drupalvm
 vagrant_ip: 192.168.88.88
-
-# Primary directory that is synced onto the Vagrant machine.
-# This should usually be equivalent to the directory on the host that contains
-# the Drupal-VM code and your project.
-# On production shared webservers, this is usually your user's home directory.
-base_synced_dir: "/home/{{ vagrant_machine_name }}"
-
-# Root directory for the web app project.
-# This is where the code and everything else in the project's repo will go.
-# If you change this, you should also change the corresponding synced folder below.
-project_root_dir: "{{ base_synced_dir }}/drupal"
 
 # Allow Drupal VM to be accessed via a public network interface on your host.
 # Vagrant boxes are insecure by default, so be careful. You've been warned!
@@ -35,10 +32,8 @@ vagrant_synced_folders:
   # The first synced folder will be used for the default Drupal installation, if
   # any of the build_* settings are 'true'. By default the folder is set to
   # the drupal-vm folder.
-  # If you change the `destination`, you probably also want to change `base_synced_dir`
-  # above.
   - local_path: .
-    destination: "{{ base_synced_dir }}"
+    destination: /var/www/drupalvm
     type: nfs
     create: true
 
@@ -53,7 +48,7 @@ vagrant_plugins:
 
 # Minimum required versions.
 drupalvm_vagrant_version_min: '1.8.6'
-drupalvm_ansible_version_min: '2.2'
+drupalvm_ansible_version_min: '2.4'
 
 # Force use of ansible_local provisioner, even if Ansible is installed on host.
 force_ansible_local: false
@@ -70,17 +65,16 @@ drupal_build_makefile: false
 drush_makefile_path: "{{ config_dir }}/drupal.make.yml"
 drush_make_options: "--no-gitinfofile"
 
-# Set 'build_makefile' to 'false' and this to 'true' if you are using a
+# Set 'drupal_build_makefile' to 'false' and this to 'true' if you are using a
 # composer based site deployment strategy.
 drupal_build_composer: false
 drupal_composer_path: "{{ config_dir }}/drupal.composer.json"
-# You probably don't want to change this.
-drupal_composer_install_dir: "{{ project_root_dir }}"
+drupal_composer_install_dir: "/var/www/drupalvm/drupal"
 drupal_composer_dependencies:
-  - "drupal/devel:1.x-dev"
+  - "drupal/devel:^1.2"
 
-# Set this to 'true' and 'build_makefile', 'build_composer' to 'false' if you
-# are using Composer's create-project as a site deployment strategy.
+# Set this to 'true' and 'drupal_build_makefile', 'drupal_build_composer' to 'false'
+# if you are using Composer's create-project as a site deployment strategy.
 drupal_build_composer_project: true
 drupal_composer_project_package: "drupal-composer/drupal-project:8.x-dev"
 drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction"
@@ -90,14 +84,14 @@ drupal_composer_project_options: "--prefer-dist --stability dev --no-interaction
 drupal_install_site: true
 
 # Required Drupal settings.
-# The location of the actual Drupal site code.
 drupal_core_path: "{{ drupal_composer_install_dir }}/web"
 drupal_core_owner: "{{ drupalvm_user }}"
 drupal_db_user: drupal
 drupal_db_password: drupal
 drupal_db_name: drupal
+drupal_db_host: localhost
 
-# Settings for installing a Drupal site if 'install_site:' is 'true'.
+# Settings for installing a Drupal site if 'drupal_install_site:' is 'true'.
 drupal_major_version: 8
 drupal_domain: "{{ vagrant_hostname }}"
 drupal_site_name: "Drupal"
@@ -117,7 +111,9 @@ drupalvm_cron_jobs: []
 # this variable is 'true'.
 configure_drush_aliases: true
 drush_aliases_host_template: "templates/drupalvm.aliases.drushrc.php.j2"
+drush_aliases_host_template_yml: "templates/drupalvm.aliases.yml.j2"
 drush_aliases_guest_template: "templates/drupalvm-local.aliases.drushrc.php.j2"
+drush_aliases_guest_template_yml: "templates/drupalvm-local.aliases.yml.j2"
 
 # Helper variable to configure the PHP-FPM connection for each Apache
 # VirtualHost in the `apache_vhosts` list.
@@ -156,6 +152,7 @@ apache_packages_state: latest
 apache_remove_default_vhost: true
 apache_mods_enabled:
   - expires.load
+  - headers.load
   - ssl.load
   - rewrite.load
   - proxy.load
@@ -218,7 +215,6 @@ installed_extras:
   # - blackfire
   # - drupalconsole
   - drush
-  # - drush_bde_env
   # - elasticsearch
   # - java
   - mailhog
@@ -235,17 +231,12 @@ installed_extras:
   - varnish
   # - xdebug
   # - xhprof # use `tideways` if you're installing PHP 7+
-  # CloudFoundry CLI tool.  Debian only.
-  # - cf_cli
 
 # Add any extra apt or yum packages you would like installed.
 extra_packages:
   - sqlite
-  - aptitude
 
 # You can configure almost anything else on the server in the rest of this file.
-drush_version: "8.1.10"
-
 extra_security_enabled: false
 
 firewall_enabled: true
@@ -265,26 +256,19 @@ firewall_log_dropped_packets: false
 firewall_disable_firewalld: true
 firewall_disable_ufw: true
 
-# PHP Configuration. Currently-supported versions: 5.6, 7.0, 7.1.
+# PHP Configuration. Currently-supported versions: 5.6, 7.0, 7.1, 7.2.
 # See version-specific notes: http://docs.drupalvm.com/en/latest/configurations/php/
 php_version: "7.1"
 php_install_recommends: no
-php_memory_limit: "256M"
+php_memory_limit: "192M"
 php_display_errors: "On"
 php_display_startup_errors: "On"
 php_realpath_cache_size: "1024K"
 php_sendmail_path: "/opt/mailhog/mhsendmail"
 php_opcache_enabled_in_ini: true
 php_opcache_memory_consumption: "192"
-php_opcache_max_accelerated_files: 10000
-php_opcache_fast_shutdown: "On"
-php_opcache_interned_strings_buffer: 16
+php_opcache_max_accelerated_files: 4096
 php_max_input_vars: "4000"
-
-php_log_errors: "On"
-php_error_log: "/var/log/php_errors.log"
-
-#php_date_timezone: "America/Los_Angeles"
 
 # Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
 # to instead use Apache + mod_php with an Ubuntu base box, make sure you add
@@ -299,13 +283,12 @@ composer_home_group: "{{ drupalvm_user }}"
 composer_global_packages:
   - { name: hirak/prestissimo, release: '^0.3' }
 
-# Run specified scripts before or after VM is provisioned. Path is relative to
-# the `provisioning/playbook.yml` file.
+# Run specified scripts before or after VM is provisioned. Use {{ playbook_dir }}
+# to reference the provisioning/ folder in Drupal VM or {{ config_dir }} to
+# reference the directory where your `config.yml` is.
 pre_provision_scripts: []
 post_provision_scripts: []
-  # - "../examples/scripts/configure-solr.sh"
-pre_provision_tasks_dir: "../scripts/pre-provision/tasks/*.yml"
-post_provision_tasks_dir: "../scripts/post-provision/tasks/*.yml"
+  # - "{{ playbook_dir }}/../examples/scripts/configure-solr.sh"
 
 # MySQL Configuration.
 mysql_root_password: root
@@ -317,7 +300,8 @@ adminer_install_filename: index.php
 # Node.js configuration (if enabled above).
 # Valid examples: "0.10", "0.12", "4.x", "5.x", "6.x".
 nodejs_version: "6.x"
-nodejs_npm_global_packages: []
+nodejs_npm_global_packages:
+  - name: npm
 nodejs_install_npm_user: "{{ drupalvm_user }}"
 npm_config_prefix: "/home/{{ drupalvm_user }}/.npm-global"
 
@@ -338,16 +322,15 @@ pimpmylog_grant_all_privs: true
 # XDebug configuration. XDebug is disabled by default for better performance.
 php_xdebug_default_enable: 0
 php_xdebug_coverage_enable: 0
-php_xdebug_cli_enable: 1
+php_xdebug_cli_disable: yes
 php_xdebug_remote_enable: 1
 php_xdebug_remote_connect_back: 1
-# Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
 php_xdebug_idekey: PHPSTORM
 php_xdebug_max_nesting_level: 256
 php_xdebug_remote_host: "{{ ansible_default_ipv4.gateway }}"
 
 # Solr Configuration (if enabled above).
-solr_version: "5.5.3"
+solr_version: "5.5.5"
 solr_xms: "64M"
 solr_xmx: "128M"
 

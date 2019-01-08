@@ -14,7 +14,7 @@ You can add as many synced folders as you'd like, and you can configure [any typ
 
 ## Options
 
-The synced folder options exposed are `type`, `excluded_paths` (when using rsync), `id`, `create` and `mount_options`. Besides these there are some sane defaults set when using rsync. For example all files synced with rsync will be writable by everyone, thus allowing the web server to create files.
+The synced folder options exposed are `type`, `excluded_paths` (when using rsync), `id`, `create`, `mount_options` and `nfs_udp`. Besides these there are some sane defaults set when using rsync. For example all files synced with rsync will be writable by everyone, thus allowing the web server to create files.
 
 ### Overriding defaults
 
@@ -33,6 +33,8 @@ options_override:
     "--chmod=gu=rwX,o=rX", # 664 for files, 775 for directories
   ]
 ```
+
+> Note If you're using CentOS, the group should be set to `httpd` or `apache` instead.
 
 ## Synced Folder Troubleshooting
 
@@ -71,7 +73,35 @@ vagrant_synced_folders:
       group: "www-data"
 ```
 
+> Note If you're using CentOS, the group should be set to `httpd` or `apache` instead.
+
 See [this issue](https://github.com/geerlingguy/drupal-vm/issues/66) for more details.
+
+### Using [`vagrant-bindfs`](https://github.com/gael-ian/vagrant-bindfs) to work around permissions-related errors
+
+If you're using NFS synced folders the mounted directories will use the same numeric permissions on the guest VM as on the host OS. If you're on OSX for instance, your files within the VM would be owned by 501:20. To correct these permissions you can use the [`vagrant-bindfs` plugin](https://github.com/gael-ian/vagrant-bindfs) to mount your NFS folders to a temporary location and then re-mount them to the actual destination with the correct ownership.
+
+First install the plugin with `vagrant plugin install vagrant-bindfs` and then add a `Vagrantfile.local` with the following:
+
+```rb
+vconfig['vagrant_synced_folders'].each do |synced_folder|
+  case synced_folder['type']
+  when "nfs"
+    guest_path = synced_folder['destination']
+    host_path = File.expand_path(synced_folder['local_path'])
+    config.vm.synced_folders[guest_path][:guestpath] = "/var/nfs#{host_path}"
+    config.bindfs.bind_folder "/var/nfs#{host_path}", guest_path,
+      u: 'vagrant',
+      g: 'www-data',
+      perms: 'u=rwX:g=rwD',
+      o: 'nonempty'
+    config.nfs.map_uid = Process.uid
+    config.nfs.map_gid = Process.gid
+  end
+end
+```
+
+> Note If you're using CentOS, the group should be set to `httpd` or `apache` instead.
 
 ### Other NFS-related errors
 

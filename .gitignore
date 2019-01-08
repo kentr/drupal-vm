@@ -2,28 +2,29 @@
 .DS_Store
 
 # Editor and language files.
-/.idea/
-/.project
+.idea/
+.project/
+.bundle/
 .buildpath
-/.bundle/
-/.settings/
+.settings/
 
 # Ansible files.
 *.retry
 .galaxy_install_info
 
 # Vagrant files.
-/.vagrant/
+.vagrant/
 vagrant_ansible_inventory_default
 
-# DrupalVM specific files.
+# Drupal VM specific files.
 local.config.yml
-# config.yml
-docker-compose.yml
-drupal.make.yml
 Vagrantfile.local
+# /config.yml
+/docker-compose.yml
+/drupal.make.yml
 /examples/prod/inventory
 /examples/prod/bootstrap/vars.yml
+/scripts/
 /drupal/
 
 # Some roles include 'config.yml' files.
