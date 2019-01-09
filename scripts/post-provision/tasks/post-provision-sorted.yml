@@ -5,3 +5,5 @@
   loop_control:
     loop_var: outer_item_sorted
   with_list: "{{ lookup('fileglob','./sorted/*.yml').split(',') | sort }}"
+  tags:
+    - always

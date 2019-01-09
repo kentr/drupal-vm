@@ -8,16 +8,35 @@
   tags:
     - wordpress
 
-# Call the existing `kentr.wordpress` role with pre-existing values
-# for `wp_install` or `wp_deploy`.
-- name: Include `kentr.wordpress` role to setup WordPress.
-  include_role:
-    name: kentr.wordpress
-  vars:
-    wp_add_siteurl_to_wp_config: True
-    wp_mysql_db_create: false
-    wp_mysql_db_create_users: false
-    wp_siteurl: "{{ local_uri }}"
-  when: project_type == "wordpress"
-  tags:
-    - wordpress
+- block:
+  - block:
+    # Workaround for NFS synced folders, since it's not possible to change
+    # file owner / group.
+    - name: Set `wp_core_owner`, `wp_core_group`.
+      block:
+        - stat:
+            get_checksum: false
+            path: "{{ wp_deploy_dir | dirname }}"
+          register: wp_deploy_dir_parent_check
+
+        - block:
+          - set_fact:
+              wp_core_owner: "{{ wp_deploy_dir_parent_check.stat.uid }}"
+          - set_fact:
+              wp_core_group: "{{ wp_deploy_dir_parent_check.stat.gr_name }}"
+
+          when: wp_deploy_dir_parent_check.stat.exists and wp_deploy_dir_parent_check.stat.gr_name == 'vagrant_group'
+
+    # Call the existing `kentr.wordpress` role with pre-existing values
+    # for `wp_install` or `wp_deploy`.
+    - name: Include `kentr.wordpress` role to setup WordPress.
+      include_role:
+        name: kentr.wordpress
+      vars:
+        wp_add_siteurl_to_wp_config: True
+        wp_mysql_db_create: false
+        wp_mysql_db_create_users: false
+        wp_siteurl: "{{ local_uri }}"
+      when: project_type == "wordpress"
+      tags:
+      - wordpress
