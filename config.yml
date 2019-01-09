@@ -1,4 +1,5 @@
 ---
+vagrant_box: geerlingguy/ubuntu1604
 
 # Web app project type.
 # Possible values: 'drupal', 'wordpress' (case-sensitive).
