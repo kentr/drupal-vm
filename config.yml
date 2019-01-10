@@ -467,11 +467,6 @@ installed_extras:
   # - xhprof # use `tideways` if you're installing PHP 7+
   # - wp-cli
 
-# Add any extra apt or yum packages you would like installed.
-extra_packages:
-  - sqlite
-  - aptitude
-
 # You can configure almost anything else on the server in the rest of this file.
 drush_version: "8.1.10"
 
