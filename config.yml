@@ -451,7 +451,7 @@ installed_extras:
   # - blackfire
   # - cf_cli
   # - drupalconsole
-  - drush
+  # - drush
   # - drush_bde_env
   # - elasticsearch
   # - java
@@ -470,11 +470,6 @@ installed_extras:
   # - xdebug
   # - xhprof # use `tideways` if you're installing PHP 7+
   # - wp-cli
-
-# Add any extra apt or yum packages you would like installed.
-extra_packages:
-  - sqlite
-  - aptitude
 
 # You can configure almost anything else on the server in the rest of this file.
 drush_version: "8.1.10"
