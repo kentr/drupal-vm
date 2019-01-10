@@ -447,7 +447,7 @@ installed_extras:
   # - blackfire
   # - cf_cli
   # - drupalconsole
-  - drush
+  # - drush
   # - drush_bde_env
   # - elasticsearch
   # - java
