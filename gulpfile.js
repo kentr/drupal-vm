@@ -82,7 +82,10 @@ gulp.task('watch', function() {
 // Static Server + Watch
 gulp.task('serve', ['css', 'fonts', 'watch'], function() {
   browserSync.init({
-    proxy: config.browserSyncProxy
+    proxy: config.browserSyncProxy,
+    files: [
+      config.themeDir + '/' + '**/*.{php,inc,module,theme,twig,yml}'
+    ]
   });
 });
 
