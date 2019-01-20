@@ -53,7 +53,7 @@ gulp.task('css', function() {
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
-    .pipe(browserSync.reload({ stream: true, match: '**/*.css' }));
+    .pipe(browserSync.stream({match: '**/*.css'}));
 });
 
 // Compress images.
@@ -82,7 +82,10 @@ gulp.task('watch', function() {
 // Static Server + Watch
 gulp.task('serve', ['css', 'fonts', 'watch'], function() {
   browserSync.init({
-    proxy: config.browserSyncProxy
+    proxy: config.browserSyncProxy,
+    files: [
+      config.themeDir + '/' + '**/*.{php,inc,module,theme,twig,yml}'
+    ]
   });
 });
 
