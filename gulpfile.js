@@ -8,7 +8,7 @@
 
 // Include gulp.
 var gulp = require('gulp');
-var browserSync = require('browser-sync').create();
+var browsersync = require('browser-sync').create();
 
 // Include plugins.
 var sass = require('gulp-sass');
@@ -53,7 +53,7 @@ gulp.task('css', function() {
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
-    .pipe(browserSync.stream({match: '**/*.css'}));
+    .pipe(browsersync.stream({match: '**/*.css'}));
 });
 
 // Compress images.
@@ -80,18 +80,11 @@ gulp.task('watch', function(done) {
   done();
 });
 
-var gulpServeTask = function() {
-  console.log('gulpServeTask');
-  browserSync.init({
-    proxy: config.browserSyncProxy
-  });
-}
-
 // Static Server + Watch
 gulp.task('serve', gulp.series(gulp.parallel('css', 'fonts'), 'watch', function() {
-  console.log('gulpServeTask');
-  browserSync.init({
-    proxy: config.browserSyncProxy,
+  browsersync.init({
+    proxy: config.browsersync.proxy,
+    browser: config.browsersync.browser,
     files: [
       config.themeDir + '/' + '**/*.{php,inc,module,theme,twig,yml}'
     ]
