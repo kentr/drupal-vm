@@ -1,9 +1,9 @@
 {
-  "name": "radix_sub",
-  "description": "A theme based on Radix.",
+  "name": "theme_build",
+  "description": "Generic theme building gulpfile.",
   "private": true,
   "scripts": {
-    "setup": "npm install && bower install",
+    "setup": "npm install",
     "postinstall": "find node_modules/ -name '*.info' -type f -delete"
   },
   "devDependencies": {
