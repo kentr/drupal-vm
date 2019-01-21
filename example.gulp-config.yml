@@ -5,8 +5,13 @@
 
 # The gulp setup here and in `gulpfile.js` may not even work for some web projects.
 
-# URL of backend dev server to be proxied by browser sync.
-browserSyncProxy: 'http://example.dev'
+# Browsersync options.
+# See https://browsersync.io/docs/options
+browserSync
+  # URL of backend dev server to be proxied by browser sync.
+  proxy: 'http://example.dev'
+  # Browsers to open when starting.
+  browser: 'default'
 
 # Alias to use for drush ops, such as cache clearing.
 drushAlias: '@example.dev'
