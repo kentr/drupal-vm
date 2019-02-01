@@ -8,7 +8,7 @@
 
 // Include gulp.
 var gulp = require('gulp');
-var browserSync = require('browser-sync').create();
+var browsersync = require('browser-sync').create();
 
 // Include plugins.
 var sass = require('gulp-sass');
@@ -51,9 +51,9 @@ gulp.task('css', function() {
       includePaths: config.css.includePaths
     }))
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
-    .pipe(sourcemaps.write('./'))
+    .pipe(sourcemaps.write())
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
-    .pipe(browserSync.reload({ stream: true, match: '**/*.css' }));
+    .pipe(browsersync.stream({match: '**/*.css'}));
 });
 
 // Compress images.
@@ -74,17 +74,22 @@ gulp.task('fonts', function() {
 });
 
 // Watch task.
-gulp.task('watch', function() {
-  gulp.watch(config.themeDir + '/' + config.css.src, ['css']);
-  gulp.watch(config.themeDir + '/' + config.images.src, ['images']);
+gulp.task('watch', function(done) {
+  gulp.watch(config.themeDir + '/' + config.css.src, gulp.series('css'));
+  gulp.watch(config.themeDir + '/' + config.images.src, gulp.series('images'));
+  done();
 });
 
 // Static Server + Watch
-gulp.task('serve', ['css', 'fonts', 'watch'], function() {
-  browserSync.init({
-    proxy: config.browserSyncProxy
+gulp.task('serve', gulp.series(gulp.parallel('css', 'fonts'), 'watch', function() {
+  browsersync.init({
+    proxy: config.browsersync.proxy,
+    browser: config.browsersync.browser,
+    files: [
+      config.themeDir + '/' + '**/*.{php,inc,module,theme,twig,yml}'
+    ]
   });
-});
+}));
 
 // Run drush to clear the theme registry.
 gulp.task('drush', shell.task([
@@ -107,4 +112,4 @@ gulp.task('js-lint', function() {
 });
 
 // Default Task
-gulp.task('default', ['serve']);
+gulp.task('default', gulp.series('serve'));

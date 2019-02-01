@@ -26,7 +26,6 @@ Available variables are listed below, along with default values (see `defaults/m
     drupal_deploy_repo: ""
     drupal_deploy_version: master
     drupal_deploy_update: true
-    drupal_deploy_force: Yes
     drupal_deploy_dir: "/var/www/drupal"
     drupal_deploy_accept_hostkey: no
 
@@ -35,9 +34,12 @@ Set `drupal_deploy` to `true` and `drupal_build_composer*` to `false` if you wou
   - `repo`: Git repository address
   - `version`: can be a branch, tag, or commit hash
   - `update`: whether the repository should be updated to the latest commit, if `version` is a branch
-  - `force`: whether local modifications to the working tree should be discarded.
   - `dir`: The directory into which the repository will be checked out
   - `accept_hostkey`: Whether to automatically accept the Git server's hostkey on the first connection.
+
+You can also control whether a `composer install` is run after the git clone is finished using the following variable:
+
+    drupal_deploy_composer_install: yes
 
 ### Build a project from a Drush Make file
 
@@ -84,7 +86,7 @@ Required Drupal settings. When used in a production or shared environment, you s
 
 Set this to `false` if you don't need to install Drupal (using the `drupal_*` settings below), but instead copy down a database (e.g. using `drush sql-sync`).
 
-    drupal_domain: "drupaltest.dev"
+    drupal_domain: "drupaltest.test"
     drupal_site_name: "Drupal"
     drupal_install_profile: standard
     drupal_site_install_extra_args: []

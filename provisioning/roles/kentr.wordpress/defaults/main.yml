@@ -39,6 +39,9 @@ wp_site_name: "{{ wp_apache_hostname | default('example') }}"
 # Set this to 'true' and specify a Git repository if you want to deploy WordPress
 # to your server from an existing repository.
 wp_deploy: false
+wp_deploy_clone_depth: 20
+# Should the clone be a single-branch repo?
+wp_deploy_clone_single_branch: False
 wp_deploy_repo: ""
 wp_deploy_version: master
 wp_deploy_update: true
