@@ -9,7 +9,7 @@
         {#-
           SSH information for the alias is included unless:
             - drush_all_aliases_remote != True OR
-            - item.drush_alias_is_local_on_remote_node != True OR
+            - item.drush_alias_is_local_on_remote_node = False OR
               - item.drush_alias_is_local_on_remote_node is undefined AND
               - item.env in ['prod', 'stage']
 
