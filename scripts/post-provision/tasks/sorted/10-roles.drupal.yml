@@ -5,6 +5,11 @@
   # Prevents need to install a project-specific Drush into every D7 project.
   # Overrides Drush launcher installation.
   block:
+    # Gets information about `ansible_user`.
+    # Required because `become: No` or
+    # `become_user: "{{ ansible_user}}"` was not yielding the correct
+    # HOME environment value.
+    # @see https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible
     - user:
         name: "{{ ansible_user }}"
         state: present
