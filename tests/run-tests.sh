@@ -26,6 +26,10 @@ if [ $distro = 'centos7' ]; then
 elif [ $distro = 'centos6' ]; then
   init="/sbin/init"
   opts="--privileged"
+# Ubuntu 18.04
+elif [ $distro = 'ubuntu1804' ]; then
+  init="/lib/systemd/systemd"
+  opts="--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 # Ubuntu 16.04
 elif [ $distro = 'ubuntu1604' ]; then
   init="/lib/systemd/systemd"
@@ -94,7 +98,7 @@ printf "\n"${green}"Checking playbook syntax..."${neutral}"\n"
 docker exec --tty $CONTAINER_ID env TERM=xterm ansible-playbook $DRUPALVM_DIR/provisioning/playbook.yml --syntax-check
 
 # Run Ansible Lint.
-docker exec $CONTAINER_ID bash -c "easy_install ansible-lint"
+docker exec $CONTAINER_ID bash -c "pip install ansible-lint"
 docker exec $CONTAINER_ID bash -c "cd $DRUPALVM_DIR/provisioning && ansible-lint playbook.yml" || true
 
 # Run the setup playbook.

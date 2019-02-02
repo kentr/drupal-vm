@@ -1,6 +1,10 @@
-Drupal VM supports deploying Drupal VM to a production environment. The security of your servers is _your_ responsibility.
+Drupal VM can be made to manage a production environment. The security of your servers is _your_ responsibility, and **such usage should be considered experimental and unsupported**.
 
 (See companion blog post to this documentation: [Soup to Nuts: Using Drupal VM to build local and prod](https://www.jeffgeerling.com/blog/2017/soup-nuts-using-drupal-vm-build-local-and-prod).)
+
+If you want to try managing a production environment (or other non-local environments) with Drupal VM, please see the following suggestions for making these servers more secure and easier to manage.
+
+> Note: As of Drupal VM 5.0.0, the example production configuration files are no longer included with Drupal VM. You would need to download [Drupal VM 4.9.1](https://github.com/geerlingguy/drupal-vm/releases/tag/4.9.1) and copy the `examples/prod` directory into your Drupal VM codebase to make the example commands work with a newer version of Drupal VM.
 
 ## Production specific overrides.
 
@@ -43,7 +47,15 @@ First, you'd create an Ansible Vault encrypted file:
 
     $ ansible-vault create secrets.yml
 
-Create the file inside your VM's configuration directory, add any plaintext passwords, and save it. Ansible Vault will encrypt the file, and you can edit the file using `ansible-vault edit`.
+Create the file inside your VM's configuration directory, and save the following inside (replacing the actual passwords with your own secure ones!):
+
+```
+drupal_account_pass: add-your-secure-password-1-here
+drupal_db_password: add-your-secure-password-2-here                                                                  
+mysql_root_password: add-your-secure-password-3-here
+```
+
+Ansible Vault will encrypt the file, and you can edit the file using `ansible-vault edit`.
 
 When running `vagrant` commands, make sure you tell the Ansible provisioner to use `--ask-vault-pass`, e.g.:
 
@@ -57,7 +69,7 @@ And if you need to override one of the secrets stored in that file, you can do s
 
 ## Example: Drupal VM on DigitalOcean
 
-The [`examples/prod` directory](https://github.com/geerlingguy/drupal-vm/tree/master/examples/prod) contains an example production configuration for Drupal VM which can be used to deploy Drupal VM to a production environment on a cloud provider like DigitalOcean, Linode, or AWS.
+The [`examples/prod` directory](https://github.com/geerlingguy/drupal-vm/tree/4.9.1/examples/prod) contains an example production configuration for Drupal VM which can be used to deploy Drupal VM to a production environment on a cloud provider like DigitalOcean, Linode, or AWS.
 
 This guide contains instructions for how you can build a Drupal environment with Drupal VM on DigitalOcean.
 
@@ -70,7 +82,7 @@ Make sure you have an SSH key you can use to connect to your DigitalOcean drople
 Once you are logged into DigitalOcean and have added your SSH key, click the 'Create Droplet' button on your Droplets page. For the Droplet, choose the following options:
 
   - **Image**: Choose `Ubuntu 16.04.x x64`
-  - **Size**: 1 GB / 1 CPU (currently $10/month; you can choose a higher plan if needed)
+  - **Size**: 1 GB / 1 CPU (currently $5/month; you can choose a higher plan if needed)
   - **Region**: Choose whatever region is geographically nearest to you and your site visitors
   - **Settings**: (Nothing here affects how Drupal VM works, choose what you'd like)
   - **Add SSH Keys**: Select the SSH key you added to your account earlier.
@@ -88,9 +100,9 @@ Your DigitalOcean Droplet is booted and ready to have Drupal VM installed on it.
 
 ### Customize `config.yml` for production
 
-Copy [`examples/prod/prod.config.yml`](https://github.com/geerlingguy/drupal-vm/blob/master/examples/prod/prod.config.yml) to `config.yml`, and by looking at `default.config.yml` add any other overrides you'd like. Whatever variables you have set in `config.yml` will override the defaults set by `default.config.yml`.
+Copy [`examples/prod/prod.config.yml`](https://github.com/geerlingguy/drupal-vm/blob/4.9.1/examples/prod/prod.config.yml) to `config.yml`, and by looking at `default.config.yml` add any other overrides you'd like. Whatever variables you have set in `config.yml` will override the defaults set by `default.config.yml`.
 
-The changes outlined in the [example `prod.config.yml`](https://github.com/geerlingguy/drupal-vm/blob/master/examples/prod/prod.config.yml) disable development-environment tools (like Pimp My Log and Adminer) and add extra security hardening configuration (via the `extra_security_enabled` variable).
+The changes outlined in the [example `prod.config.yml`](https://github.com/geerlingguy/drupal-vm/blob/4.9.1/examples/prod/prod.config.yml) disable development-environment tools (like Pimp My Log and Adminer) and add extra security hardening configuration (via the `extra_security_enabled` variable).
 
 You now have Drupal VM configured for production by default. This is the recommended and safest way, so that you can't accidentally provision a production server with development tools. If desired you can also use the [environment variable `DRUPALVM_ENV`](#production-specific-overrides) to load an additional `<ENV>.config.yml` with production specific overrides. In most cases this is not needed though.
 
