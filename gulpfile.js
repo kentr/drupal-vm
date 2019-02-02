@@ -33,7 +33,7 @@ var config = YAML.load('gulp-config.yml');
 
 // CSS.
 gulp.task('css', function() {
-  return gulp.src(config.themeDir + '/' + config.css.src)
+  return gulp.src(config.themeDir + '/' + config.css.src, { sourcemaps: true })
     .pipe(glob())
     .pipe(plumber({
       errorHandler: function (error) {
@@ -52,7 +52,7 @@ gulp.task('css', function() {
       includePaths: config.css.includePaths
     }))
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
-    .pipe(sourcemaps.write())
+    .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
     // Set the file modification time.
     // @see https://github.com/gulpjs/gulp/issues/1461
