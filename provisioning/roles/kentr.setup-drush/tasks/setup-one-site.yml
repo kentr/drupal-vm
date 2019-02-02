@@ -59,7 +59,6 @@
 #       Will be added to the alias block as a `db-url` property.
 ##########################################################################################
 
-
 # ----------------------------------------------
 # REMOTE
 
@@ -103,27 +102,23 @@
 # ----------------------------------------------
 # LOCAL
 
-# TODO: Adapt to Drush 9
-
-- name: Ensure local Drush alias file exists.
-  delegate_to: 127.0.0.1
-  become: No
-  template:
-    # Don't overwrite existing file.
-    force: No
-    dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
-    src: templates/drush.aliases.drushrc.php.j2
-
 - name: Set `drush_all_aliases_remote`.
   set_fact:
     drush_all_aliases_remote: True
+
+# We're assuming that local Drush is >= 9.
+- name: Define local Drush alias file.
+  set_fact:
+    drush_local_alias_file: "~/.drush/sites/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.site.yml"
 
 - name: Insert local Drush alias declarations.
   delegate_to: 127.0.0.1
   become: No
   blockinfile:
-    dest: "~/.drush/{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.aliases.drushrc.php"
-    marker: "// {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
+    dest: "{{ drush_local_alias_file }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
     state: present
-    content:  "{{ lookup('template', 'templates/single-alias-block.j2') }}"
+    content:  "{{ lookup('template', 'templates/' + drush_single_alias_template) }}"
+    # For Drush >= 9, it's a simple YAML file that can be created as we go.
+    create: "{{ drush_9_or_higher }}"
   when: item.uri is defined and drush_aliases_local | default(False)
