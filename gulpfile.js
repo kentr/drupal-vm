@@ -24,6 +24,7 @@ var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var sourcemaps = require('gulp-sourcemaps');
 var scssLint = require('gulp-scss-lint');
+var touch = require('gulp-touch-fd');
 var jshint = require('gulp-jshint');
 
 // Load config
@@ -53,6 +54,9 @@ gulp.task('css', function() {
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
     .pipe(sourcemaps.write())
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
+    // Set the file modification time.
+    // @see https://github.com/gulpjs/gulp/issues/1461
+    .pipe(touch())
     .pipe(browsersync.stream({match: '**/*.css'}));
 });
 
