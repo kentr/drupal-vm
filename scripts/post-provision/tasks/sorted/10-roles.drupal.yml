@@ -1,45 +1,46 @@
 ---
 
-- name: Install Drush globally and set `DRUSH_LAUNCHER_FALLBACK` for D7.
-  # @see https://github.com/geerlingguy/drupal-vm/issues/1672#issuecomment-368309383
-  # Prevents need to install a project-specific Drush into every D7 project.
-  # Overrides Drush launcher installation.
+- name: Install and set up Drush.
   block:
-    # Gets information about `ansible_user`.
-    # Required because `become: No` or
-    # `become_user: "{{ ansible_user}}"` was not yielding the correct
-    # HOME environment value.
-    # @see https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible
-    - user:
-        name: "{{ ansible_user }}"
-        state: present
-      register: ansible_user_registered
 
-    - name: Install global Drush for D7.
-      become: No
+    - name: Install Drush globally and set `DRUSH_LAUNCHER_FALLBACK` for D7.
+      # @see https://github.com/geerlingguy/drupal-vm/issues/1672#issuecomment-368309383
+      # Prevents need to install a project-specific Drush into every D7 project.
+      # Overrides Drush launcher installation.
+      block:
+        # Gets information about `ansible_user`.
+        # Required because `become: No` or
+        # `become_user: "{{ ansible_user}}"` was not yielding the correct
+        # HOME environment value.
+        # @see https://stackoverflow.com/questions/33343215/how-to-get-an-arbitrary-remote-users-home-directory-in-ansible
+        - user:
+            name: "{{ ansible_user }}"
+            state: present
+          register: ansible_user_registered
+
+        - name: Install global Drush for D7.
+          become: No
+          include_role:
+            name: geerlingguy.drush
+          vars:
+            drush_launcher_install: False
+            drush_composer_global_install: True
+            drush_composer_version: "{{ drush_version }}"
+            drush_composer_path: "{{ ansible_user_registered.home }}/.composer/vendor/bin/drush-role-dummy-link"
+
+        - name: Ensure globally-installed Drush is symlinked into bin dir.
+          file:
+            src: "{{ ansible_user_registered.home }}/.composer/vendor/bin/drush"
+            dest: "{{ drush_composer_path }}"
+            force: Yes
+            state: link
+
+      when: drupal_major_version == 7
+
+    - name: Set up drush.
       include_role:
-        name: geerlingguy.drush
+        name: kentr.setup-drush
       vars:
-        drush_launcher_install: False
-        drush_composer_global_install: True
-        drush_composer_version: "{{ drush_version }}"
-        drush_composer_path: "{{ ansible_user_registered.home }}/.composer/vendor/bin/drush-role-dummy-link"
+        installations: "{{ instances | selectattr('type', 'equalto', 'drupal')  | list }}"
 
-    - name: Ensure globally-installed Drush is symlinked into bin dir.
-      file:
-        src: "{{ ansible_user_registered.home }}/.composer/vendor/bin/drush"
-        dest: "{{ drush_composer_path }}"
-        force: Yes
-        state: link
-
-  when: project_type == "drupal" and drush_setup_drush | default(False) and 'drush' in installed_extras and drupal_major_version == 7
-
-- name: Set up drush.
-  include_role:
-    name: kentr.setup-drush
-  vars:
-    installations: "{{ instances | selectattr('type', 'equalto', 'drupal')  | list }}"
   when: project_type == "drupal" and drush_setup_drush | default(False) and 'drush' in installed_extras
-  tags:
-    - drupal
-    - drush
