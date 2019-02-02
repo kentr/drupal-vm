@@ -11,6 +11,7 @@ var gulp = require('gulp');
 var browsersync = require('browser-sync').create();
 
 // Include plugins.
+var cssNano = require('gulp-cssnano');
 var sass = require('gulp-sass');
 var imagemin = require('gulp-imagemin');
 var pngcrush = require('imagemin-pngcrush');
@@ -52,6 +53,7 @@ gulp.task('css', function() {
       includePaths: config.css.includePaths
     }))
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
+    .pipe(cssNano())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
     // Set the file modification time.
