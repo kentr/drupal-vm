@@ -41,6 +41,7 @@ wp_admin_user: 'admin'
 wp_admin_password: ''
 wp_admin_email: ''
 wp_site_title: 'My Great WordPress Site'
+wp_domain: "wordpresstest.test"
 
 wp_install_dummy_data: False
 
