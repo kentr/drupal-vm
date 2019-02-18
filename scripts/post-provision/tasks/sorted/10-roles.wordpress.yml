@@ -12,6 +12,8 @@
   - block:
     # Workaround for NFS synced folders, since it's not possible to change
     # file owner / group.
+    # Checks parent folder instead of `/vagrant` because `/vagrant`
+    # may not exist.
     - name: Set `wp_core_owner`, `wp_core_group`.
       block:
         - stat:
