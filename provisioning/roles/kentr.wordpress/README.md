@@ -23,9 +23,9 @@ $ git clone https://github.com/kentr/wordpress.ansible.role.git
 ```yaml
 wp_version: 4.0
 wp_install_dir: '/var/sites/awesome_wordpress_site'
-wp_db_name: 'database_name_here'
-wp_db_user: 'username_here'
-wp_db_password: 'password_here'
+wp_db_name: 'wordpress'
+wp_db_user: 'wordpress'
+wp_db_password: 'wordpress'
 wp_db_host: 'localhost'
 wp_db_charset: 'utf8'
 wp_db_collate: ''
