@@ -21,6 +21,7 @@
     "gulp-scss-lint": "^1.0.0",
     "gulp-shell": "^0.6.5",
     "gulp-sourcemaps": "^2.6.4",
+    "gulp-touch-fd": "github:funkedigital/gulp-touch-fd",
     "gulp-uglify": "^3.0.1",
     "gulp-util": "^3.0.8",
     "imagemin-pngcrush": "^6.0.0",
