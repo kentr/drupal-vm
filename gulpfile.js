@@ -12,21 +12,25 @@ var browsersync = require('browser-sync').create();
 
 // Include plugins.
 var autoprefix = require('gulp-autoprefixer');
-var concat = require('gulp-concat');
+var critical = require('critical');
 var cssNano = require('gulp-cssnano');
 var glob = require('gulp-sass-glob');
+var gutil = require('gulp-util');
 var imagemin = require('gulp-imagemin');
 var jshint = require('gulp-jshint');
 var notify = require('gulp-notify');
+var path = require('path');
 var plumber = require('gulp-plumber');
 var pngcrush = require('imagemin-pngcrush');
-var rename = require('gulp-rename');
+var rimraf = require('rimraf');
+var rp = require('request-promise');
 var sass = require('gulp-sass');
 var scssLint = require('gulp-scss-lint');
 var shell = require('gulp-shell');
 var sourcemaps = require('gulp-sourcemaps');
 var touch = require('gulp-touch-fd');
 var uglify = require('gulp-uglify');
+var urljoin = require('url-join');
 
 // Load config
 var YAML = require('yamljs');
@@ -123,13 +127,6 @@ gulp.task('default', gulp.series('serve'));
 // Tasks to generate critical CSS.
 // @see https://www.smashingmagazine.com/2015/08/understanding-critical-css/
 // @see https://github.com/asilgag/critical-css-gulp-example/blob/master/gulp_tasks/critical.js
-var critical = require('critical');
-
-var path = require('path');
-var gutil = require('gulp-util');
-var urljoin = require('url-join');
-var rimraf = require('rimraf');
-var rp = require('request-promise');
 
 // Allows invalid HTTPS certificates
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
