@@ -20,7 +20,7 @@ env:
     # Defaults - Ubuntu 16.04.
     - type: defaults
       distro: ubuntu1604
-      local_config: "config.yml"
+      local_config: "test/customized.config.yml"
       TEST_INSTALLED_EXTRAS: false
 
 before_install:
