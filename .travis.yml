@@ -20,8 +20,9 @@ env:
     # Defaults - Ubuntu 16.04.
     - type: defaults
       distro: ubuntu1604
-      local_config: "test/customized.config.yml"
+      local_config: "tests/customized.config.yml"
       TEST_INSTALLED_EXTRAS: false
+      DRUPALVM_ENV: '-vvvD'
 
 before_install:
   # Pull container.
