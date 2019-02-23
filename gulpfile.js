@@ -120,9 +120,11 @@ gulp.task('js-lint', function() {
 // Default Task
 gulp.task('default', gulp.series('serve'));
 
+// Tasks to generate critical CSS.
+// @see https://www.smashingmagazine.com/2015/08/understanding-critical-css/
+// @see https://github.com/asilgag/critical-css-gulp-example/blob/master/gulp_tasks/critical.js
 var critical = require('critical');
 
-/* jslint node: true */
 var path = require('path');
 var gutil = require('gulp-util');
 var urljoin = require('url-join');
