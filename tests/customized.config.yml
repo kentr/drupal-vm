@@ -548,6 +548,11 @@ instances:
     # Absolute path to web root for the environment.
     root: "{{ web_app_web_root }}"
     drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: "{{ local_domain }}"
+    ssh_user: "{{ ansible_user|default('root') }}"
+    drush_ssh_options: "-o PasswordAuthentication=no -i {{ lookup('env','HOME') }}/.vagrant.d/insecure_private_key -o LogLevel=quiet"
+    drush_alias_is_local_on_remote_node: True
 
   - name: "{{ prod_domain }}"
     # one of "local", "dev", "stage", "prod"
@@ -558,6 +563,9 @@ instances:
     # Absolute path to web root for the environment.
     root: "/home/{{ client_server_username }}/public_html"
     drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: halifax.dreamhost.com
+    ssh_user: "{{ client_server_username }}"
 
 # Misc
 # Set up bash and other basics of login account.
