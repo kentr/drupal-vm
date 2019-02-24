@@ -1,4 +1,5 @@
 ---
+# dist: xenial
 language: php
 php: '7.1'
 services: docker
@@ -22,7 +23,6 @@ env:
       distro: ubuntu1604
       local_config: "tests/customized.config.yml"
       TEST_INSTALLED_EXTRAS: false
-      DRUPALVM_ENV: '-vvvD'
 
 before_install:
   # Pull container.
