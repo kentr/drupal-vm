@@ -32,6 +32,10 @@
   become: no
   when: known_hosts_file.stat.exists
 
+- name: DEBUG ansible_env
+  debug:
+    var: ansible_env
+
 # Set up vagrant MySQL credentials.
 # The criteria for this task are independent of the criteria for the setup in
 # `geerlingguy.mysql`.  That role may also be configured to write a `.my.cnf` file
@@ -39,6 +43,8 @@
 - name: Copy user-my.cnf file with password credentials.
   template:
     src: "{{ playbook_dir }}/../scripts/misc/templates/user-my.cnf.j2"
-    dest: "/home/{{ drupalvm_user }}/.my.cnf"
-    owner: "{{ drupalvm_user }}"
+    dest: "{{ ansible_env.HOME }}/.my.cnf"
+    owner: "{{ ansible_user }}"
     mode: 0600
+  # Skip for `root` so we don't muck up the default `root` credentials.
+  when: ansible_user != 'root'
