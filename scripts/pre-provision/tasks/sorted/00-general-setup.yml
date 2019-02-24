@@ -32,10 +32,6 @@
   become: no
   when: known_hosts_file.stat.exists
 
-- name: DEBUG ansible_env
-  debug:
-    var: ansible_env
-
 # Set up vagrant MySQL credentials.
 # The criteria for this task are independent of the criteria for the setup in
 # `geerlingguy.mysql`.  That role may also be configured to write a `.my.cnf` file
