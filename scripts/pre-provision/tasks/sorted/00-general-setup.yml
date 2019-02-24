@@ -5,8 +5,16 @@
     path: "{{ workspace }}"
     state: directory
 
-- name: Set server timezone.
-  command: "timedatectl set-timezone {{ php_date_timezone }}"
+- block:
+    - name: Ensure `tzdata` package is installed.
+      package:
+        name: tzdata
+        state: present
+
+    - name: Set server timezone.
+      timezone:
+        name: "{{ php_date_timezone }}"
+
   when: php_date_timezone is defined
 
 # `known_hosts` must come before any provisioning that uses SSH, such as Git checkouts.
