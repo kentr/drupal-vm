@@ -582,4 +582,4 @@ swapfile_add: False
 swapfile_size: 512K
 
 # Experimental to fix local Docker test.
-composer_home_path: "{{ ansible_env.HOME }}/.composer"
+composer_home_path: "/home/{{ drupalvm_user }}/.composer"
