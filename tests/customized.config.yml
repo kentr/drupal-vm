@@ -40,10 +40,10 @@ web_app_deploy_force: True
 drush_git_ps1_showdirtystate: False
 
 # The domain name for the local installation
-domain_name: client.org
-prod_domain: "{{ domain_name }}"
+domain_name: drupalvm.test
+prod_domain: "www.{{ domain_name }}"
 stage_domain: "stage.{{ domain_name }}"
-local_domain: "local.{{ domain_name }}"
+local_domain: "{{ domain_name }}"
 
 vagrant_hostname: "{{ local_domain }}"
 
@@ -199,7 +199,7 @@ drush_insert_project_shell_aliases: true
 # Though site is not installed, this is used within the Pantheon project
 # to form the database import file name.
 # see database_import_filename
-drupal_major_version: 7
+# drupal_major_version: 7
 
 # Install & configure basic site into database. Does not install code.
 # Set this to 'false' if you don't need to install drupal (using the drupal_*
@@ -427,7 +427,8 @@ mysql_users:
 
 # Comment out any extra utilities you don't want to install. If you don't want
 # to install *any* extras, set this value to an empty set, e.g. `[]`.
-installed_extras: []
+installed_extras:
+  - drush
 
 php_sendmail_path: "/usr/sbin/sendmail -t -i"
 
@@ -583,3 +584,11 @@ swapfile_size: 512K
 
 # Experimental to fix local Docker test.
 composer_home_path: "/home/{{ drupalvm_user }}/.composer"
+
+## OVERRIDES
+
+drupal_install_site: true
+drupal_build_composer_project: true
+
+# Must be "web" for Drupal composer installation
+web_app_web_dir: "web"
