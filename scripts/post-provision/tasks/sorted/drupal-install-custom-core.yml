@@ -20,7 +20,7 @@
 # will be undefined or set to a value corresponding to an existing group.
 # For me, that value has consistently been `dialout`.
 - block:
-    - name: "Get information about `web_app_project_root` parent directory."
+    - name: Get information about `web_app_project_root` parent directory.
       stat:
         get_checksum: false
         path: "{{ web_app_project_root | dirname }}"
