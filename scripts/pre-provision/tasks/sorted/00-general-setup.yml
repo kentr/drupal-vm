@@ -47,4 +47,4 @@
     owner: "{{ ansible_user }}"
     mode: 0600
   # Skip for `root` so we don't muck up the default `root` credentials.
-  when: ansible_user != 'root'
+  when: ansible_env.HOME != '/root'
