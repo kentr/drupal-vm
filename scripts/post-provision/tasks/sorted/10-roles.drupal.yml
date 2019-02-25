@@ -42,7 +42,11 @@
       when: (drupal_major_version == 7 or not drush_launcher_install)
 
     - name: Set up drush.
-      include_role:
+      become: false
+      # `import_role` is used so that `become: false` propagates to role.
+      # Note that this has a side-effect of setting the variables
+      # specified below for the entire play.
+      import_role:
         name: kentr.setup-drush
       vars:
         installations: "{{ instances | selectattr('type', 'equalto', 'drupal')  | list }}"
