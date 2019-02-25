@@ -4,3 +4,9 @@
 #
 # General setup variables that apply to all scenarios should go
 # in `molecule/resources/prepare-vars.yml`.
+
+# For docker testing, Ansible runs as root.
+# Therefore, `~/www` maps to `/root/www`.
+# However, pytest doesn't know this, so we specify the
+# absolute path.
+wp_install_dir: "/root/www"

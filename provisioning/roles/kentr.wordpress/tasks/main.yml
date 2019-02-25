@@ -61,18 +61,20 @@
     src: wp-config.php.j2
     force: no
 
-- name: Fetch random salts for `wp-config.php`.
-  uri:
-    url: https://api.wordpress.org/secret-key/1.1/salt/
-    return_content: true
-  register: wp_salt
-  failed_when: wp_salt.status != 200
+- block:
+    - name: Fetch random salts for `wp-config.php`.
+      uri:
+        url: https://api.wordpress.org/secret-key/1.1/salt/
+        return_content: true
+      register: wp_salt
+      failed_when: wp_salt.status != 200
 
-- name: Add salts to `wp-config.php`.
-  blockinfile:
-    path: "{{ wp_install_dir }}/wp-config.php"
-    block: "{{ wp_salt.content }}"
-    insertbefore: '\/\*\*#@-\*\/'
+    - name: Add salts to `wp-config.php`.
+      blockinfile:
+        path: "{{ wp_install_dir }}/wp-config.php"
+        block: "{{ wp_salt.content }}"
+        insertbefore: '\/\*\*#@-\*\/'
+  when: not wp_config_check.stat.exists
 
 - name: Block access to `debug.log`.
   blockinfile:

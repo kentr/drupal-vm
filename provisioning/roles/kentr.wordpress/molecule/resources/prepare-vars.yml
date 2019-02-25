@@ -10,7 +10,7 @@
 # Defined here so that it is available for `prepare` action.
 # Use directory owned by ansible user so that we can test
 # with `become: false`
-wp_install_dir: "/home/{{ ansible_user }}/www"
+wp_install_dir: "~/www"
 
 php_enable_webserver: false
 php_enablerepo: "remi,remi-php71"

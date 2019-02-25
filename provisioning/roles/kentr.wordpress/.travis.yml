@@ -3,8 +3,22 @@ sudo: required
 language: python
 services:
   - docker
+
+env:
+  global:
+    - ROLE_NAME: wordpress
+  matrix:
+    - MOLECULE_DISTRO: ubuntu1604
+
 install:
-  - pip install molecule
-  - pip install docker
+  - pip install molecule docker
+
+before_script:
+  # Use actual Ansible Galaxy role name for the project directory,
+  # so that on Travis-CI ansible can find the role.
+  - cd ../
+  - mv ansible-role-$ROLE_NAME kentr.$ROLE_NAME
+  - cd kentr.$ROLE_NAME
+
 script:
   - molecule test

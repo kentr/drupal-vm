@@ -2,18 +2,17 @@
 dependency:
   name: galaxy
 driver:
-  name: vagrant
-  provider:
-    name: virtualbox
+  name: docker
 lint:
   name: yamllint
 platforms:
-  - name: vagrant-ubuntu
-    box: geerlingguy/ubuntu1604
-    memory: 512
-    cpus: 1
-    provider_raw_config_args:
-      - "customize ['modifyvm', :id, '--cpuexecutioncap', '50']"
+  - name: instance
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
 provisioner:
   name: ansible
   lint:

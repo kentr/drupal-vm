@@ -1,6 +1,6 @@
 ---
 
-- name: Download WordPress {{wp_version}} to {{ workspace }}.
+- name: Download {{ wp_version }} to {{ workspace }}.
   get_url:
     url: "http://wordpress.org/wordpress-{{ wp_version }}.tar.gz"
     force: no
@@ -12,6 +12,7 @@
     dest: "{{ workspace }}"
     copy: no
     extra_opts: "--no-same-owner"
+  creates: "{{ workspace }}/wordpress/index.php"
 
 - name: Move extracted files to {{ wp_install_dir }}.
   synchronize:
@@ -19,3 +20,4 @@
     dest: "{{ wp_install_dir }}/"
     archive: True
   delegate_to: "{{ inventory_hostname }}"
+  creates: "{{ wp_install_dir }}/index.php"
