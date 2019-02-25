@@ -1,0 +1,45 @@
+---
+# General setup variables for the `prepare` and `verify` actions.
+# These can be overridden for specific scenarios in the respective
+# playbooks & variable files.
+#
+# However, if the scenario also requires specific provisioning, all
+# applicable roles should probably be called again in the scenario's playbook.
+#
+# Webroot for WordPress.
+# Defined here so that it is available for `prepare` action.
+# Use directory owned by ansible user so that we can test
+# with `become: false`
+wp_install_dir: "/home/{{ ansible_user }}/www"
+
+php_enable_webserver: false
+php_enablerepo: "remi,remi-php71"
+php_enable_php_fpm: true
+php_fpm_listen: "127.0.0.1:9000"
+
+apache_mods_enabled:
+  - expires.load
+  - ssl.load
+  - rewrite.load
+  - proxy.load
+  - proxy_fcgi.load
+apache_remove_default_vhost: true
+apache_vhosts:
+  - servername: "{{ wp_domain }}"
+    serveralias: "www.{{ wp_domain }}"
+    documentroot: "{{ wp_install_dir }}"
+    extra_parameters: |
+          <FilesMatch \.php$>
+            SetHandler "proxy:fcgi://{{ php_fpm_listen }}"
+          </FilesMatch>
+
+mysql_enablerepo: "remi"
+mysql_databases:
+  - name: "{{ wp_db_name }}"
+    encoding: utf8mb4
+    collation: utf8mb4_general_ci
+mysql_users:
+  - name: "{{ wp_db_user }}"
+    host: "%"
+    password: "{{ wp_db_password }}"
+    priv: "{{ wp_db_name }}.*:ALL"

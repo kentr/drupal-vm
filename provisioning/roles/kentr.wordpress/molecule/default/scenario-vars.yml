@@ -1,0 +1,6 @@
+---
+# This file contains role setup and test variables / overrides
+# that are specific to the scenario (if any).
+#
+# General setup variables that apply to all scenarios should go
+# in `molecule/resources/prepare-vars.yml`.

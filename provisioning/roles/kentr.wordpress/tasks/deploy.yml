@@ -8,41 +8,41 @@
     group: "{{ wp_core_group }}"
 
 - block:
-  - name: Check out WordPress to the docroot.
-    git:
-      accept_hostkey: "{{ wp_deploy_accept_hostkey }}"
-      depth: "{{ wp_deploy_clone_depth | default(omit) }}"
-      dest: "{{ wp_deploy_dir }}"
-      force: yes
-      repo: "{{ wp_deploy_repo }}"
-      update: "{{ wp_deploy_update }}"
-      version: "{{ wp_deploy_version }}"
-    # Add TMP directories to environment to work around
-    # https://github.com/ansible/ansible/issues/30064
-    become: no
-    environment:
-      TMPDIR: "{{ ansible_env.HOME }}/.ansible/tmp"
-      TMP: "{{ ansible_env.HOME }}/.ansible/tmp"
-      TEMP: "{{ ansible_env.HOME }}/.ansible/tmp"
-    notify: clear opcache
-    register: wp_deploy_repo_updated
+    - name: Check out WordPress to the docroot.
+      git:
+        accept_hostkey: "{{ wp_deploy_accept_hostkey }}"
+        depth: "{{ wp_deploy_clone_depth | default(omit) }}"
+        dest: "{{ wp_deploy_dir }}"
+        force: true
+        repo: "{{ wp_deploy_repo }}"
+        update: "{{ wp_deploy_update }}"
+        version: "{{ wp_deploy_version }}"
+      # Add TMP directories to environment to work around
+      # https://github.com/ansible/ansible/issues/30064
+      become: false
+      environment:
+        TMPDIR: "{{ ansible_env.HOME }}/.ansible/tmp"
+        TMP: "{{ ansible_env.HOME }}/.ansible/tmp"
+        TEMP: "{{ ansible_env.HOME }}/.ansible/tmp"
+      notify: clear opcache
+      register: wp_deploy_repo_updated
 
-  # Undo the implied single-branch result that results from a `depth`
-  # option above.
-  # See https://stackoverflow.com/a/17937889
-  - block:
-    - name: Convert from single branch.
-      command: >
-        git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-      args:
-        chdir: "{{ wp_deploy_dir }}"
-      become: no
+    # Undo the implied single-branch result that results from a `depth`
+    # option above.
+    # See https://stackoverflow.com/a/17937889
+    - block:
+        - name: Convert from single branch.
+          command: >
+            git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+          args:
+            chdir: "{{ wp_deploy_dir }}"
+          become: false
 
-    - name: Fetch all remote branches.
-      command: >
-        git fetch origin
-      args:
-        chdir: "{{ wp_deploy_dir }}"
-      become: no
+        - name: Fetch all remote branches.
+          command: >
+            git fetch origin
+          args:
+            chdir: "{{ wp_deploy_dir }}"
+          become: false
 
-    when: wp_deploy_clone_depth is defined and not wp_deploy_clone_single_branch
+      when: wp_deploy_clone_depth is defined and not wp_deploy_clone_single_branch
