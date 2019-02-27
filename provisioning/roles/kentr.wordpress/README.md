@@ -1,5 +1,7 @@
 # Ansible Role: WordPress
 
+[![Build Status](https://travis-ci.org/kentr/ansible-role-wordpress.svg?branch=master)](https://travis-ci.org/kentr/ansible-role-wordpress)
+
 Ansible role that installs and configures WordPress, forked from https://github.com/chusiang/wordpress.ansible.role.
 
 Features include:
@@ -15,7 +17,7 @@ $ git clone https://github.com/kentr/wordpress.ansible.role.git
 ```
 
 ## Requirements & Dependencies
-- Ansible 1.4 or higher
+- Ansible 2.7 or higher
 - Curl
 
 ## Variables
@@ -40,8 +42,8 @@ wp_install_site: False
 wp_admin_user: 'admin'
 wp_admin_password: ''
 wp_admin_email: ''
-wp_site_title: 'My Great WordPress Site'
-wp_domain: "wordpresstest.test"
+wp_site_title: 'WordPress'
+wp_domain: "wordpress.test"
 
 wp_install_dummy_data: False
 

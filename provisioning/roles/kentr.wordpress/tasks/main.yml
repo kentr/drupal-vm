@@ -63,6 +63,8 @@
 
 - block:
     - name: Fetch random salts for `wp-config.php`.
+      # `no_log` is set to hide database credentials, salts, etc.
+      no_log: True
       uri:
         url: https://api.wordpress.org/secret-key/1.1/salt/
         return_content: true
@@ -70,6 +72,8 @@
       failed_when: wp_salt.status != 200
 
     - name: Add salts to `wp-config.php`.
+      # `no_log` is set to hide database credentials, salts, etc.
+      no_log: True
       blockinfile:
         path: "{{ wp_install_dir }}/wp-config.php"
         block: "{{ wp_salt.content }}"

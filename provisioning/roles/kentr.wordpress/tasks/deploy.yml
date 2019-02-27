@@ -37,6 +37,9 @@
           args:
             chdir: "{{ wp_deploy_dir }}"
           become: false
+          # Disable `changed` for  idempotence.  There's never any output to
+          # indicate a change anyway, so it's moot.
+          changed_when: false
 
         - name: Fetch all remote branches.
           command: >
@@ -44,5 +47,7 @@
           args:
             chdir: "{{ wp_deploy_dir }}"
           become: false
+          register: wp_deploy_fetch_result
+          changed_when: wp_deploy_fetch_result.stdout|length|bool
 
       when: wp_deploy_clone_depth is defined and not wp_deploy_clone_single_branch

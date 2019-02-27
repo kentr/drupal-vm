@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import stat
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -42,6 +43,12 @@ def test_wp_config_file_exists(host, ansible_role_vars):
 
     assert f.exists
 
+    # Verify file group.
+    assert f.group == ansible_role_vars['wp_core_group']
+
+    # Verify that group has read permission.
+    assert bool(f.mode & stat.S_IRGRP)
+
 
 def test_wp_config_file_contains_salts(host, ansible_role_vars):
     f = host.file(ansible_role_vars['wp_install_dir'] + '/wp-config.php')
@@ -71,4 +78,14 @@ def test_wp_config_file_contains_db_credentials(host, ansible_role_vars):
         "^define('DB_HOST',\s*'"
         + ansible_role_vars['wp_db_host']
         + "');"
+        ))
+
+
+def test_wp_config_file_contains_db_table_prefix(host, ansible_role_vars):
+    f = host.file(ansible_role_vars['wp_install_dir'] + '/wp-config.php')
+
+    assert f.contains((
+        "^$table_prefix\s*=\s*'"
+        + ansible_role_vars['wp_table_prefix']
+        + "';"
         ))

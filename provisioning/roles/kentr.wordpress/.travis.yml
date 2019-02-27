@@ -21,4 +21,4 @@ before_script:
   - cd kentr.$ROLE_NAME
 
 script:
-  - molecule test
+  - molecule test --all

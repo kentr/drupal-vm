@@ -6,7 +6,7 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: docker-default
+  - name: docker-deploy
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
@@ -20,7 +20,12 @@ provisioner:
   playbooks:
     prepare: ../resources/prepare.yml
 scenario:
-  name: default
+  name: deploy
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
 verifier:
   name: testinfra
   env:
