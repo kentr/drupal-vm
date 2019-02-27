@@ -1,0 +1,14 @@
+---
+# This file contains role setup and test variables / overrides
+# that are specific to the scenario (if any).
+#
+# General setup variables that apply to all scenarios should go
+# in `molecule/resources/prepare-vars.yml`.
+
+# To be consistent with `prepare-vars.yml`.
+wp_deploy_dir: "/var/www/wordpress"
+# Note: The following was not working in the python test file:
+# `wp_install_dir: "{{ wp_deploy_dir }}/web"`:
+wp_install_dir: "/var/www/wordpress/web"
+
+wp_table_prefix: 'wp_table_prefix_test_'
