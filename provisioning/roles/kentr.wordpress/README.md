@@ -1,5 +1,7 @@
 # Ansible Role: WordPress
 
+[![Build Status](https://travis-ci.org/kentr/ansible-role-wordpress.svg?branch=master)](https://travis-ci.org/kentr/ansible-role-wordpress)
+
 Ansible role that installs and configures WordPress, forked from https://github.com/chusiang/wordpress.ansible.role.
 
 Features include:
@@ -15,7 +17,7 @@ $ git clone https://github.com/kentr/wordpress.ansible.role.git
 ```
 
 ## Requirements & Dependencies
-- Ansible 1.4 or higher
+- Ansible 2.7 or higher
 - Curl
 
 ## Variables
@@ -23,9 +25,9 @@ $ git clone https://github.com/kentr/wordpress.ansible.role.git
 ```yaml
 wp_version: 4.0
 wp_install_dir: '/var/sites/awesome_wordpress_site'
-wp_db_name: 'database_name_here'
-wp_db_user: 'username_here'
-wp_db_password: 'password_here'
+wp_db_name: 'wordpress'
+wp_db_user: 'wordpress'
+wp_db_password: 'wordpress'
 wp_db_host: 'localhost'
 wp_db_charset: 'utf8'
 wp_db_collate: ''
@@ -40,7 +42,8 @@ wp_install_site: False
 wp_admin_user: 'admin'
 wp_admin_password: ''
 wp_admin_email: ''
-wp_site_title: 'My Great WordPress Site'
+wp_site_title: 'WordPress'
+wp_domain: "wordpress.test"
 
 wp_install_dummy_data: False
 
@@ -48,8 +51,8 @@ wp_fs_method: 'direct'
 wp_lang: ''
 
 wp_mysql_enable: true
-wp_mysql_db_create: true
-wp_mysql_db_create_users: true
+wp_mysql_db_create: false
+wp_mysql_db_create_users: false
 wp_mysql_site_restore_saved_db: false
 wp_backup_local_path: "{{ playbook_dir }}/_private/backup"
 # Local path to database dump file.

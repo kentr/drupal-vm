@@ -1,0 +1,18 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+
+  vars_files:
+    # General setup variables.
+    - ../resources/prepare-vars.yml
+    # Scenario-specific variables & overrides for the setup
+    # and testing of the role.
+    - scenario-vars.yml
+
+  roles:
+    - role: mychiara.wp-cli
+
+    # Run the test role.
+    - role: kentr.wordpress
+      become: false

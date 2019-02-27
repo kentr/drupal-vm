@@ -13,16 +13,18 @@
   include_tasks: deploy.yml
   when: wp_deploy
 
-- name: Ensure that installation directory exists.
-  block:
+- block:
     # If it's a link, check target.
-    - stat:
+    - name: "Get information on {{ wp_install_dir }}"
+      stat:
         path: "{{ wp_install_dir_check.stat.lnk_source }}"
         get_checksum: no
       when: wp_install_dir_check.stat.exists and wp_install_dir_check.stat.islnk
       register: wp_install_dir_target_check
       failed_when: wp_install_dir_target_check is defined and not wp_install_dir_target_check.stat.isdir
-    - file:
+
+    - name: Ensure that installation directory exists.
+      file:
         path: "{{ wp_install_dir }}"
         state: directory
         owner: "{{ wp_core_owner }}"
@@ -59,18 +61,24 @@
     src: wp-config.php.j2
     force: no
 
-- name: Fetch random salts for `wp-config.php`.
-  no_log: True
-  command: curl https://api.wordpress.org/secret-key/1.1/salt/
-  register: 'wp_salt'
-  when: not wp_config_check.stat.exists
+- block:
+    - name: Fetch random salts for `wp-config.php`.
+      # `no_log` is set to hide database credentials, salts, etc.
+      no_log: True
+      uri:
+        url: https://api.wordpress.org/secret-key/1.1/salt/
+        return_content: true
+      register: wp_salt
+      failed_when: wp_salt.status != 200
 
-- name: Add salts to `wp-config.php`.
-  blockinfile:
-    path: "{{ wp_install_dir }}/wp-config.php"
-    block: "{{ wp_salt.stdout }}"
-    insertbefore: '\/\*\*#@-\*\/'
-  when: wp_salt.changed
+    - name: Add salts to `wp-config.php`.
+      # `no_log` is set to hide database credentials, salts, etc.
+      no_log: True
+      blockinfile:
+        path: "{{ wp_install_dir }}/wp-config.php"
+        block: "{{ wp_salt.content }}"
+        insertbefore: '\/\*\*#@-\*\/'
+  when: not wp_config_check.stat.exists
 
 - name: Block access to `debug.log`.
   blockinfile:
