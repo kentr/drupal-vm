@@ -12,3 +12,4 @@ rules:
     level: warning
   # Allow ansible truthy values.
   truthy: disable
+  document-start: disable
