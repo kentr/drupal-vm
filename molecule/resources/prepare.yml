@@ -1,0 +1,8 @@
+---
+# Shared playbook for `prepare` phase of tests.
+
+# Copy test configuration files into place.
+
+# Include default variables.
+
+# Create `vagrant_user`

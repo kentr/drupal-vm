@@ -1,0 +1,31 @@
+---
+driver:
+  name: docker
+lint:
+  name: yamllint
+platforms:
+  # Platforms cannot be defined in `--base-config` file.
+  # See https://github.com/ansible/molecule/issues/1328
+  - name: dvm-docker-default
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - ${MOLECULE_PROJECT_DIRECTORY}/:/var/www/drupalvm/:rw,delegated
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+scenario:
+  name: default
+  converge_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
