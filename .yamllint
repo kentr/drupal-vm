@@ -1,5 +1,12 @@
 extends: default
 
+ignore: |
+  default.config.yml
+  example.docker-compose.yml
+  example.drupal.make.yml
+  mkdocs.yml
+  provisioning/
+
 rules:
   braces:
     max-spaces-inside: 1
