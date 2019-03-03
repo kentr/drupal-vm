@@ -36,7 +36,7 @@ def ansible_role_vars(host):
 
     return ansible_vars
 
-# Functional test for successful deploy.
+
 def test_installed_site_home_page_title(host, ansible_role_vars):
 
     # Test both that the home page loads at all, and that
