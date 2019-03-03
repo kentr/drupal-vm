@@ -8,7 +8,7 @@ platforms:
   # Platforms cannot be defined in `--base-config` file.
   # See https://github.com/ansible/molecule/issues/1328
   # MOLECULE_SCENARIO_NAME
-  - name: dvm-docker-default
+  - name: "dvm-docker-${MOLECULE_SCENARIO_NAME}"
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
