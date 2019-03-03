@@ -45,5 +45,20 @@ def test_installed_site_home_page_title(host, ansible_role_vars):
     assert '<title>' + ansible_role_vars['wp_site_title'] in cmd.stdout
 
 
-# def test_search_replace():
-#     # https://www.wordpress.test/test-page
+def test_db_search_replace(host, ansible_role_vars):
+
+    cmd = host.run('curl -s --location ' +
+                   ansible_role_vars['local_domain'] +
+                   '/test-page')
+
+    assert ('search-replace test 1: http://' +
+            ansible_role_vars['local_domain']) in cmd.stdout
+
+    assert ('search-replace test 2: https://' +
+            ansible_role_vars['local_domain']) in cmd.stdout
+
+    assert ('search-replace test 3: http://' +
+            ansible_role_vars['local_domain']) in cmd.stdout
+
+    assert ('search-replace test 4: https://' +
+            ansible_role_vars['local_domain']) in cmd.stdout
