@@ -3,5 +3,6 @@
 !.git*
 !.travis.yml
 !.yamllint
+!local.config.yml
 pytestdebug.log
 *.pyc
