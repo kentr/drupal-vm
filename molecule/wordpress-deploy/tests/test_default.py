@@ -19,20 +19,20 @@ def ansible_role_vars(host):
         ("file=../../default.config.yml"
          " name=default_config"))["ansible_facts"]["default_config"]
 
-    ansible_vars = host.ansible(
+    ansible_vars.update(host.ansible(
         "include_vars",
         ("file=../../config.yml"
-         " name=config"))["ansible_facts"]["config"]
+         " name=config"))["ansible_facts"]["config"])
 
     ansible_vars.update(host.ansible(
         "include_vars",
         ("file=../resources/prepare-vars.yml"
          " name=prepare_vars"))["ansible_facts"]["prepare_vars"])
 
-    ansible_vars = host.ansible(
+    ansible_vars.update(host.ansible(
         "include_vars",
         ("file=../../local.config.yml"
-         " name=local_config"))["ansible_facts"]["local_config"]
+         " name=local_config"))["ansible_facts"]["local_config"])
 
     return ansible_vars
 
