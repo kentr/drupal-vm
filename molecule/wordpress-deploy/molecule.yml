@@ -19,6 +19,8 @@ provisioner:
   name: ansible
   lint:
     name: ansible-lint
+  playbooks:
+    prepare: ../resources/prepare.yml
 scenario:
   name: wordpress-deploy
   # Moved run-once steps out of `converge` sequence for faster development.
