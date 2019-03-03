@@ -1,37 +1,23 @@
 ---
 # Variables specific to `wordpress-deploy` test scenario.
 
-# "drupal" or "wordpress"
 project_type: wordpress
 project_repo: "https://github.com/kentr/wordpress-test.git"
 
-# The domain name for the local installation
 domain_name: "wordpress.test"
 prod_domain: "wordpress.test"
 stage_domain: "stage.wordpress.test"
 local_domain: "local.wordpress.test"
 vagrant_hostname: "local.wordpress.test"
 
-# Perform a database import from a dump file?
 do_db_import: True
-# Path to database dump file on local (host) machine.
-# Should either be an absolute path or relative to the directory `scripts/post-provision/tasks`.
-# The dump file must exist at the path specified.  If a dump file doesn't exist, you'll
-# need to create it an put it in the specified location.
 database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/resources/wordpress-test.sql.gz"
 
 client_server_username: "wordpress"
 
 web_app_deploy: true
 
-# The `web` directory is specific to the project's
-# file structure, as cloned from the repo.
-#
-# The project should be cloned to `web_app_deploy`, and
-# then the `web` directory is within that clone.
 web_app_web_dir: "web"
-
-db_table_prefix: 'wp_'
 
 # `wp_site_title` is defined so that the variable is available
 # in the tests.
@@ -40,7 +26,6 @@ db_table_prefix: 'wp_'
 # was exported.
 wp_site_title: 'WordPress Deploy Test'
 
-# Instance definitions used for setting up the Wraith configs and anything else.
 instances:
   - name: "local.wordpress.test"
     env: local
