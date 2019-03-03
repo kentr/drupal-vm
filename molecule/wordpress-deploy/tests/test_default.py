@@ -41,7 +41,9 @@ def test_installed_site_home_page_title(host, ansible_role_vars):
 
     # Test both that the home page loads at all, and that
     # it contains the configured site title.
-    cmd = host.run('curl -s ' + ansible_role_vars['local_domain'])
+    cmd = host.run('curl -s ' +
+                   ansible_role_vars['local_domain'])
+
     assert '<title>' + ansible_role_vars['wp_site_title'] in cmd.stdout
 
 
