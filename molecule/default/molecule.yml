@@ -3,10 +3,11 @@ driver:
   name: docker
 lint:
   name: yamllint
+  enabled: false
 platforms:
   # Platforms cannot be defined in `--base-config` file.
   # See https://github.com/ansible/molecule/issues/1328
-  - name: dvm-docker-default
+  - name: "dvm-docker-${MOLECULE_SCENARIO_NAME}"
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
@@ -20,11 +21,28 @@ provisioner:
     name: ansible-lint
 scenario:
   name: default
-  converge_sequence:
+  # Moved run-once steps out of `converge` sequence for faster development.
+  create_sequence:
     - dependency
     - create
     - prepare
+  converge_sequence:
     - converge
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    # Temporarily disable due to apache installation error.
+    # - idempotence
+    - side_effect
+    - verify
+    # Currently no cleanup steps are defined, and I'm getting errors.
+    # - cleanup
+    - destroy
 verifier:
   name: testinfra
   lint:
