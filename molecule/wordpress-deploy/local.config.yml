@@ -46,16 +46,12 @@ instances:
     env: local
     uri: "http://local.wordpress.test"
     type: "wordpress"
-    major_version: "{{ drupal_major_version }}"
-    root: "{{ drupal_core_path }}"
-    drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
+    root: "/home/wordpress/LOCAL_wordpress/web"
 
-  - name: "{{ prod_domain }}"
+  - name: "wordpress.test"
     env: prod
-    uri: "http://{{ prod_domain }}"
+    uri: "http://wordpress.test"
     type: "wordpress"
-    major_version: "{{ drupal_major_version }}"
-    root: "/home/{{ client_server_username }}/public_html"
-    drush_alias_file_prefix: "{{ drush_alias_file_prefix }}"
+    root: "/home/wordpress/public_html"
 
 apache_redirect_missing_files: False
