@@ -37,3 +37,4 @@ provisioning/test-*.yml
 # Misc
 /drushrc.php
 /LOCAL_*/
+pytestdebug.log
