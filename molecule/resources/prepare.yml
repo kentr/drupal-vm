@@ -8,19 +8,34 @@
 
   tasks:
 
-    # Copy test configuration files into place.
-    - name: Check if scenario `local.config.yml` exists.
-      stat:
-        get_checksum: false
-        path: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/local.config.yml"
-      register: scenario_local_config_check
+    - block:
+        - name: Check if project `local.config.yml` exists.
+          stat:
+            get_checksum: false
+            path: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml"
+          register: project_local_config_check
 
-    - name: Copy scenario `local.config.yml` into position.
-      synchronize:
-        checksum: true
-        dest: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml"
-        src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/local.config.yml"
-      when: scenario_local_config_check.stat.exists
+        - name: Backup project `local.config.yml`.
+          synchronize:
+            checksum: true
+            dest: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml.molecule-backup"
+            src: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml"
+          when: project_local_config_check.stat.exists
+
+    - block:
+        # Copy test configuration files into place.
+        - name: Check if scenario `local.config.yml` exists.
+          stat:
+            get_checksum: false
+            path: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/local.config.yml"
+          register: scenario_local_config_check
+
+        - name: Copy scenario `local.config.yml` into position.
+          synchronize:
+            checksum: true
+            dest: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml"
+            src: "{{ lookup('env', 'MOLECULE_SCENARIO_DIRECTORY') }}/local.config.yml"
+          when: scenario_local_config_check.stat.exists
 
 - name: Prepare test VM / container.
   hosts: all
