@@ -15,7 +15,7 @@ database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/resou
 
 client_server_username: "wordpress"
 
-web_app_deploy: true
+wp_deploy: true
 
 web_app_web_dir: "web"
 
