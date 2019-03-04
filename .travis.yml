@@ -1,39 +1,16 @@
 ---
-# dist: xenial
-language: php
-php: '7.1'
-services: docker
+sudo: required
+language: python
+services:
+  - docker
 
 env:
-  global:
-    - CONFIG: tests/config.yml
-      MAKEFILE: example.drupal.make.yml
-      COMPOSERFILE: example.drupal.composer.json
-      HOSTNAME: drupalvm.test
-      MACHINE_NAME: drupalvm
-      IP: 192.168.88.88
-      DRUPALVM_DIR: /var/www/drupalvm
-      DRUSH_BIN: drush
-      TEST_INSTALLED_EXTRAS: true
-      CONTAINER_ID: dvm-test
-
   matrix:
-    # Defaults - Ubuntu 16.04.
-    - type: defaults
-      distro: ubuntu1604
-      local_config: "tests/customized.config.yml"
-      TEST_INSTALLED_EXTRAS: false
+    - MOLECULE_DISTRO: ubuntu1604
 
-before_install:
-  # Pull container.
-  - docker pull geerlingguy/docker-${distro}-ansible:latest
-
-  # Install lint tools.
-  - gem install rubocop
+install:
+  # Use `--pre` flag to get molecule >= 2.20.
+  - pip install molecule docker --pre
 
 script:
-  # Vagrantfile syntax check.
-  - 'rubocop ./Vagrantfile ./lib/drupalvm --except LineLength,Eval,MutableConstant,BlockLength,MethodLength,ConditionalAssignment,IndentArray,AlignParameters'
-
-  # Run tests.
-  - composer run-tests
+  - molecule test wordpress-deploy
