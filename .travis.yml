@@ -13,4 +13,4 @@ install:
   - pip install molecule docker --pre
 
 script:
-  - molecule test -s wordpress-deploy
+  - molecule -c molecule/base-config.yml test -s wordpress-deploy

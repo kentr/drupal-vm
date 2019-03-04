@@ -19,10 +19,6 @@ provisioner:
   name: ansible
   lint:
     name: ansible-lint
-  playbooks:
-    prepare: ../resources/prepare.yml
-    # `cleanup` requires molecule >= 2.20.
-    cleanup: ../resources/cleanup.yml
 scenario:
   name: wordpress-deploy
   # Moved run-once steps out of `converge` sequence for faster development.

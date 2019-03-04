@@ -9,4 +9,7 @@ provisioner:
   lint:
     name: ansible-lint
   playbooks:
-    prepare: "molecule/resources/prepare.yml"
+  playbooks:
+    prepare: molecule/resources/prepare.yml
+    # `cleanup` requires molecule >= 2.20.
+    cleanup: molecule/resources/cleanup.yml
