@@ -21,6 +21,8 @@ provisioner:
     name: ansible-lint
   playbooks:
     prepare: ../resources/prepare.yml
+    # `cleanup` requires molecule >= 2.20.
+    cleanup: ../resources/cleanup.yml
 scenario:
   name: wordpress-deploy
   # Moved run-once steps out of `converge` sequence for faster development.
@@ -43,7 +45,7 @@ scenario:
     - side_effect
     - verify
     # Currently no cleanup steps are defined, and I'm getting errors.
-    # - cleanup
+    - cleanup
     - destroy
 verifier:
   name: testinfra

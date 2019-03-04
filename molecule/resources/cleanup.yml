@@ -1,0 +1,24 @@
+---
+# Shared playbook for `cleanup` action of tests.
+# Requires molecule >= 2.20.
+
+- name: Cleanup local environment.
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+
+    - block:
+        - name: Check if backup `local.config.yml` exists.
+          stat:
+            get_checksum: false
+            path: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml.molecule-backup"
+          register: backup_local_config_check
+
+        - name: Restore backup `local.config.yml`.
+          command: >
+            mv
+            {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml.molecule-backup
+            {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml
+          when: backup_local_config_check.stat.exists
