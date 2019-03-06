@@ -3,43 +3,43 @@
 - name: Install and set up Drush.
   block:
 
-    - name: Install Drush globally for D7 or when specified.
-      # @see https://github.com/geerlingguy/drupal-vm/issues/1672#issuecomment-368309383
-      # Prevents need to install a project-specific Drush into every D7
-      # project.
-      # Overrides Drush launcher installation.
-      #
-      # Mostly follows the `geerlingguy.drush` role's global composer
-      # install option, except:
-      #  * Installs into the ansible inventory user instead of `root`.
-      #  * Forces the replacement of the symlink at `/usr/local/bin/drush`
-      #    so that `drush` is easily usable by subsequent ansible tasks
-      #    without messing with environment variables.
-      block:
+    # - name: Install Drush globally for D7 or when specified.
+    #   # @see https://github.com/geerlingguy/drupal-vm/issues/1672#issuecomment-368309383
+    #   # Prevents need to install a project-specific Drush into every D7
+    #   # project.
+    #   # Overrides Drush launcher installation.
+    #   #
+    #   # Mostly follows the `geerlingguy.drush` role's global composer
+    #   # install option, except:
+    #   #  * Installs into the ansible inventory user instead of `root`.
+    #   #  * Forces the replacement of the symlink at `/usr/local/bin/drush`
+    #   #    so that `drush` is easily usable by subsequent ansible tasks
+    #   #    without messing with environment variables.
+    #   block:
 
-        - name: Install global Drush for D7 under `vagrant` user.
-          become: false
-          # `import_role` is used so that `become: false` propagates to role.
-          # Note that this has a side-effect of setting the variables
-          # specified below for the entire play.
-          import_role:
-            name: geerlingguy.drush
-          vars:
-            drush_composer_version: "{{ drush_version }}"
-            drush_composer_global_install: True
-            # Override default to prevent attempt to create link in system
-            # directory.
-            drush_composer_path: |
-              {{ composer_home_path }}/vendor/bin/drush-dummy-link
+    #     - name: Install global Drush for D7 under `vagrant` user.
+    #       become: false
+    #       # `import_role` is used so that `become: false` propagates to role.
+    #       # Note that this has a side-effect of setting the variables
+    #       # specified below for the entire play.
+    #       import_role:
+    #         name: geerlingguy.drush
+    #       vars:
+    #         drush_composer_version: "{{ drush_version }}"
+    #         drush_composer_global_install: True
+    #         # Override default to prevent attempt to create link in system
+    #         # directory.
+    #         drush_composer_path: |
+    #           {{ composer_home_path }}/vendor/bin/drush-dummy-link
 
-        - name: Ensure globally-installed Drush is symlinked into bin dir.
-          file:
-            src: "{{ composer_home_path }}/vendor/bin/drush"
-            dest: "/usr/local/bin/drush"
-            force: Yes
-            state: link
+    #     - name: Ensure globally-installed Drush is symlinked into bin dir.
+    #       file:
+    #         src: "{{ composer_home_path }}/vendor/bin/drush"
+    #         dest: "/usr/local/bin/drush"
+    #         force: Yes
+    #         state: link
 
-      when: (drupal_major_version == 7 or not drush_launcher_install)
+    #   when: (drupal_major_version == 7 or not drush_launcher_install)
 
     - name: Set up drush.
       become: false
