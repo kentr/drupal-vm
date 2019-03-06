@@ -3,7 +3,7 @@
   hosts: all
 
   # Simulate primary playbook variable definitions / includes,
-  # so to get values for `vagrant_user` and `ansible_user`.
+  # to get values for `vagrant_user` and `ansible_user`.
   vars_files:
     - ../../provisioning/vars/main.yml
     - ../../default.config.yml
@@ -26,45 +26,15 @@
 
   tasks:
 
-    # BEGIN PREPARE
-    # Create a non-root user for Molecule / Docker testing, if necessary.
+    # When used with Molecule / Docker, `ansible_user` is not defined.
+    # This sets the user for subsequent ansible connections,
+    # so must come after granting passwordless sudo to `vagrant_user`.
     # For simplicity and parity with using DrupalVM for Vagrant,
-    # we're sticking with "vagrant" as the user name.
-    # To be safe, we're only doing this when both `ansible_user` and
-    # `vagrant_user` are undefined.
-    - block:
-        # Set `vagrant_user` so that it's available.
-        - name: Define `vagrant_user` if not defined.
-          set_fact:
-            vagrant_user: "vagrant"
-          when: vagrant_user is not defined
-
-        - name: "Ensure that `{{ vagrant_user }}` user exists for tests."
-          user:
-            name: "{{ vagrant_user }}"
-            shell: /bin/bash
-            groups: sudo
-            append: yes
-
-        # See https://www.reddit.com/r/ansible/comments/5xzj8b/how_to_modify_sudoers_file_with_ansible/
-        - name: Give `{{ vagrant_user }}` passwordless sudo.
-          lineinfile:
-            line: "{{ vagrant_user }} ALL=(ALL) NOPASSWD: ALL"
-            path: /etc/sudoers
-            insertbefore: EOF
-            validate: 'visudo -cf %s'
-
-        # When used with Molecule / Docker, `ansible_user` is not defined.
-        # This sets the user for subsequent ansible connections,
-        # so must come after granting passwordless sudo to `vagrant_user`.
-        # For simplicity and parity with using DrupalVM for Vagrant,
-        # we're setting this to `vagrant_user`.
-        - name: Define `ansible_user` if not defined.
-          set_fact:
-            ansible_user: "{{ vagrant_user }}"
-          when: ansible_user is not defined
-
-    # END  PREPARE
+    # we're setting this to `vagrant_user`.
+    - name: Define `ansible_user` if not defined.
+      set_fact:
+        ansible_user: "{{ vagrant_user }}"
+      when: ansible_user is not defined
 
     # This should be run in the converge phase, because the path for
     # `src` may change between scenarios as defined in their `molecule.yml`
@@ -75,10 +45,6 @@
         # The path for `src` is declared as a volume in scenario `molecule.yml`.
         src: "/var/www/drupalvm"
         state: link
-
-    - name: DEBUG
-      debug:
-        msg: "END play 1"
 
 # Second play.
 - name: Import main playbook.
