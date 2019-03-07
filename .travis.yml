@@ -4,6 +4,10 @@ language: python
 services:
   - docker
 
+branches:
+  only:
+  - travis-experiments
+
 env:
   matrix:
     - MOLECULE_DISTRO: ubuntu1604
