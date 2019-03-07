@@ -40,7 +40,6 @@ scenario:
     # - idempotence
     - side_effect
     - verify
-    # Currently no cleanup steps are defined, and I'm getting errors.
     - cleanup
     - destroy
 verifier:
