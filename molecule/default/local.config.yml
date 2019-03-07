@@ -11,7 +11,7 @@ vagrant_hostname: "drupalvm.test"
 
 client_server_username: "drupalvm"
 
-drupal_major_version: 8
+drupal_major_version: "{{ lookup('env', 'DRUPALVM_DRUPAL_MAJOR_VERSION' )|default('8', true) }}"
 drupal_install_site: true
 drupal_site_name: "Drupal Install Test"
 

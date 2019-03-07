@@ -7,7 +7,7 @@ lint:
 platforms:
   # Platforms cannot be defined in `--base-config` file.
   # See https://github.com/ansible/molecule/issues/1328
-  - name: "dvm-docker-${MOLECULE_SCENARIO_NAME}"
+  - name: "dvm-docker-${MOLECULE_SCENARIO_NAME}-drupal-${DRUPALVM_DRUPAL_MAJOR_VERSION:-8}"
     image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu1604}-ansible:latest"
     command: ${MOLECULE_DOCKER_COMMAND:-""}
     volumes:
