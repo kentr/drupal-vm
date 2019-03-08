@@ -19,7 +19,7 @@ drupal_major_version: 7
 drupal_site_name: "Drupal 7 Deploy Test"
 
 drupal_deploy: true
-drupal_deploy_version: "7.x"
+drupal_deploy_version: "{{ drupal_major_version }}.x"
 
 web_app_web_dir: "web"
 
