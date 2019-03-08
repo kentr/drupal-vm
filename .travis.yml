@@ -10,6 +10,7 @@ services:
 branches:
   only:
   - travis-experiments
+  - dev
 
 env:
   matrix:
