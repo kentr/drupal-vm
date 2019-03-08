@@ -1,0 +1,42 @@
+---
+# Variables specific to `wordpress-deploy` test scenario.
+
+project_type: wordpress
+project_repo: "https://github.com/kentr/wordpress-test.git"
+
+domain_name: "wordpress.test"
+prod_domain: "wordpress.test"
+stage_domain: "stage.wordpress.test"
+local_domain: "local.wordpress.test"
+vagrant_hostname: "local.wordpress.test"
+
+do_db_import: True
+database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/resources/wordpress-test.sql.gz"
+
+client_server_username: "wordpress"
+
+wp_deploy: true
+
+web_app_web_dir: "web"
+
+# `wp_site_title` is defined so that the variable is available
+# in the tests.
+# If a database is imported, the value here must match whatever
+# site title was used for the site from which the database
+# was exported.
+wp_site_title: 'WordPress Deploy Test'
+
+instances:
+  - name: "local.wordpress.test"
+    env: local
+    uri: "http://local.wordpress.test"
+    type: "wordpress"
+    root: "/home/wordpress/LOCAL_wordpress/web"
+
+  - name: "wordpress.test"
+    env: prod
+    uri: "http://wordpress.test"
+    type: "wordpress"
+    root: "/home/wordpress/public_html"
+
+apache_redirect_missing_files: False

@@ -1,5 +1,5 @@
 ---
-- name: clear opcache
+- name: wordpress clear opcache
   command: >
     php -r
       "if (function_exists('apc_clear_cache')) {

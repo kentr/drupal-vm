@@ -5,8 +5,16 @@
     path: "{{ workspace }}"
     state: directory
 
-- name: Set server timezone.
-  command: "timedatectl set-timezone {{ php_date_timezone }}"
+- block:
+    - name: Ensure `tzdata` package is installed.
+      package:
+        name: tzdata
+        state: present
+
+    - name: Set server timezone.
+      timezone:
+        name: "{{ php_date_timezone }}"
+
   when: php_date_timezone is defined
 
 # `known_hosts` must come before any provisioning that uses SSH, such as Git checkouts.
@@ -31,6 +39,8 @@
 - name: Copy user-my.cnf file with password credentials.
   template:
     src: "{{ playbook_dir }}/../scripts/misc/templates/user-my.cnf.j2"
-    dest: "/home/{{ drupalvm_user }}/.my.cnf"
-    owner: "{{ drupalvm_user }}"
+    dest: "{{ ansible_env.HOME }}/.my.cnf"
+    owner: "{{ ansible_user }}"
     mode: 0600
+  # Skip for `root` so we don't muck up the default `root` credentials.
+  when: ansible_env.HOME != '/root'

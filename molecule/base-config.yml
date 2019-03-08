@@ -1,0 +1,15 @@
+---
+dependency:
+  name: galaxy
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    # Paths should be relative to scenario directories
+    # (or) so it seems.
+    # Makes sense, since documentation says values will be
+    # "deep merged" with those in scenario `molecule.yml`.
+    prepare: ../resources/prepare.yml
+    # `cleanup` requires molecule >= 2.20.
+    cleanup: ../resources/cleanup.yml

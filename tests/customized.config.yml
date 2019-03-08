@@ -1,0 +1,602 @@
+---
+vagrant_box: geerlingguy/ubuntu1604
+
+# Web app project type.
+# Possible values: 'drupal', 'wordpress' (case-sensitive).
+project_type: drupal
+# Repo for the web app project.
+project_repo: "git@bitbucket.org:git-repo.git"
+
+# Perform a database import from a dump file?
+do_db_import: False
+# Path to database dump file on local (host) machine.
+# Should either be an absolute path or relative to the directory `scripts/post-provision/tasks`.
+# The dump file must exist at the path specified.  If a dump file doesn't exist, you'll
+# need to create it an put it in the specified location.
+database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/_DB/insert-filename-here"
+
+# EXPERIMENTAL.  Attempt to automatically sync database from prod on provision?
+# Possible values: 'once', 'always', 'never' (case-sensitive).
+# If `do_db_import` is True, this value is ignored and no auto-sync is performed.
+# This feature is not documented, and may cause you frustration.
+db_do_sync: never
+
+# EXPERIMENTAL. Attempt to sync user-uploaded files from prod on provision?
+# This feature is not documented, and may cause you frustration.
+do_user_files_sync: False
+
+# Deploy web app project from repo?
+# Note: Assumes database and `settings.php` are already in place, which may not
+# true for a dev environment.
+web_app_deploy: False
+# Force the deployment?
+# If False, deploy will fail if there are local modifications to the web project files.
+# If True, local modifications to web project files may be discarded.
+web_app_deploy_force: True
+
+# Should the Git PS1 prompt show a dirty repo?
+# See https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh.
+# Note: Enabling this can make the shell prompt pretty slow.
+drush_git_ps1_showdirtystate: False
+
+# The domain name for the local installation
+domain_name: drupalvm.test
+prod_domain: "www.{{ domain_name }}"
+stage_domain: "stage.{{ domain_name }}"
+local_domain: "{{ domain_name }}"
+
+vagrant_hostname: "{{ local_domain }}"
+
+# Username for the client account on the prod server.
+client_server_username: client_server_username
+
+# For consistency with prod, you would set this to the same value as the user on
+# the prod server.
+vagrant_machine_name: "{{ client_server_username }}"
+
+# Primary directory that is synced onto the Vagrant machine.
+# This should usually be equivalent to the directory on the host that contains
+# the Drupal-VM code and your project.
+# On production shared webservers, this is usually your user's home directory.
+
+# On normal hosts, this would be something like this:
+# "{{ ansible_user_home }}"
+# Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
+# do a workaround:
+base_synced_dir: "/home/{{ client_server_username }}"
+
+# Root directory for the web app project.
+# This is where the code and everything else in the project's repo will go.
+# If you change this, you should also change the corresponding synced folder below.
+#
+# On normal hosts, this would be something like this:
+# "{{ base_synced_dir }}/LOCAL_{{ ansible_user_id }}"
+# Vagrant seems to choke if ansible_user_id isn't "vagrant", so we have to
+# do a workaround:
+# Name of app project directory within Drupal-VM project.
+web_app_project_dir: "LOCAL_{{ client_server_username }}"
+# Full absolute path to project root in target machine (VM).
+web_app_project_root: "{{ base_synced_dir }}/{{ web_app_project_dir }}"
+
+# Directory containing actual web files, relative to project root.
+# For Drupal Composer projects, this would be "web".
+# If the web directory is the same as the project root, leave this empty.
+web_app_web_dir: "public_html"
+
+# The location of the actual Drupal site code.
+# It may be the same as web_app_project_root, depending on how your project is set up.
+# TODO: Improve handling of empty `web_app_web_dir`.
+web_app_web_root: "{{ web_app_project_root }}/{{ web_app_web_dir }}"
+
+drupal_core_path: "{{ web_app_web_root }}"
+drupal_core_owner: "{{ drupalvm_user }}"
+drupal_core_group: "{{ drupalvm_webserver_user }}"
+drupal_deploy: "{{ web_app_deploy }}"
+drupal_deploy_dir: "{{ web_app_project_root }}"
+drupal_deploy_repo: "{{ project_repo }}"
+# Discard existing files in Drupal working directory?
+drupal_deploy_force: "{{ web_app_deploy_force | default(False) }}"
+
+# Directory under "sites/" that holds settings.php, etc.
+# TODO: Rename this to `drupal_config_site_directory`.
+config_site_directory: "default"
+# Full path of Drupal site directory, relative to web root.
+# Most likely, this shouldn't be changed.
+# Change `config_site_directory` instead.
+drupal_config_directory: "sites/{{ config_site_directory }}"
+
+# Public / private files directories.  If your Drupal root directory is different from
+# that on prod, then you'll want to set this to match your local site to override the
+# values in the prod database.
+# These should match what is in your Drush alias file, if you have set a value there.
+# Public file directory is relative to web root.
+drupal_file_public_path: "{{ drupal_config_directory }}/files"
+# Private file path is absolute, since they may be outside the webroot.
+drupal_file_private_path: ""
+
+# Directory where contrib modules live, relative to site root.
+drupal_modules_contrib_path: "{{ drupal_config_directory }}/modules"
+
+# The default type for synced folders when `type` isn't specified in the config
+# for the individual folder.
+# This is `virtualbox` by default so that users don't have to set up `nfs`.
+# http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more info.
+vagrant_synced_folder_default_type: virtualbox
+
+# A list of synced folders, with the keys 'local_path', 'destination', and
+# a 'type' of [nfs|rsync|smb] (leave empty for slow native shares). See
+# http://docs.drupalvm.com/en/latest/getting-started/syncing-folders/ for more.
+vagrant_synced_folders:
+  # The first synced folder will be used for the default Drupal installation, if
+  # any of the build_* settings are 'true'. By default the folder is set to
+  # the drupal-vm folder.
+  # If you change the `destination`, you probably also want to change `base_synced_dir`
+  # above.
+  - local_path: .
+    destination: "{{ base_synced_dir }}"
+    create: true
+
+# You probably don't want to change this.
+drupal_composer_install_dir: "{{ web_app_project_root }}"
+
+# Should be valid version at https://github.com/drush-ops/drush.
+# This can be the the literal string HEAD, a branch name, a tag name.
+# See http://docs.ansible.com/ansible/git_module.html#options.
+# drush_version: "master"
+drush_version: "8.1.15"
+drush_keep_updated: false
+drush_composer_cli_options: "--prefer-dist --no-interaction"
+
+# Custom Drush alias tasks to insert just the local declaration into an existing
+# alias file.
+insert_local_drush_alias: True
+# Experimental role to set up drush alias locally and on remote.
+# Won't do much if project_type != 'drupal'.
+drush_setup_drush: True
+# Prefix to use on the Drush / WP-CLI alias file.  This value will determine the 1st part of
+# the alias, between the "@" and the first ".".
+# Example: if cli_alias_file_prefix = "my_project", the resulting aliases will be
+#  - @my_project.loc
+#  - @my_project.whatever
+cli_alias_file_prefix: "{{ client_server_username }}"
+
+# Exclude data from these tables in database dumps.
+# For Drupal, the table structure will be included.
+# For WordPress, the tables will be excluded entirely.
+# Format: comma-separated list of table names.
+db_dump_exclude_tables: "'cache','cache_*','history','sessions','watchdog'"
+
+# Extra args for `rsync` when synchronizing files from prod.
+files_rsync_extra_args: '--partial -avu'
+# Patterns passed to `rsync` --exclude args when synchronizing files from prod.
+files_rsync_excludes:
+  - '*.flv'
+  - '*.mov'
+  - '*.mp3'
+  - '*.mp4'
+  - '*.swf'
+  - '*.wmv'
+  - '*.pdf'
+  - '*.doc*'
+  - '*.ppt*'
+  - '*.psd'
+  - '*.tar.*'
+  - '*.tbz'
+  - '*.tgz'
+  - '*.xls*'
+  - 'css/**'
+  - 'js/**'
+  - 'php/twig/**'
+  - 'config_**'
+
+# This is Drupal-VM's default Drush alias feature, which creates funky aliases and
+# clobbers an existing file. So, it's disabled.
+configure_drush_aliases: false
+
+# Create project drushrc.php with various Drush shell aliases.
+drush_insert_project_shell_aliases: true
+
+# Though site is not installed, this is used within the Pantheon project
+# to form the database import file name.
+# see database_import_filename
+# drupal_major_version: 7
+
+# Install & configure basic site into database. Does not install code.
+# Set this to 'false' if you don't need to install drupal (using the drupal_*
+# settings below), but instead copy down a database (e.g. using drush sql-sync).
+drupal_install_site: false
+
+# Set this to 'false' if you are using a different site deployment strategy and
+# would like to configure 'vagrant_synced_folders' and 'apache_vhosts' manually.
+drupal_build_makefile: false
+
+# Set 'drupal_build_makefile' to 'false' and this to 'true' if you are using a
+# composer based site deployment strategy.
+drupal_build_composer: false
+
+# Set this to 'true' and 'drupal_build_makefile', 'drupal_build_composer' to 'false' if you
+# are using Composer's create-project as a site deployment strategy.
+drupal_build_composer_project: false
+
+extra_packages:
+  - sqlite
+  - aptitude
+  - "libapache2-mod-php{{ php_version }}"
+
+################################################################################
+# APACHE
+################################################################################
+
+# Use the standard user as Apache user for standard.
+drupalvm_webserver_user: "{{ vagrant_user }}"
+
+# Apache VirtualHosts. Add one for each site you are running inside the VM. For
+# multisite deployments, you can point multiple servernames at one documentroot.
+# View the geerlingguy.apache Ansible Role README for more options.
+
+# Ubuntu Snakeoil Certificates
+ssl_certificate_file: "/etc/ssl/certs/ssl-cert-snakeoil.pem"
+ssl_certificate_key_file: "/etc/ssl/private/ssl-cert-snakeoil.key"
+
+# Add an Apache redirect for user-upload files that aren't on the local site?
+# This feature attempts to reduce the need for copying user-upload files
+# from the prod site by automatically redirecting the browser to the live site
+# for any user-upload files that are missing on the local site.
+apache_redirect_missing_files: True
+
+# Apache vhost global extra parameters, applied to all vhosts.
+apache_vhosts_extra_parameters_global: ''
+
+# Apache vhost extra parameters, applied to the primary project site vhost.
+apache_vhosts_extra_parameters_site: ''
+
+# Apache vhost extra parameters to force redirect to https version.
+apache_vhosts_extra_parameters_redirect_ssl: |
+  <IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=302]
+  </IfModule>
+
+# Protect admin tools with Apache Basic Authentication and firewall.
+security_protect_admin_tools: False
+
+# Local directory for storage of files that contain randomly-generated passwords.
+# These passwords are used for the MySQL user and the Apache Basic Authentication
+# on the admin / dev tools.
+# The value should be relative to the DrupalVM root directory (aka, the
+# "vagrant" directory).
+#
+# WARNING: This system is inherently insecure, as the passwords are stored in
+# plaintext on the host machine. It's only slightly better than using default
+# or hard-coded passwords.  These are just dev / test boxes, right?
+# Choose this directory carefully.  If you put it within the web project
+# directory, the passwords might be copied to the remote machine and be visible
+# in plaintext via the browser or by any process running on the remote machine.
+#
+# For more information about how these passwords are generated, see:
+# https://docs.ansible.com/ansible/2.5/plugins/lookup/password.html
+random_passwords_dir: 'ansible_random_passwords'
+
+# File path for generic Apache Basic Auth password file on the remote machine.
+# The password in this file will be bcrypted.
+security_admin_tools_apache_passwd_file: "{{ apache_conf_path }}/.htpasswd"
+
+# Apache vhost extra parameters to add Basic Auth protection for admin tools.
+apache_vhosts_extra_parameter_admin_tools_auth: |
+  # Basic authentication.
+  <Location />
+      AuthType Basic
+      AuthName "Restricted Content"
+      AuthUserFile {{ security_admin_tools_apache_passwd_file }}
+      Require valid-user
+  </Location>
+
+# Full Apache vhost extra parameters for admin tools vhosts.
+# Note: This may be modified by tasks.
+apache_vhosts_extra_parameters_admin_tools: |
+  {{ apache_vhosts_extra_parameters_redirect_ssl }}
+  {{ apache_vhosts_extra_parameters_global }}
+
+apache_vhosts:
+  - servername: "{{ vagrant_hostname }}"
+    serveralias: "www.{{ vagrant_hostname }}"
+    documentroot: "{{ web_app_web_root }}"
+    certificate_file: "{{ ssl_certificate_file }}"
+    certificate_key_file: "{{ ssl_certificate_key_file }}"
+    extra_parameters: |
+      {{ apache_vhosts_extra_parameters_global }}
+      {{ apache_vhosts_extra_parameters_site }}
+
+# Copy all `apache_vhosts` to `apache_vhosts_ssl` for SSL versions.
+apache_vhosts_ssl: "{{ apache_vhosts }}"
+
+apache_mods_enabled:
+  - expires.load
+  - ssl.load
+  - rewrite.load
+  - proxy.load
+#  - proxy_fcgi.load
+  - proxy_http.load
+
+# If a file named "config.php{{ php_version }}.yml" exists in the config
+# directory, it will be included automatically and override the variables in
+# this file.
+# Configs for PHP 5.6 are in config.php5.6.yml
+php_version: "7.1"
+
+# Drupal VM defaults to using PHP-FPM with either Apache or Nginx. If you wish
+# to instead use Apache + mod_php with an Ubuntu base box, make sure you add
+# libapache2-mod-php7.0 to `extra_packages` elsewhere in this config file.
+php_enable_php_fpm: False
+apache_vhost_php_fpm_parameters: ""
+
+php_install_recommends: no
+php_packages:
+  - "php{{ php_version }}"
+  # See note about php_apc_enable_cli below.
+  - "php{{ php_version }}-apcu"
+  - "php{{ php_version }}-mcrypt"
+  - "php{{ php_version }}-cli"
+  - "php{{ php_version }}-common"
+  - "php{{ php_version }}-curl"
+  - "php{{ php_version }}-dev"
+  - "php{{ php_version }}-fpm"
+  - "php{{ php_version }}-gd"
+  - "php{{ php_version }}-sqlite3"
+  - "php{{ php_version }}-xml"
+  - "php{{ php_version }}-mbstring"
+  - libpcre3-dev
+php_conf_paths:
+  - "/etc/php/{{ php_version }}/fpm"
+  - "/etc/php/{{ php_version }}/apache2"
+  - "/etc/php/{{ php_version }}/cli"
+php_extension_conf_paths:
+  - "/etc/php/{{ php_version }}/fpm/conf.d"
+  - "/etc/php/{{ php_version }}/apache2/conf.d"
+  - "/etc/php/{{ php_version }}/cli/conf.d"
+php_fpm_daemon: "php{{ php_version }}-fpm"
+php_fpm_conf_path: "/etc/php/{{ php_version }}/fpm"
+php_fpm_pool_conf_path: "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
+php_mysql_package: "php{{ php_version }}-mysql"
+
+# "If you install `redis`:
+php_redis_package: "php{{ php_version }}-redis"
+
+# "If you install `memcached`:
+php_memcached_package: "php{{ php_version }}-memcached"
+
+php_xdebug_version: 2.6.0
+
+# Enable APCu for CLI so that drush can enable the apc module and clear caches.
+php_apc_enable_cli: 1
+
+# XDebug configuration. XDebug is disabled by default for better performance.
+php_xdebug_default_enable: 0
+php_xdebug_coverage_enable: 0
+php_xdebug_cli_enable: 0
+php_xdebug_remote_enable: 0
+php_xdebug_remote_connect_back: 1
+php_xdebug_remote_autostart: 0
+php_xdebug_remote_host: 10.0.2.2
+# Drupal smart trim requires high max_nesting_level.
+php_xdebug_max_nesting_level: 512
+# Use PHPSTORM for PHPStorm, sublime.xdebug for Sublime Text.
+php_xdebug_idekey: ECLIPSE_DBGP
+
+php_date_timezone: "America/Los_Angeles"
+# Composer requires lots of memory.
+# See https://github.com/geerlingguy/drupal-vm/issues/547
+php_memory_limit: 256M
+php_opcache_max_accelerated_files: 10000
+php_opcache_fast_shutdown: "On"
+php_opcache_interned_strings_buffer: 16
+
+# Enable all errors.
+# See https://secure.php.net/manual/en/migrating5.errorrep.php
+php_error_reporting: "E_ALL | E_STRICT"
+# Disable error display on screen.  Helps with visual regression testing.
+php_display_errors: 0
+php_log_errors: 1
+php_error_log: /var/log/apache2/error.log
+
+pre_provision_tasks_dir: "../scripts/pre-provision/tasks/*.yml"
+post_provision_tasks_dir: "../scripts/post-provision/tasks/*.yml"
+
+db_user: vagrant
+db_password: vagrant
+db_name: vagrant
+db_charset: utf8mb4
+db_collate: utf8mb4_general_ci
+
+# Destination directory for SQL dump files.
+db_remote_dump_directory: "/home/{{ client_server_username }}/tmp"
+db_local_dump_directory: "{{ web_app_project_root }}/tmp"
+
+# MySQL databases and users.
+mysql_databases:
+  - name: "{{ db_name }}"
+    encoding: "{{ db_charset }}"
+    collation: "{{ db_collate }}"
+
+mysql_users:
+  - name: "{{ db_user }}"
+    host: "%"
+    password: "{{ db_password }}"
+    priv: "{{ db_name }}.*:ALL"
+
+# Comment out any extra utilities you don't want to install. If you don't want
+# to install *any* extras, set this value to an empty set, e.g. `[]`.
+installed_extras:
+  - drush
+
+php_sendmail_path: "/usr/sbin/sendmail -t -i"
+
+
+# A list of files that should override the default global my.cnf.
+# Each item in the array requires a "src" parameter which is a path to a file.
+# An optional "force" parameter can force the file to be updated each time ansible runs.
+# See:
+#   - https://github.com/geerlingguy/ansible-role-mysql
+#   - https://dev.mysql.com/doc/refman/5.7/en/option-files.html
+mysql_config_include_files:
+  - src: "{{ playbook_dir }}/../scripts/misc/templates/mysql.overrides.cnf"
+    force: True
+
+################################################################################
+# Core already installed in project directory
+################################################################################
+
+# Database import
+#
+# Source file for database.  Will be copied to the node and imported into
+# the database specified for the Drupal site.
+# Name of database import source file.
+# database_import_filename: "prod.d{{ drupal_major_version }}.latest.sql.gz"
+# Directory where the database source file resides.
+# Path should be relative to the provisioning directory.
+# drupal_database_import_directory: "../backup/prod/db"
+
+drush_bde_env_options: "--base-url=https://{{vagrant_hostname}} --site-root={{ web_app_web_root }}"
+behat_binary_dir: "{{ drupal_composer_install_dir }}/bin"
+behat_config_file: "{{ web_app_web_root }}/sites/default/behat-tests/behat.yml"
+behat_cmd: "behat -c {{ behat_config_file }}"
+################################################################################
+
+drupal_db_name: "{{ db_name }}"
+drupal_db_user: "{{ db_user }}"
+drupal_db_password: "{{ db_password }}"
+
+install_wordpress: False
+wp_version: latest
+wp_deploy: "{{ web_app_deploy }}"
+wp_deploy_clone_depth: 20
+# Should the clone be a single-branch repo?
+wp_deploy_clone_single_branch: False
+wp_deploy_repo: "{{ project_repo }}"
+wp_domain: "{{ local_domain }}"
+wp_deploy_dir: "{{ web_app_project_root }}"
+wp_install_dir: "{{ web_app_web_root }}"
+
+# Initialize blank WordPress site after installing code?
+wp_install_site: False
+wp_admin_user: 'admin'
+wp_admin_password: 'admin'
+wp_admin_email: "{{ client_server_username }}@{{ local_domain }}"
+wp_site_title: "{{ client_server_username|capitalize }} WordPress Site"
+# WARNING: Dummy data can be installed multiple times.
+wp_install_dummy_data: False
+
+# Error reporting on screen, and other debug tools.  Ensure this is off when doing
+# visual regression testing.
+wp_debug: True
+
+wp_db_name: "{{ db_name }}"
+wp_db_user: "{{ db_user }}"
+wp_db_password: "{{ db_password }}"
+wp_db_charset: "{{ db_charset }}"
+wp_db_collate: "{{ db_collate }}"
+# Prefix cannot be empty.
+wp_table_prefix: "{{ db_table_prefix | default('wp_') }}"
+wp_fs_method: 'direct'
+wp_lang: ''
+
+wp_core_owner: "{{ drupalvm_user }}"
+
+# EXPERIMENTAL: Set up WP-CLI aliases locally and on remote?
+# Won't do much if project_type != 'wordpress'.
+wp_setup_wp_cli: True
+
+# Set `workspace` to take advantage of `vagrant-cachier`.
+workspace: /tmp/vagrant-cache/generic
+
+# Setup vars for Wraith testing scripts.
+# Assumes Wraith is already installed on system.
+# See https://bbc-news.github.io/wraith/
+# You must have access to the project repo.
+wraith_testing_framework:
+  install: False
+  # Git URL for wraith testing system.
+  repo: repo_url
+  # Absolute path in target node for the wraith testing directory.
+  install_dir: "{{ web_app_project_root }}/wraith"
+
+  # Paths file
+  # Path on local machine to a file containing the path definitions for Wraith.
+  paths_file: "{{ web_app_project_root }}/wraith"
+
+  # SSH remote host to which results will be copied.
+  # You must have rsync access to this host.
+  rsync_dest_host: "{{ cli_alias_file_prefix }}"
+
+  # Remote directory to which results will be copied.
+  # Directory must already exist on the target machine, and you must have write
+  # access to it.
+  # Can be relative to the SSH user, or absolute.
+  # A trailing slash will be added automatically, so that only the directory contents
+  # are copied.
+  rsync_dest_dir: path/to/vr-shots
+
+# Instance definitions used for setting up the Wraith configs and anything else.
+instances:
+  - name: "{{ local_domain }}"
+    # one of "local", "dev", "stage", "prod"
+    env: local
+    uri: "http://{{ local_domain }}"
+    type: "{{ project_type }}"
+    major_version: "{{ drupal_major_version }}"
+    # Absolute path to web root for the environment.
+    root: "{{ web_app_web_root }}"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: "{{ local_domain }}"
+    ssh_user: "{{ ansible_user|default('root') }}"
+    drush_ssh_options: "-o PasswordAuthentication=no -i {{ lookup('env','HOME') }}/.vagrant.d/insecure_private_key -o LogLevel=quiet"
+    drush_alias_is_local_on_remote_node: True
+
+  - name: "{{ prod_domain }}"
+    # one of "local", "dev", "stage", "prod"
+    env: prod
+    uri: "http://{{ prod_domain }}"
+    type: "{{ project_type }}"
+    major_version: "{{ drupal_major_version }}"
+    # Absolute path to web root for the environment.
+    root: "/home/{{ client_server_username }}/public_html"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: halifax.dreamhost.com
+    ssh_user: "{{ client_server_username }}"
+
+# Misc
+# Set up bash and other basics of login account.
+setup_hosting_account: True
+
+# Shims for backwards-compatibility.  It's preferable to set agnostic variables above.
+drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+# Drush automatically adds a single leading "-" to the rsync `mode`, so we have to remove
+# one leading hyphen here.
+drush_rsync_mode: "{{ files_rsync_extra_args | default('')  | regex_replace('^-', '') }}"
+drush_rsync_excludes: "{{ files_rsync_excludes | default([]) | join(':') }}"
+
+# Ensure vagrant plugins are installed.
+vagrant_plugins:
+  - name: vagrant-vbguest
+  - name: vagrant-hostsupdater
+  - name: vagrant-cachier
+
+# Add swap to the server? (Debian only)
+# Defaults to `False`
+swapfile_add: False
+# Size of swapfile.
+swapfile_size: 512K
+
+# Experimental to fix local Docker test.
+composer_home_path: "/home/{{ drupalvm_user }}/.composer"
+
+## OVERRIDES
+
+drupal_install_site: true
+drupal_build_composer_project: true
+
+# Must be "web" for Drupal composer installation
+web_app_web_dir: "web"

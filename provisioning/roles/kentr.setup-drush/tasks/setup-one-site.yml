@@ -120,5 +120,5 @@
     state: present
     content:  "{{ lookup('template', 'templates/' + drush_single_alias_template) }}"
     # For Drush >= 9, it's a simple YAML file that can be created as we go.
-    create: "{{ drush_9_or_higher }}"
+    create: true
   when: item.uri is defined and drush_aliases_local | default(False)
