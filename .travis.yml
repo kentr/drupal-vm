@@ -11,13 +11,16 @@ branches:
   only:
   - travis-experiments
 
+# Manual build matrix.
+# See https://github.com/travis-ci/travis-ci/issues/1519
 env:
-  matrix:
-    - MOLECULE_DISTRO: ubuntu1604
+  - MOLECULE_DISTRO=ubuntu1604 SCENARIO=default
+  - MOLECULE_DISTRO=ubuntu1604 SCENARIO=wordpress-deploy
+  - MOLECULE_DISTRO=ubuntu1604 SCENARIO=drupal-deploy-7
 
 install:
   # Use `--pre` flag to get molecule >= 2.20.
   - pip install molecule docker --pre
 
 script:
-  - travis_wait 45 molecule -c molecule/base-config.yml test --all
+  - "travis_wait 25 molecule -c molecule/base-config.yml test -s $SCENARIO"
