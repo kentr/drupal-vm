@@ -20,4 +20,4 @@ install:
   - pip install molecule docker --pre
 
 script:
-  - molecule -c molecule/base-config.yml test --all
+  - travis_wait 45 molecule -c molecule/base-config.yml test --all
