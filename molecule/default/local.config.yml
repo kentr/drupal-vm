@@ -47,8 +47,10 @@ apache_redirect_missing_files: False
 
 installed_extras:
   - drush
-  - mailhog
-  - pimpmylog
+
+# Use sendmail, since we're not installing mailhog.
+# See http://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
+php_sendmail_path: "/usr/sbin/sendmail -t -i"
 
 # Install drush globally to prevent need for project-specific drush.
 # Installing from source due to composer global installation as `root`.
