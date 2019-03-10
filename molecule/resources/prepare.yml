@@ -82,6 +82,12 @@
             name: "{{ vagrant_user }}"
             shell: /bin/bash
             groups: sudo
+            # Attempt to set user id to the same as TravisCI docker host,
+            # otherwise omit the attribute.
+            # This helps permissions issues with writing files, both inside
+            # the molecule container and on the host.
+            # `TRAVIS_UID` is a currently-undocumented convenience variable.
+            uid: "{{ lookup('env', 'TRAVIS_UID')|default(omit, true) }}"
             append: yes
 
         # See https://www.reddit.com/r/ansible/comments/5xzj8b/how_to_modify_sudoers_file_with_ansible/

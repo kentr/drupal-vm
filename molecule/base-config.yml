@@ -3,6 +3,12 @@ dependency:
   name: galaxy
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      stdout_callback: 'null'
+      display_skipped_hosts: false
+      display_ok_hosts: false
+      deprecation_warnings: false
   lint:
     name: ansible-lint
   playbooks:
