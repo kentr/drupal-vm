@@ -1,0 +1,62 @@
+---
+# Variables specific to drupal-deploy test scenario.
+# Many values are duplicated as scalars because the testinfra AnsibleRunner
+# doesn't interpolate Jinja strings when including variables.
+
+project_type: drupal
+project_repo: "https://github.com/kentr/drupal-deploy-test.git"
+
+domain_name: "drupal.test"
+local_domain: "drupal.test"
+vagrant_hostname: "drupal.test"
+
+do_db_import: True
+database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/resources/drupal-{{ drupal_major_version }}-test.sql.gz"
+
+client_server_username: "drupal"
+
+drupal_major_version: 7
+drupal_site_name: "Drupal 7 Deploy Test"
+
+drupal_deploy: true
+drupal_deploy_version: "{{ drupal_major_version }}.x"
+
+web_app_web_dir: "web"
+
+instances:
+  - name: "drupal.test"
+    env: local
+    uri: "http://drupal.test"
+    type: "drupal"
+    root: "/home/drupal/LOCAL_drupal/web"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: "{{ local_domain }}"
+    ssh_user: "{{ ansible_user|default('root') }}"
+    drush_ssh_options: "-o PasswordAuthentication=no -i {{ lookup('env','HOME') }}/.vagrant.d/insecure_private_key -o LogLevel=quiet"
+    drush_alias_is_local_on_remote_node: True
+
+  - name: "drupal.test"
+    env: prod
+    uri: "http://drupal.test"
+    type: "drupal"
+    root: "/home/drupal/public_html"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: halifax.dreamhost.com
+    ssh_user: "{{ client_server_username }}"
+
+apache_redirect_missing_files: False
+
+installed_extras:
+  - drush
+
+# Use sendmail, since we're not installing mailhog.
+# See http://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
+php_sendmail_path: "/usr/sbin/sendmail -t -i"
+
+# Install drush globally to prevent need for project-specific drush.
+# Installing from source due to composer global installation as `root`.
+drush_launcher_install: false
+drush_composer_global_install: false
+drush_install_from_source: true
