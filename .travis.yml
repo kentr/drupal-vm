@@ -11,6 +11,7 @@ branches:
   only:
   - travis-experiments
   - dev
+  - customized
 
 # Manual build matrix.
 # See https://github.com/travis-ci/travis-ci/issues/1519
