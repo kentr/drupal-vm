@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/kentr/drupal-vm.svg?branch=customized)](https://travis-ci.org/kentr/drupal-vm)
+
 ## This branch
 
 This branch adds:
