@@ -39,7 +39,7 @@ instances:
     type: "wordpress"
     root: "/home/wordpress/public_html"
 
-apache_redirect_missing_files: False
+apache_redirect_missing_files: true
 
 installed_extras: []
 
