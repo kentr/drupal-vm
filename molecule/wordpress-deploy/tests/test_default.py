@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import re
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -64,3 +65,24 @@ def test_db_search_replace(host, ansible_role_vars):
 
     assert ('search-replace test 4: https://' +
             ansible_role_vars['local_domain']) in cmd.stdout
+
+
+def test_missing_files_redirect_present(host, ansible_role_vars):
+
+    # Check status code for the `is-there.png` file.
+    cmd = host.run('curl -s --head ' +
+                   ansible_role_vars['local_domain'] +
+                   '/wp-content/uploads/is-there.png')
+
+    assert re.match('HTTP.*?200 OK', cmd.stdout)
+
+
+def test_missing_files_redirect_not_present(host, ansible_role_vars):
+
+    cmd = host.run('curl -s --head ' +
+                   ansible_role_vars['local_domain'] +
+                   '/wp-content/uploads/not-there.png')
+
+    assert re.match('HTTP.*?302 Found', cmd.stdout)
+    assert (ansible_role_vars['prod_domain'] +
+            '/wp-content/uploads/not-there.png') in cmd.stdout
