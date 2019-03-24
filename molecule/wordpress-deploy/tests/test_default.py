@@ -13,11 +13,12 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 def ansible_role_vars(host):
 
     # Include variables from ansible variable files.
-    # Paths are relative to the scenario directory.
+    # Paths must be relative to the scenario directory.
     # `test_test_variable_files` is declared in `base-config.yml`,
     # under the `all` group.
     vars_files = host.ansible.get_variables()['test_variable_files']
 
+    # Load variables from `vars_files` into `host`.
     for file in vars_files:
         host.ansible(
             "include_vars",
