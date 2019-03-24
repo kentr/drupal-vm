@@ -16,13 +16,18 @@ def ansible_role_vars(host):
     # Paths must be relative to the scenario directory.
     # `test_test_variable_files` is declared in `base-config.yml`,
     # under the `all` group.
-    vars_files = host.ansible.get_variables()['test_variable_files']
+    try:
+        vars_files = host.ansible.get_variables()['test_variable_files']
+    except KeyError:
+        raise KeyError("Could not get ansible variable 'test_variable_files'"
+                       " to use in 'include_vars'. Is it defined?")
 
     # Load variables from `vars_files` into `host`.
     for file in vars_files:
         host.ansible(
             "include_vars",
-            "file=" + file)
+            "file=" + file
+        )
 
     return host.ansible.get_variables()
 
