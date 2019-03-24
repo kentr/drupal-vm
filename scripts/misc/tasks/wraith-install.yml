@@ -47,6 +47,7 @@
 # In spite of `geerlingguy.ruby` adding the gems path to `/etc/profile.d`,
 # it wasn't working correctly.
 - name: Add gems path to `.profile`.
+  become: no
   blockinfile:
     path: ~/.profile
     backup: True
@@ -55,12 +56,14 @@
 
 - name: Install configured gems.
   gem: "name={{ item }} state=present"
+  become: no
   with_items:
     - wraith
   register: wraith_install_result
 
 - name: Get wraith gem directory for patch.
   command: "find {{ gems_path }} -name wraith-* -type d"
+  become: no
   register: wraith_gem_dir_check
 
 - name: Set wraith gem directory for patch.
