@@ -1,0 +1,59 @@
+---
+# Variables specific to default test scenario.
+
+project_type: drupal
+
+domain_name: "drupalvm.test"
+prod_domain: "drupalvm.test"
+stage_domain: "stage.drupalvm.test"
+local_domain: "drupalvm.test"
+vagrant_hostname: "drupalvm.test"
+
+client_server_username: "drupalvm"
+
+drupal_major_version: "{{ lookup('env', 'DRUPALVM_DRUPAL_MAJOR_VERSION' )|default('8', true) }}"
+drupal_install_site: true
+drupal_site_name: "Drupal Install Test"
+
+web_app_web_dir: "web"
+
+drupal_build_composer: true
+drupal_build_composer_project: true
+
+instances:
+  - name: "drupalvm.test"
+    env: local
+    uri: "http://drupalvm.test"
+    type: "drupal"
+    root: "/home/drupalvm/LOCAL_drupal/web"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: "{{ local_domain }}"
+    ssh_user: "{{ ansible_user|default('root') }}"
+    drush_ssh_options: "-o PasswordAuthentication=no -i {{ lookup('env','HOME') }}/.vagrant.d/insecure_private_key -o LogLevel=quiet"
+    drush_alias_is_local_on_remote_node: True
+
+  - name: "drupalvm.test"
+    env: prod
+    uri: "http://drupalvm.test"
+    type: "drupal"
+    root: "/home/drupalvm/public_html"
+    drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
+    repo: "{{ project_repo }}"
+    ssh_host: halifax.dreamhost.com
+    ssh_user: "{{ client_server_username }}"
+
+apache_redirect_missing_files: False
+
+installed_extras:
+  - drush
+
+# Use sendmail, since we're not installing mailhog.
+# See http://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
+php_sendmail_path: "/usr/sbin/sendmail -t -i"
+
+# Install drush globally to prevent need for project-specific drush.
+# Installing from source due to composer global installation as `root`.
+drush_launcher_install: false
+drush_composer_global_install: false
+drush_install_from_source: true

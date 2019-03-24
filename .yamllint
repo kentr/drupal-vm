@@ -1,0 +1,22 @@
+extends: default
+
+ignore: |
+  default.config.yml
+  example.docker-compose.yml
+  example.drupal.make.yml
+  mkdocs.yml
+  provisioning/
+
+rules:
+  braces:
+    max-spaces-inside: 1
+    level: error
+  brackets:
+    max-spaces-inside: 1
+    level: error
+  line-length:
+    max: 160
+    level: warning
+  # Allow ansible truthy values.
+  truthy: disable
+  document-start: disable

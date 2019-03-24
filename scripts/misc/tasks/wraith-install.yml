@@ -10,6 +10,10 @@
   become: Yes
   include_role:
     name: "geerlingguy.nodejs"
+  vars:
+    nodejs_npm_global_packages:
+      - name: phantomjs
+      - name: casperjs
 
 - name: Install `ruby`.
   become: Yes
@@ -47,6 +51,7 @@
 # In spite of `geerlingguy.ruby` adding the gems path to `/etc/profile.d`,
 # it wasn't working correctly.
 - name: Add gems path to `.profile`.
+  become: no
   blockinfile:
     path: ~/.profile
     backup: True
@@ -55,12 +60,14 @@
 
 - name: Install configured gems.
   gem: "name={{ item }} state=present"
+  become: no
   with_items:
     - wraith
   register: wraith_install_result
 
 - name: Get wraith gem directory for patch.
   command: "find {{ gems_path }} -name wraith-* -type d"
+  become: no
   register: wraith_gem_dir_check
 
 - name: Set wraith gem directory for patch.
@@ -75,18 +82,3 @@
     src: "{{ item }}"
   with_fileglob:
     - "{{ playbook_dir }}/../scripts/misc/patches/wraith/*.*"
-
-- name: Add Wraith npm dependencies.
-  npm:
-    name: "{{ item.name | default(item) }}"
-    version: "{{ item.version | default('latest') }}"
-    global: Yes
-    state: latest
-  become: Yes
-  environment:
-    NPM_CONFIG_PREFIX: "{{ npm_config_prefix }}"
-    NODE_PATH: "$NODE_PATH:{{ npm_config_prefix }}/lib/node_modules"
-    NPM_CONFIG_UNSAFE_PERM: "{{ npm_config_unsafe_perm }}"
-  with_items:
-    - name: phantomjs
-    - name: casperjs

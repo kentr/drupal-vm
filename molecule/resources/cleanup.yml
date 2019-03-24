@@ -1,0 +1,56 @@
+---
+# Shared playbook for `cleanup` action of tests.
+# Requires molecule >= 2.20.
+
+- name: Cleanup local environment.
+  hosts: localhost
+  connection: local
+  become: false
+
+  # Simulate primary playbook variable definitions / includes,
+  # to get values for `vagrant_user` and `ansible_user`.
+  vars_files:
+    - ../../provisioning/vars/main.yml
+    - ../../default.config.yml
+
+  pre_tasks:
+
+    # config.yml is imported first b/c the PHP version switching wasn't working
+    # with all items in one list.
+    - name: Include optional configuration files.
+      include_vars: "{{ item }}"
+      with_fileglob:
+        - "../../config.yml"
+
+    - name: Include optional configuration files.
+      include_vars: "{{ item }}"
+      with_fileglob:
+        - "../../local.config.yml"
+        - "../../secrets.yml"
+        - "../../{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
+
+  tasks:
+
+    - block:
+        - name: Check if backup `local.config.yml` exists.
+          stat:
+            get_checksum: false
+            path: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml.molecule-backup"
+          register: backup_local_config_check
+
+        - name: Restore backup `local.config.yml`.
+          command: >
+            mv
+            {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml.molecule-backup
+            {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/local.config.yml
+          when: backup_local_config_check.stat.exists
+
+    # Delete artifact web app files from deploy tests that are on the host machine
+    # due to shared folders.
+    # Helps with running molecule locally.
+    - name: Delete local artifact web app files from deploy tests.
+      file:
+        path: >-
+          {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/{{ web_app_project_dir }}
+        state: absent
+        force: true

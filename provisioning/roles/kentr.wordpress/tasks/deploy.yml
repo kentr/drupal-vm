@@ -24,7 +24,7 @@
         TMPDIR: "{{ ansible_env.HOME }}/.ansible/tmp"
         TMP: "{{ ansible_env.HOME }}/.ansible/tmp"
         TEMP: "{{ ansible_env.HOME }}/.ansible/tmp"
-      notify: clear opcache
+      notify: wordpress clear opcache
       register: wp_deploy_repo_updated
 
     # Undo the implied single-branch result that results from a `depth`
