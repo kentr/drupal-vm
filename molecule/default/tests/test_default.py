@@ -8,33 +8,27 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 
 # Define fixture for dynamic ansible role variables.
-# @see https://github.com/philpep/testinfra/issues/345#issuecomment-409999558
 @pytest.fixture
 def ansible_role_vars(host):
 
     # Include variables from ansible variable files.
-    # Paths are relative to the scenario directory.
-    ansible_vars = host.ansible(
-        "include_vars",
-        ("file=../../default.config.yml"
-         " name=default_config"))["ansible_facts"]["default_config"]
+    # Paths must be relative to the scenario directory.
+    # `test_test_variable_files` is declared in `base-config.yml`,
+    # under the `all` group.
+    try:
+        vars_files = host.ansible.get_variables()['test_variable_files']
+    except KeyError:
+        raise KeyError("Could not get ansible variable 'test_variable_files'"
+                       " to use in 'include_vars'. Is it defined?")
 
-    ansible_vars.update(host.ansible(
-        "include_vars",
-        ("file=../../config.yml"
-         " name=config"))["ansible_facts"]["config"])
+    # Load variables from `vars_files` into `host`.
+    for file in vars_files:
+        host.ansible(
+            "include_vars",
+            "file=" + file
+        )
 
-    ansible_vars.update(host.ansible(
-        "include_vars",
-        ("file=../resources/prepare-vars.yml"
-         " name=prepare_vars"))["ansible_facts"]["prepare_vars"])
-
-    ansible_vars.update(host.ansible(
-        "include_vars",
-        ("file=../../local.config.yml"
-         " name=local_config"))["ansible_facts"]["local_config"])
-
-    return ansible_vars
+    return host.ansible.get_variables()
 
 
 def test_installed_site_home_page_title(host, ansible_role_vars):
