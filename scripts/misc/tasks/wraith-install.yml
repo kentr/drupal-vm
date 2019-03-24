@@ -10,6 +10,10 @@
   become: Yes
   include_role:
     name: "geerlingguy.nodejs"
+  vars:
+    nodejs_npm_global_packages:
+      - name: phantomjs
+      - name: casperjs
 
 - name: Install `ruby`.
   become: Yes
@@ -78,18 +82,3 @@
     src: "{{ item }}"
   with_fileglob:
     - "{{ playbook_dir }}/../scripts/misc/patches/wraith/*.*"
-
-- name: Add Wraith npm dependencies.
-  npm:
-    name: "{{ item.name | default(item) }}"
-    version: "{{ item.version | default('latest') }}"
-    global: Yes
-    state: latest
-  become: Yes
-  environment:
-    NPM_CONFIG_PREFIX: "{{ npm_config_prefix }}"
-    NODE_PATH: "$NODE_PATH:{{ npm_config_prefix }}/lib/node_modules"
-    NPM_CONFIG_UNSAFE_PERM: "{{ npm_config_unsafe_perm }}"
-  with_items:
-    - name: phantomjs
-    - name: casperjs
