@@ -14,7 +14,7 @@ def ansible_role_vars(host):
 
     # Include variables from ansible variable files.
     # Paths must be relative to the scenario directory.
-    # `test_test_variable_files` is declared in `base-config.yml`,
+    # `test_variable_files` is declared in `base-config.yml`,
     # under the `all` group.
     try:
         vars_files = host.ansible.get_variables()['test_variable_files']
