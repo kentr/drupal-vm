@@ -21,13 +21,6 @@ provisioner:
     name: ansible-lint
 scenario:
   name: default
-  # Moved run-once steps out of `converge` sequence for faster development.
-  create_sequence:
-    - dependency
-    - create
-    - prepare
-  converge_sequence:
-    - converge
   test_sequence:
     - lint
     - destroy
