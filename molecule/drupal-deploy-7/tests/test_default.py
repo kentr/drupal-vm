@@ -1,6 +1,7 @@
 import os
 
 import pytest
+import re
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -40,3 +41,31 @@ def test_installed_site_home_page_title(host, ansible_role_vars):
 
     assert ('<title>Welcome to ' +
             ansible_role_vars['drupal_site_name']) in cmd.stdout
+
+
+def test_missing_files_redirect_present(host, ansible_role_vars):
+
+    # Check status code for the `is-there.png` file.
+    cmd = host.run('curl -s --head ' +
+                   ansible_role_vars['local_domain'] +
+                   '/' + ansible_role_vars['drupal_file_public_path'] +
+                   '/is-there.png')
+
+    assert re.match('HTTP.*?200 OK', cmd.stdout)
+
+
+def test_missing_files_redirect_not_present(host, ansible_role_vars):
+
+    cmd = host.run('curl -s --head ' +
+                   ansible_role_vars['local_domain'] +
+                   '/' + ansible_role_vars['drupal_file_public_path'] +
+                   '/not-there.png')
+
+    assert re.match('HTTP.*?302 Found', cmd.stdout)
+
+    url = host.ansible('set_fact',
+                       'url="{{ prod_domain }}/{{ drupal_file_public_path }}/'
+                       'not-there.png"'
+                       )['ansible_facts']['url']
+
+    assert (url) in cmd.stdout
