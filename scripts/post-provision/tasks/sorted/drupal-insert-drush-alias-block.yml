@@ -1,13 +1,20 @@
 ---
 
-# Add Drush post-sync hook to enable modules.
-# See http://api.drush.ws/api/drush/examples!sync_enable.drush.inc/master.
-- name: Add sync_enable.drush.inc.
-  delegate_to: 127.0.0.1
-  become: no
-  template:
-    # Don't overwrite existing file.
-    force: no
-    dest: "~/.drush/sync_enable.drush.inc"
-    src: "{{ playbook_dir }}/../scripts/post-provision/templates/sync_enable.drush.inc.j2"
+- block:
+    - name: Ensure `~/.drush` directory exists.
+      file:
+        path: "~/.drush"
+        state: "directory"
+
+    # Add Drush post-sync hook to enable modules.
+    # See http://api.drush.ws/api/drush/examples!sync_enable.drush.inc/master.
+    - name: Add `sync_enable.drush.inc`.
+      delegate_to: 127.0.0.1
+      become: no
+      template:
+        # Don't overwrite existing file.
+        force: no
+        dest: "~/.drush/sync_enable.drush.inc"
+        src: "{{ playbook_dir }}/../scripts/post-provision/templates/sync_enable.drush.inc.j2"
+
   when: project_type == "drupal" and insert_local_drush_alias | default(false)

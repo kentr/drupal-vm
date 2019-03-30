@@ -19,17 +19,19 @@
 # The above quote implies that in some cases Ansible 2.3+, `gr_name`
 # will be undefined or set to a value corresponding to an existing group.
 # For me, that value has consistently been `dialout`.
-- name: Set `drupal_core_owner`, `drupal_core_group`.
-  block:
-    - stat:
+- block:
+    - name: Get information about `web_app_project_root` parent directory.
+      stat:
         get_checksum: false
         path: "{{ web_app_project_root | dirname }}"
       register: web_app_deploy_dir_parent_check
 
     - block:
-      - set_fact:
+      - name: Set `drupal_core_owner`.
+        set_fact:
           drupal_core_owner: "{{ web_app_deploy_dir_parent_check.stat.uid }}"
-      - set_fact:
+      - name: Set `drupal_core_group`.
+        set_fact:
           drupal_core_group: "{{ web_app_deploy_dir_parent_check.stat.gr_name }}"
 
       when: web_app_deploy_dir_parent_check.stat.exists and (web_app_deploy_dir_parent_check.stat.gr_name == 'vagrant_group' or web_app_deploy_dir_parent_check.stat.gr_name == 'dialout' or web_app_deploy_dir_parent_check.stat.gr_name is undefined)
@@ -41,8 +43,8 @@
     # Don't recursively set permissions.  May cause dirty repo.
     recurse: no
     mode: 0775
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
   become: yes
   ignore_errors: True
   when: project_type == "drupal" and web_app_project_root is defined
@@ -54,12 +56,12 @@
     state: directory
   when: project_type == "drupal"
 
-- name: Ensure public files directory.
+- name: Ensure public files directory exists.
   file:
     path: "{{ drupal_core_path }}/{{ drupal_file_public_path }}"
     state: directory
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0775
     recurse: True
   when: project_type == "drupal" and drupal_file_public_path is defined and drupal_file_public_path | trim != ''
@@ -68,8 +70,8 @@
   file:
     path: "{{ drupal_file_private_path }}"
     state: directory
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0775
     recurse: True
   when: project_type == "drupal" and drupal_file_private_path is defined and drupal_file_private_path | trim != ''
@@ -86,8 +88,8 @@
   file:
     path: "{{ drupal_config_directory }}"
     state: directory
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0774
   when: project_type == 'drupal'
 
@@ -95,8 +97,8 @@
   file:
     path: "{{ drupal_config_sync_directory }}"
     state: directory
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
     mode: 0770
   when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=') and drupal_config_sync_directory is defined
 
@@ -108,8 +110,8 @@
     dest: "{{ drupal_core_path }}/{{ drupal_config_directory }}/settings.php"
     mode: 0440
     force: no
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)
 
 - name: Custom core - add settings.local.php.
@@ -118,6 +120,6 @@
     src: "../scripts/post-provision/templates/settings.local.php.d{{ drupal_major_version }}.j2"
     dest: "{{ drupal_core_path }}/{{ drupal_config_directory }}/settings.local.php"
     mode: 0440
-    owner: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupal_core_owner) }}"
-    group: "{{ (vagrant_directory.stat.gr_name == 'vagrant_group' or vagrant_directory.stat.gr_name == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
+    owner: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupal_core_owner) }}"
+    group: "{{ (drupal_core_group == 'vagrant_group' or drupal_core_group == 'dialout') | ternary(omit, drupalvm_webserver_user) }}"
   when: project_type == "drupal" and custom_core_add_settings_local_php|default(True)

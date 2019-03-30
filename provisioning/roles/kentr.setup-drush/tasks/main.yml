@@ -70,12 +70,20 @@
   set_fact:
     drush_9_or_higher: "{{ drush_version | version_compare('9', '>=') }}"
 
-- name: Ensure `sites` directory exists.
+- name: Ensure `~/.drush/sites` directory exists.
   become: No
   file:
     path: ~/.drush/sites
     state: directory
   when: drush_9_or_higher
+
+- name: Ensure local `~/.drush/sites` directory exists.
+  become: No
+  delegate_to: localhost
+  file:
+    path: ~/.drush/sites
+    state: directory
+  when: drush_aliases_local
 
 - include_tasks: setup-one-site.yml
   with_items: "{{ installations }}"

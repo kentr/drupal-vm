@@ -11,21 +11,26 @@ var gulp = require('gulp');
 var browsersync = require('browser-sync').create();
 
 // Include plugins.
-var sass = require('gulp-sass');
-var imagemin = require('gulp-imagemin');
-var pngcrush = require('imagemin-pngcrush');
-var shell = require('gulp-shell');
-var plumber = require('gulp-plumber');
-var notify = require('gulp-notify');
 var autoprefix = require('gulp-autoprefixer');
+var critical = require('critical');
+var cssNano = require('gulp-cssnano');
 var glob = require('gulp-sass-glob');
-var uglify = require('gulp-uglify');
-var concat = require('gulp-concat');
-var rename = require('gulp-rename');
-var sourcemaps = require('gulp-sourcemaps');
-var scssLint = require('gulp-scss-lint');
-var touch = require('gulp-touch-fd');
+var gutil = require('gulp-util');
+var imagemin = require('gulp-imagemin');
 var jshint = require('gulp-jshint');
+var notify = require('gulp-notify');
+var path = require('path');
+var plumber = require('gulp-plumber');
+var pngcrush = require('imagemin-pngcrush');
+var rimraf = require('rimraf');
+var rp = require('request-promise');
+var sass = require('gulp-sass');
+var scssLint = require('gulp-scss-lint');
+var shell = require('gulp-shell');
+var sourcemaps = require('gulp-sourcemaps');
+var touch = require('gulp-touch-fd');
+var uglify = require('gulp-uglify');
+var urljoin = require('url-join');
 
 // Load config
 var YAML = require('yamljs');
@@ -52,6 +57,7 @@ gulp.task('css', function() {
       includePaths: config.css.includePaths
     }))
     .pipe(autoprefix('last 2 versions', '> 1%', 'ie 9', 'ie 10'))
+    .pipe(cssNano())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(config.themeDir + '/' + config.css.dest))
     // Set the file modification time.
@@ -117,3 +123,59 @@ gulp.task('js-lint', function() {
 
 // Default Task
 gulp.task('default', gulp.series('serve'));
+
+// Tasks to generate critical CSS.
+// @see https://www.smashingmagazine.com/2015/08/understanding-critical-css/
+// @see https://github.com/asilgag/critical-css-gulp-example/blob/master/gulp_tasks/critical.js
+
+// Allows invalid HTTPS certificates
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
+var criticalGenerate = function (done) {
+  'use strict';
+  Object.keys(config.critical.urls).map(function (url, index) {
+    var pageUrl = urljoin(config.critical.baseDomain, url);
+    var destCssPath = path.join(
+        config.critical.dest,
+        config.critical.urls[url] + '.css'
+      );
+
+    return rp({uri: pageUrl, strictSSL: false})
+      .then(function (body) {
+        var htmlString = body
+          .replace(/href="\//g, 'href="' + urljoin(config.critical.baseDomain, '/'))
+          .replace(/src="\//g, 'src="' + urljoin(config.critical.baseDomain, '/'));
+
+        gutil.log('Generating critical css', gutil.colors.magenta(destCssPath), 'from', pageUrl);
+
+        critical.generate({
+          base: config.themeDir,
+          html: htmlString,
+          src: '',
+          dest: destCssPath,
+          minify: false,
+          width: config.critical.width,
+          height: config.critical.height,
+          penthouse: config.critical.penthouse
+        });
+
+        if (index + 1 === Object.keys(config.critical.urls).length) {
+          return done();
+        }
+      })
+      .catch(function(err) {
+        console.log(err)
+      });
+  });
+};
+
+gulp.task('critical:clean', function (done) {
+  'use strict';
+  var criticalDest = path.join(config.themeDir, config.critical.dest);
+  return rimraf(criticalDest, function () {
+    gutil.log('Critical directory', gutil.colors.magenta(criticalDest), 'deleted');
+    return done();
+  });
+});
+
+gulp.task('critical', gulp.series('critical:clean', criticalGenerate));

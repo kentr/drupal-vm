@@ -1,0 +1,51 @@
+---
+- name: Converge
+  hosts: all
+
+  # Simulate primary playbook variable definitions / includes,
+  # to get values for `vagrant_user` and `ansible_user`.
+  vars_files:
+    - ../../provisioning/vars/main.yml
+    - ../../default.config.yml
+
+  pre_tasks:
+
+    # config.yml is imported first b/c the PHP version switching wasn't working
+    # with all items in one list.
+    - name: Include optional configuration files.
+      include_vars: "{{ item }}"
+      with_fileglob:
+        - "../../config.yml"
+
+    - name: Include optional configuration files.
+      include_vars: "{{ item }}"
+      with_fileglob:
+        - "../../local.config.yml"
+        - "../../secrets.yml"
+        - "../../{{ lookup('env', 'DRUPALVM_ENV')|default(drupalvm_env, true)|default(ansible_env.DRUPALVM_ENV)|default(omit) }}.config.yml"
+
+  tasks:
+
+    # When used with Molecule / Docker, `ansible_user` is not defined.
+    # This sets the user for subsequent ansible connections,
+    # so must come after granting passwordless sudo to `vagrant_user`.
+    # For simplicity and parity with using DrupalVM for Vagrant,
+    # we're setting this to `vagrant_user`.
+    - name: Define `ansible_user` if not defined.
+      set_fact:
+        ansible_user: "{{ vagrant_user }}"
+      when: ansible_user is not defined
+
+    # This should be run in the converge phase, because the path for
+    # `src` may change between scenarios as defined in their `molecule.yml`
+    - name: Create link for `base_synced_dir` to Docker volume.
+      become: true
+      file:
+        path: "{{ base_synced_dir }}"
+        # The path for `src` is declared as a volume in scenario `molecule.yml`.
+        src: "/var/www/drupalvm"
+        state: link
+
+# Second play.
+- name: Import main playbook.
+  import_playbook:  "../../provisioning/playbook.yml"
