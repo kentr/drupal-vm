@@ -9,10 +9,10 @@
       RewriteEngine on
       # Attempt to load files from production if
       # they're not in our local version
-      RewriteCond %{REQUEST_FILENAME} !-d
-      RewriteCond %{REQUEST_FILENAME} !-f
-      RewriteRule {{ drupal_file_public_path }}/(.*) \
-        {{ prod_uri }}/{{ drupal_file_public_path }}/$1 [NC,L]
+      RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-d
+      RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+      RewriteRule ^/{{ drupal_file_public_path }}(.*) \
+        {{ prod_uri }}/{{ drupal_file_public_path }}$1 [NC,L]
       </IfModule>
   when: apache_redirect_missing_files | default(False) and drupalvm_webserver == 'apache' and project_type == 'drupal'
   tags:
@@ -27,10 +27,10 @@
       RewriteEngine on
       # Attempt to load files from production if
       # they're not in our local version
-      RewriteCond %{REQUEST_FILENAME} !-d
-      RewriteCond %{REQUEST_FILENAME} !-f
-      RewriteRule wp-content/uploads/(.*) \
-        {{ prod_uri }}/wp-content/uploads/$1 [NC,L]
+      RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-d
+      RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+      RewriteRule ^/wp-content/uploads(.*) \
+        {{ prod_uri }}/wp-content/uploads$1 [NC,L]
       </IfModule>
   when: apache_redirect_missing_files | default(False) and drupalvm_webserver == 'apache' and project_type == 'wordpress'
   tags:
@@ -42,3 +42,7 @@
   when: apache_redirect_missing_files | default(False) and drupalvm_webserver == 'apache'
   tags:
     - webserver
+
+# RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-d
+# RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+# RewriteRule ^/wp-content/uploads(.*) http://interview-wp.radicaldesigns.org/wp-content/uploads$1 [NC,L]

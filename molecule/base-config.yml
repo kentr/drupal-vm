@@ -9,6 +9,29 @@ provisioner:
       display_skipped_hosts: false
       display_ok_hosts: false
       deprecation_warnings: false
+  inventory:
+    group_vars:
+      all:
+        # Shared additional variable files for test setups.
+        #
+        # These files are included into the `testinfra` host
+        # object using Ansible `include_vars` in a pytest
+        # fixture function.
+        #
+        # Therefore, as long as the variables are referenced
+        # within the context of the `AnsibleRunner`, Jinja2 syntax
+        # will be parsed and evaluated as normal with Ansible variables.
+        #
+        # In other words, variable references in expressions like this
+        # will be interpolated (substituted with their correct values):
+        # "{{ some_variable }}"
+        #
+        # File paths should be relative to the scenario directories.
+        test_variable_files:
+          - "../../default.config.yml"
+          - "../../config.yml"
+          - "../resources/prepare-vars.yml"
+          - "../../local.config.yml"
   lint:
     name: ansible-lint
   playbooks:
