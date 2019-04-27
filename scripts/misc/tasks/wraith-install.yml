@@ -62,6 +62,8 @@
   gem: "name={{ item }} state=present"
   become: no
   with_items:
+    # `rake` is required due to https://askubuntu.com/a/874551.
+    - rake
     - wraith
   register: wraith_install_result
 
