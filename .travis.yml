@@ -23,8 +23,7 @@ env:
   - MOLECULE_DISTRO=ubuntu1604 SCENARIO=drupal-deploy-7
 
 install:
-  # Use `--pre` flag to get molecule >= 2.20.
-  - pip install molecule docker --pre
+  - pip install molecule docker
 
 script:
   - "travis_wait 25 molecule -c molecule/base-config.yml test -s $SCENARIO"
