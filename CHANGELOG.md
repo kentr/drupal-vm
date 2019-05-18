@@ -1,5 +1,61 @@
 # Drupal VM Changelog
 
+
+## 5.0.0 "Flynn Lives" (2019-04-09)
+
+There are no major architectural changes in this release, which speaks to the current maturity of the Drupal VM platform; instead, this release focuses on updating all the default versions—most especially of the base OS to Ubuntu 18.04 'Bionic'. If you need to remain on Ubuntu 16.04 for now, please make sure you explicitly set `vagrant_box: geerlingguy/ubuntu1604` in your `config.yml`, or use a version of the `geerlingguy/drupal-vm` Vagrant box _older than_ `2.0.0`.
+
+### Breaking Changes
+
+  * #1881: Ubuntu 18.04 is now the defaul.t OS version (and is used in the `geerlingguy/drupal-vm` base image `2.0.0` and later)
+    * Ubuntu 14.04 is no longer supported.
+  * #1874: PHP 7.2 is now the default PHP version
+    * PHP 5.6 is no longer supported (though you may be able to install it for some time).
+  * #1885: Node.js 10.x is now the default Node.js version.
+    * Node.js 0.10, 0.12, 4.x, and 5.x are no longer supported (though you may be able to install some of them for some time).
+
+### New/changed variables in default.config.yml
+
+  * `php_version` changed from `7.1` to `7.2`
+  * `nodejs_version` changed from `6.x` to `10.x`
+
+### Improvements
+
+  * #1919: Ran out of songs from original Tron soundtrack; releases shall now be named after Tron: Legacy tracks.
+
+### Bugfixes
+
+  * #1895: Fixed typo in Drush docs.
+
+
+## 4.9.2 (2019-01-03)
+
+### Breaking Changes
+
+  * Ubuntu 14.04 is still supported as long as the LTS release is receiving security updates, but some functionality may start breaking for Ubuntu 14.04, as more and more upstreams are dropping support for the old Ubuntu version.
+
+### New/changed variables in default.config.yml
+
+  * #1774: `vagrant_box` was changed to `geerlingguy/drupal-vm`. This box is faster to start in all cases, and should work fine even when switching between Apache/Nginx or MySQL/PostgreSQL. You can always override and switch back to `geerlingguy/ubuntu1604` or whatever base box you prefer.
+
+### Improvements
+
+  * #1760: Add test and support for Ubuntu 18.04 Bionic Beaver.
+  * #1883: Drop 'official-ish' support for using Drupal VM for prod.
+  * #1851: Remove Ubuntu 14.04 from test suite as more upstreams are dropping support.
+  * #1774: Switch to default Drupal VM base box for faster provisioning.
+  * #532: Update BigPipe docs slightly.
+  * #1619: Add an example of what to put in secrets.yml.
+  * Updated roles: apache, php-versions, composer, php, java, varnish, elasticsearch, php-pecl, tideways, nginx, security, postgresql
+
+### Bugfixes
+
+  * #1843: Drush 9.5.0 was breaking due to some pathing issues.
+  * #1846: Fixed typo in build-composer.yml that caused composer install to fail.
+  * #1854: Document older Varnish version requirement for CentOS 6.
+  * #1880: Disable audio driver in VirtualBox VM.
+
+
 ## 4.9.1 (2018-10-10)
 
 ### Breaking Changes
