@@ -23,7 +23,10 @@ env:
   - MOLECULE_DISTRO=ubuntu1604 SCENARIO=drupal-deploy-7
 
 install:
-  - pip install molecule docker
+  # `master` branch of `molecule` is required to get
+  # `testinfra` >= `3.0` for support of Ansible `2.8`.
+  # See https://github.com/philpep/testinfra/issues/431
+  - pip install git+https://github.com/ansible/molecule.git docker
 
 script:
   - "travis_wait 25 molecule -c molecule/base-config.yml test -s $SCENARIO"
