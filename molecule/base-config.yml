@@ -26,13 +26,12 @@ provisioner:
         # will be interpolated (substituted with their correct values):
         # "{{ some_variable }}"
         #
-        # File paths should be relative to the directory from which
-        # the `molecule` command is run.
+        # File paths should be relative to the scenario directories.
         test_variable_files:
-          - "default.config.yml"
-          - "config.yml"
-          - "molecule/resources/prepare-vars.yml"
-          - "local.config.yml"
+          - "../../default.config.yml"
+          - "../../config.yml"
+          - "../resources/prepare-vars.yml"
+          - "../../local.config.yml"
   lint:
     name: ansible-lint
   playbooks:
