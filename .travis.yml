@@ -17,9 +17,9 @@ branches:
 # Manual build matrix.
 # See https://github.com/travis-ci/travis-ci/issues/1519
 env:
-  - MOLECULE_DISTRO=ubuntu1604 SCENARIO=default
-  - MOLECULE_DISTRO=ubuntu1604 SCENARIO=wordpress-deploy
-  - MOLECULE_DISTRO=ubuntu1604 SCENARIO=drupal-deploy-7
+  - SCENARIO=default PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
+  - SCENARIO=wordpress-deploy PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
+  - SCENARIO=drupal-deploy-7 PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
 
 install:
   # `06133bf` is current HEAD for `molecule`.  Current official
