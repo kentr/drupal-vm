@@ -113,21 +113,14 @@
             'rm {{ database_dump_file }}.gz'
           when: _db_do_sync
 
-        - name: Import dump file.
-          become: no
+        # TODO: Refactor to share code with `15-import-db.yml` for DRYness.
+        - name: Import database.
           mysql_db:
-            login_user: "{{ db_user }}"
-            # `login_password` is omitted due to security concerns and
-            # problems importing gzipped dumpfile in some cases.
-            # Therefore, this task depends on the existence of a `.my.cnf`
-            # file in the Ansible user's home directory.
-            # See https://github.com/ansible/ansible/issues/20196
             name: "{{ db_name }}"
             state: import
-            # '.gz' extension is handled automatically.
             target: "{{ database_dump_file_local }}"
-          when: _db_do_sync
           register: db_updated
+          when: _db_do_sync
 
         # TODO: Fix this hack.  Should be a handler or something.
         # Replace cases where the protocol is included and is different
