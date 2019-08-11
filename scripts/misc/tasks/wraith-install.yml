@@ -58,10 +58,16 @@
     insertafter: EOF
     content: "export PATH={{ npm_config_prefix }}/bin:{{ gems_path }}/bin:$PATH"
 
-- name: Install configured gems.
-  gem: "name={{ item }} state=present"
+- name: Install `wraith`.
   become: no
+  gem:
+    name: "{{ item }}"
+    state: latest
+    user_install: true
   with_items:
+    # `rake` is required due to https://askubuntu.com/a/874551.
+    # Currently, this works to meet the dependency.
+    - rake
     - wraith
   register: wraith_install_result
 
