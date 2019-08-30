@@ -7,16 +7,15 @@
     installed_extras: "{{ installed_extras | default([]) + ['nodejs', 'ruby'] }}"
 
 - name: Install `nodejs`.
-  become: Yes
   include_role:
     name: "geerlingguy.nodejs"
   vars:
+    npm_config_unsafe_perm: True
     nodejs_npm_global_packages:
       - name: phantomjs
       - name: casperjs
 
 - name: Install `ruby`.
-  become: Yes
   include_role:
     name: "geerlingguy.ruby"
 
