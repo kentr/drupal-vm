@@ -17,9 +17,9 @@ branches:
 # Manual build matrix.
 # See https://github.com/travis-ci/travis-ci/issues/1519
 env:
-  - SCENARIO=default PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
-  - SCENARIO=wordpress-deploy PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
-  - SCENARIO=drupal-deploy-7 PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
+  - SCENARIO=default PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
+  - SCENARIO=wordpress-deploy PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
+  - SCENARIO=drupal-deploy-7 PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
 
 install:
   - pip install molecule flake8 docker
