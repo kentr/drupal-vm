@@ -1,0 +1,8 @@
+---
+# General setup for Drupal projects.
+
+- block:
+    - name: Add `drush` to `installed_extras` dor Drupal projects.
+      set_fact:
+        installed_extras: "{{ installed_extras|default([]) + ['drush'] }}"
+  when: project_type == "drupal"
