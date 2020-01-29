@@ -11,6 +11,9 @@
       # they're not in our local version
       RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-d
       RewriteCond %{DOCUMENT_ROOT}%{REQUEST_FILENAME} !-f
+      # Don't redirect for image styles.  Otherwise, derivatives won't be
+      # generated on the fly.
+      RewriteCond %{REQUEST_URI} !/{{ drupal_file_public_path }}/styles(.*?)/?.*
       RewriteRule ^/{{ drupal_file_public_path }}(.*) \
         {{ prod_uri }}/{{ drupal_file_public_path }}$1 [NC,L]
       </IfModule>
