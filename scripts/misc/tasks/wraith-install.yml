@@ -35,7 +35,7 @@
   when: ansible_os_family == 'Debian'
 
 - name: Check gems path.
-  command: ruby -rubygems -e 'puts Gem.user_dir'
+  command: ruby -r rubygems -e 'puts Gem.user_dir'
   become: No
   register: gems_path_check
   when: gems_path is undefined
