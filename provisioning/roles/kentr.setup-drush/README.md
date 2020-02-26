@@ -15,10 +15,7 @@ Drush installed on remote machine.
 Role Variables
 --------------
 
----
-# defaults file for kentr.setup-drush
-
-
+```yaml
 # Enable the "common" structure-tables-key.
 # See https://raw.githubusercontent.com/drush-ops/drush/master/examples/example.drushrc.php
 drush_enable_structure_tables_key_common: True
@@ -34,7 +31,7 @@ drush_enable_dated_result_file: True
 drush_alias_file_prefix: "{{ inventory_hostname }}"
 
 # SSH options passed to Drush.
-# This string will be enclosed by single quotes in the PHP Drush alias file.
+# This string will be enclosed by single quotes in the Drush alias file.
 drush_ssh_options: "-o PasswordAuthentication=no -o LogLevel=quiet"
 
 # Destination directory for SQL dump files.
@@ -53,6 +50,7 @@ drush_structure_tables:
 # See https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh.
 # Note: Enabling this can make the shell prompt pretty slow.
 drush_git_ps1_showdirtystate: True
+```
 
 Dependencies
 ------------

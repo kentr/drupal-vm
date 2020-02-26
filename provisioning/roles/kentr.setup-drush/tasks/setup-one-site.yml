@@ -118,7 +118,7 @@
     dest: "{{ drush_local_alias_file }}"
     marker: "# {mark} ANSIBLE MANAGED BLOCK: @{{ item.drush_alias_file_prefix | default(inventory_hostname) }}.{{ item.env }}"
     state: present
-    content:  "{{ lookup('template', 'templates/' + drush_single_alias_template) }}"
+    content:  "{{ lookup('template', 'templates/single-alias-block.yml.j2') }}"
     # For Drush >= 9, it's a simple YAML file that can be created as we go.
     create: true
   when: item.uri is defined and drush_aliases_local | default(False)
