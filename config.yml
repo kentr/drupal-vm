@@ -356,6 +356,7 @@ apache_vhosts_ssl: "{{ apache_vhosts }}"
 
 apache_mods_enabled:
   - expires.load
+  - headers.load
   - ssl.load
   - rewrite.load
   - proxy.load
