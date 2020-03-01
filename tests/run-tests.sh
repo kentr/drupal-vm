@@ -15,6 +15,7 @@ TEST_INSTALLED_EXTRAS="${TEST_INSTALLED_EXTRAS:-true}"
 CONTAINER_ID="${CONTAINER_ID:-dvm-test}"
 type="${type:-tests/defaults}"
 distro="${distro:-ubuntu1604}"
+tag="${tag:-latest}"
 cleanup="${cleanup:-true}"
 
 ## Set up vars for Docker setup.
@@ -22,16 +23,20 @@ cleanup="${cleanup:-true}"
 if [ $distro = 'centos7' ]; then
   init="/usr/lib/systemd/systemd"
   opts="--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-# CentOS 6
-elif [ $distro = 'centos6' ]; then
-  init="/sbin/init"
-  opts="--privileged"
+# CentOS 8
+elif [ $distro = 'centos8' ]; then
+  init="/usr/lib/systemd/systemd"
+  opts="--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 # Ubuntu 18.04
 elif [ $distro = 'ubuntu1804' ]; then
   init="/lib/systemd/systemd"
   opts="--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 # Ubuntu 16.04
 elif [ $distro = 'ubuntu1604' ]; then
+  init="/lib/systemd/systemd"
+  opts="--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
+# Debian 10
+elif [ $distro = 'debian10' ]; then
   init="/lib/systemd/systemd"
   opts="--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
 # Debian 9
@@ -73,7 +78,7 @@ docker run --name=$CONTAINER_ID -d \
   --add-host "$HOSTNAME  drupalvm":127.0.0.1 \
   -v $PWD:/var/www/drupalvm/:$volume_opts \
   $opts \
-  geerlingguy/docker-$distro-ansible:latest \
+  geerlingguy/docker-$distro-ansible:$tag \
   $init
 
 # Set up directories.
@@ -92,10 +97,6 @@ docker exec $CONTAINER_ID cp $DRUPALVM_DIR/$COMPOSERFILE ${config_dir:-$DRUPALVM
 # Check playbook syntax.
 printf "\n"${green}"Checking playbook syntax..."${neutral}"\n"
 docker exec --tty $CONTAINER_ID env TERM=xterm ansible-playbook $DRUPALVM_DIR/provisioning/playbook.yml --syntax-check
-
-# Run Ansible Lint.
-docker exec $CONTAINER_ID bash -c "pip install ansible-lint"
-docker exec $CONTAINER_ID bash -c "cd $DRUPALVM_DIR/provisioning && ansible-lint playbook.yml" || true
 
 # Run the setup playbook.
 printf "\n"${green}"Running the setup playbook..."${neutral}"\n"

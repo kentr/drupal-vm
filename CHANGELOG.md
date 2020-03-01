@@ -1,5 +1,94 @@
 # Drupal VM Changelog
 
+## 5.1.1 (2020-02-27)
+
+### Breaking Changes
+
+  - Removed 'official' support for CentOS 6 and Debian 8. These older OSes may still work, but [it would be extremely painful](https://www.youtube.com/watch?v=RZhp-Uctd-c) to keep using them.
+
+### New/changed variables in default.config.yml
+
+N/A
+
+### Improvements
+
+  * Improved CentOS 8 compatibility.
+  * Updated roles: drupal, php-xdebug, php-xhprof, php-versions, java, security, nodejs, elasticsearch, firewall, varnish, blackfire, daemonize, mysql, postgresql, ruby, php-pecl
+
+### Bugfixes
+
+  * #2011: Fix broken link in Solr documentation.
+
+
+## 5.1.0 "Recognizer" (2019-12-03)
+
+This release adds support for PHP 7.4, and completely drops PHP 5.6 support (in the past, brave and daring souls could attempt to run 5.6—it is almost impossible to do so in Drupal VM as of this release).
+
+### Breaking Changes
+
+  * #1987: Minimum required Ansible version is now 2.5.
+  * #1993: Dropped support for old unsupported PHP versions: 5.6, 7.0, 7.1.
+
+### New/changed variables in default.config.yml
+
+  * `drupalvm_ansible_version_min: '2.5'` (was `'2.4'`)
+  * `php_version` supports `"7.2"`, `"7.3"`, or `"7.4"` (5.6, 7.0, and 7.1 dropped)
+
+### Improvements
+
+  * #1993: Add PHP 7.4 support. Drop 5.6, 7.0, and 7.1 support.
+  * Updated roles: mailhog, postgresql, php-versions.
+  * Update `config.yml` documentation to use modern PHP version.
+
+### Bugfixes
+
+  * TODO
+
+
+## 5.0.2 (2019-11-04)
+
+### Breaking Changes
+
+N/A
+
+### New/changed variables in default.config.yml
+
+N/A
+
+### Improvements
+
+  * #1982: Updated Dashboard to Boostrap 4 for improved accessibility.
+  * Updated various roles to ensure Ansible 2.9 compatibility.
+  * Tested Drupal VM on macOS Catalina with latest versions of Vagrant and VirtualBox.
+  * Updated roles: postgresql, firewall, git, php-versions, varnish
+
+### Bugfixes
+
+  * #1969: Documentation typo fix for Linux installation.
+  * #1973: Fix site-install error in certain circumstances.
+
+
+## 5.0.1 (2019-08-29)
+
+### Breaking Changes
+
+N/A
+
+### New/changed variables in default.config.yml
+
+N/A
+
+### Improvements
+
+  * #1943: Update drupal console remote site example.
+  * Updated roles: php-versions, nginx, composer, postgresql, apache, git, mysql, solr, drupal.
+
+### Bugfixes
+
+  * #1920: Update git sandbox URL for pareview script.
+  * #1953: Fix typo in Linux installation guide.
+  * #1963, #1903, #1962, #1964: Fix PHP version mismatch when switching versions from 7.2 to 7.1.
+
 
 ## 5.0.0 "Flynn Lives" (2019-04-09)
 
@@ -7,7 +96,7 @@ There are no major architectural changes in this release, which speaks to the cu
 
 ### Breaking Changes
 
-  * #1881: Ubuntu 18.04 is now the defaul.t OS version (and is used in the `geerlingguy/drupal-vm` base image `2.0.0` and later)
+  * #1881: Ubuntu 18.04 is now the default OS version (and is used in the `geerlingguy/drupal-vm` base image `2.0.0` and later)
     * Ubuntu 14.04 is no longer supported.
   * #1874: PHP 7.2 is now the default PHP version
     * PHP 5.6 is no longer supported (though you may be able to install it for some time).
