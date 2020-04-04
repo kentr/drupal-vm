@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
@@ -51,12 +53,12 @@ Vagrant.configure('2') do |config|
   # Networking configuration.
   config.vm.hostname = vconfig['vagrant_hostname']
   config.vm.network :private_network,
-    ip: vconfig['vagrant_ip'],
-    auto_network: vconfig['vagrant_ip'] == '0.0.0.0' && Vagrant.has_plugin?('vagrant-auto_network')
+                    ip: vconfig['vagrant_ip'],
+                    auto_network: vconfig['vagrant_ip'] == '0.0.0.0' && Vagrant.has_plugin?('vagrant-auto_network')
 
   unless vconfig['vagrant_public_ip'].empty?
     config.vm.network :public_network,
-      ip: vconfig['vagrant_public_ip'] != '0.0.0.0' ? vconfig['vagrant_public_ip'] : nil
+                      ip: vconfig['vagrant_public_ip'] != '0.0.0.0' ? vconfig['vagrant_public_ip'] : nil
   end
 
   # SSH options.
@@ -122,7 +124,8 @@ Vagrant.configure('2') do |config|
     ansible.playbook = playbook
     ansible.extra_vars = {
       config_dir: config_dir,
-      drupalvm_env: drupalvm_env
+      drupalvm_env: drupalvm_env,
+      ansible_python_interpreter: vconfig['ansible_python_interpreter']
     }
     ansible.raw_arguments = Shellwords.shellsplit(ENV['DRUPALVM_ANSIBLE_ARGS']) if ENV['DRUPALVM_ANSIBLE_ARGS']
     ansible.tags = ENV['DRUPALVM_ANSIBLE_TAGS']

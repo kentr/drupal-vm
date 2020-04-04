@@ -4,48 +4,42 @@ Currently-supported OSes are:
 
   - Ubuntu 18.04 'Bionic' (default)
   - Ubuntu 16.04 'Xenial'
+  - RedHat Enterprise Linux / CentOS 8
   - RedHat Enterprise Linux / CentOS 7
-  - RedHat Enterprise Linux / CentOS 6 (limited support)
+  - Debian 10 'Buster'
   - Debian 9 'Stretch'
 
 For certain OSes, there are a couple other caveats and tweaks you may need to perform to get things running smoothly—the main features and latest development is only guaranteed to work with the default OS as configured in `default.config.yml`.
 
 Some other OSes should work, but are not regularly tested with Drupal VM, including Debian 8/Jessie (`debian/jessie64`).
 
-## Ubuntu 18.04 Xenial LTS
+## Ubuntu 18.04 Bionic LTS
 
-Everything should work out of the box with Ubuntu 16.04.
+Everything should work out of the box with Ubuntu 18.04.
 
 ## Ubuntu 16.04 Xenial LTS
 
-Everything should work out of the box with Ubuntu 16.04.
+Most everything should work out of the box with Ubuntu 16.04. You will need to override one variable in your `config.yml` to use an older version of Python when provisioning:
+
+    ansible_python_interpreter: /usr/bin/python
+
+## RedHat Enterprise Linux / CentOS 8
+
+Everything should work out of the box with RHEL 8.
 
 ## RedHat Enterprise Linux / CentOS 7
 
-Everything should work out of the box with RHEL 7.
+Most everything should work out of the box with CentOS 7. You will need to override one variable in your `config.yml` to use an older version of Python when provisioning:
 
-## RedHat Enterprise Linux / CentOS 6
+    ansible_python_interpreter: /usr/bin/python
 
-- **Apache without FastCGI**: If you want to use Apache with CentOS 6 on Drupal VM, you will need to modify the syntax of your `apache_vhosts` and remove the `extra_parameters: "{{ apache_vhost_php_fpm_parameters }}"` line from each one. Alternatively, you can use Nginx with the default configuration by setting `drupalvm_webserver: nginx` inside `config.yml`.
+## Debian 10 Buster
 
-- **PHP OpCache**: PHP's OpCache (if you're using PHP > 5.5) requires the following setting to be configured in `config.yml` (see upstream bug: [CentOS (6) needs additional php-opcache package](https://github.com/geerlingguy/ansible-role-php/issues/39)):
+Most everything should work out of the box with Debian 10. If you are installing `java` or `solr` in the `installed_extras`, you need to override the `java_packages` in your `config.yml`:
 
-```yaml
-php_opcache_enabled_in_ini: false
-```
-
-- **Firewalld**: [Firewalld](http://www.firewalld.org/) is not available on CentOS 6, so the Drupal VM setting `firewall_disable_firewalld`, which defaults to `true`, must be overridden in `config.yml` and set to `false`:
-
-```yaml
-firewall_disable_firewalld: false
-```
-
-- **Varnish**: Newer versions of Varnish are no longer available for CentOS 6, so you need to lock Varnish in at an older version, by adding something like the following in `config.yml`:
-
-```yaml
-varnish_version: 5.2
-```
+    java_packages:
+      - openjdk-11-jdk
 
 ## Debian 9 Stretch
 
-Everything should work out of the box with Debian 9.
+Everything should work out of the box with Debian 10.

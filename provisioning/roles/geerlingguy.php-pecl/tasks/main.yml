@@ -3,6 +3,7 @@
   include_vars: "{{ item }}"
   with_first_found:
     - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
     - "{{ ansible_os_family }}.yml"
 
 - name: Ensure pecl is installed (if configured).
@@ -14,6 +15,6 @@
 - name: Install PECL libaries.
   shell: "yes '' | {{ php_pecl_install_command }} {{ item }}"
   register: pecl_result
-  changed_when: "pecl_result.rc == 0"
+  changed_when: pecl_result is succeeded
   failed_when: "not (('already installed' in pecl_result.stdout) or ('install ok:' in pecl_result.stdout))"
   with_items: "{{ php_pecl_extensions }}"

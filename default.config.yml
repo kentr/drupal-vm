@@ -1,10 +1,10 @@
 ---
 # Available `vagrant_box` values include:
 #   - geerlingguy/drupal-vm (pre-provisioned, based on Ubuntu 18.04)
+#   - geerlingguy/centos8
 #   - geerlingguy/centos7
-#   - geerlingguy/centos6
+#   - geerlingguy/debian10
 #   - geerlingguy/debian9
-#   - geerlingguy/debian8
 #   - geerlingguy/ubuntu1804
 #   - geerlingguy/ubuntu1604
 vagrant_box: geerlingguy/drupal-vm
@@ -45,9 +45,11 @@ vagrant_plugins:
   - name: vagrant-vbguest
   - name: vagrant-hostsupdater
 
+ansible_python_interpreter: /usr/bin/python3
+
 # Minimum required versions.
-drupalvm_vagrant_version_min: '1.8.6'
-drupalvm_ansible_version_min: '2.4'
+drupalvm_vagrant_version_min: '2.2.0'
+drupalvm_ansible_version_min: '2.8'
 
 # Force use of ansible_local provisioner, even if Ansible is installed on host.
 force_ansible_local: false
@@ -198,14 +200,13 @@ mysql_users:
     priv: "{{ drupal_db_name }}.*:ALL"
 
 # PostgreSQL databases and users.
-postgresql_databases:
-  - name: "{{ drupal_db_name }}"
-
 postgresql_users:
   - name: "{{ drupal_db_user }}"
     password: "{{ drupal_db_password }}"
-    db: "{{ drupal_db_name }}"
-    priv: "ALL"
+
+postgresql_databases:
+  - name: "{{ drupal_db_name }}"
+    owner: "{{ drupal_db_user }}"
 
 # Comment out any extra utilities you don't want to install. If you don't want
 # to install *any* extras, set this value to an empty set, e.g. `[]`.
@@ -255,7 +256,7 @@ firewall_log_dropped_packets: false
 firewall_disable_firewalld: true
 firewall_disable_ufw: true
 
-# PHP Configuration. Currently-supported versions: 7.1, 7.2, 7.3.
+# PHP Configuration. Currently-supported versions: 7.2, 7.3, 7.4.
 # See version-specific notes: http://docs.drupalvm.com/en/latest/configurations/php/
 php_version: "7.2"
 php_install_recommends: no
@@ -328,8 +329,12 @@ php_xdebug_idekey: PHPSTORM
 php_xdebug_max_nesting_level: 256
 php_xdebug_remote_host: "{{ ansible_default_ipv4.gateway }}"
 
-# Solr Configuration (if enabled above).
-solr_version: "5.5.5"
+# Java configuration.
+java_packages:
+  - "{{ 'openjdk-8-jdk' if ansible_os_family == 'Debian' else 'java-1.8.0-openjdk' }}"
+
+# Solr configuration.
+solr_version: "7.7.2"
 solr_xms: "64M"
 solr_xmx: "128M"
 
