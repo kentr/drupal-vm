@@ -3,6 +3,9 @@
   hosts: all
   become: true
 
+  environment:
+    COMPOSER_MEMORY_LIMIT: '-1'
+
   vars_files:
     - test-vars.yml
 
@@ -16,6 +19,7 @@
       when: ansible_distribution == 'Debian'
     - role: geerlingguy.apache
     - role: geerlingguy.mysql
+    - role: geerlingguy.php-versions
     - role: geerlingguy.php
     - role: geerlingguy.php-mysql
     - role: geerlingguy.git
