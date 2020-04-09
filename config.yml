@@ -1,6 +1,6 @@
 ---
 # Override upstream change that breaks localhost delegation.
-ansible_python_interpreter: /usr/bin/python
+ansible_python_interpreter: auto_legacy
 
 vagrant_box: geerlingguy/ubuntu1804
 
