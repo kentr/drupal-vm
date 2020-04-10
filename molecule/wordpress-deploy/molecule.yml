@@ -32,3 +32,5 @@ scenario:
     - destroy
 verifier:
   name: testinfra
+  options:
+    pythonwarnings: ignore
