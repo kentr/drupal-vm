@@ -5,10 +5,9 @@ project_type: wordpress
 project_repo: "https://github.com/kentr/wordpress-test.git"
 
 domain_name: "wordpress.test"
-prod_domain: "wordpress.test"
-stage_domain: "stage.wordpress.test"
-local_domain: "local.wordpress.test"
-vagrant_hostname: "local.wordpress.test"
+prod_domain: "{{ domain_name }}"
+local_domain: "{{ domain_name }}"
+vagrant_hostname: "{{ domain_name }}"
 
 do_db_import: True
 database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/resources/wordpress-test.sql.gz"
@@ -27,17 +26,17 @@ web_app_web_dir: "web"
 wp_site_title: 'WordPress Deploy Test'
 
 instances:
-  - name: "local.wordpress.test"
+  - name: "{{ local_domain }}"
     env: local
-    uri: "http://local.wordpress.test"
+    uri: "http://{{ local_domain }}"
     type: "wordpress"
-    root: "/home/wordpress/LOCAL_wordpress/web"
+    root: "{{ web_app_web_root }}"
 
-  - name: "wordpress.test"
+  - name: "{{ prod_domain }}"
     env: prod
-    uri: "http://wordpress.test"
+    uri: "http://{{ prod_domain }}"
     type: "wordpress"
-    root: "/home/wordpress/public_html"
+    root: "{{ web_app_web_root }}"
 
 apache_redirect_missing_files: true
 
