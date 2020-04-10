@@ -32,8 +32,6 @@ provisioner:
           - "../../config.yml"
           - "../resources/prepare-vars.yml"
           - "../../local.config.yml"
-  lint:
-    name: ansible-lint
   playbooks:
     # Paths should be relative to scenario directories
     # (or) so it seems.
