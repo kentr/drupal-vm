@@ -44,5 +44,11 @@ apache_redirect_missing_files: true
 installed_extras: []
 
 # Use sendmail, since we're not installing mailhog.
-# See http://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
+# See https://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
 php_sendmail_path: "/usr/sbin/sendmail -t -i"
+
+# Currently required due to
+# https://github.com/geerlingguy/ansible-role-mysql/issues/344
+# Use path that's also available locally, for prepare / cleanup.
+# Currently requires creating symlink inside container in `prepare.yml`.
+ansible_python_interpreter: "/usr/local/bin/python3"

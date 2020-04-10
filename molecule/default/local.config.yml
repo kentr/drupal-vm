@@ -49,7 +49,7 @@ installed_extras:
   - drush
 
 # Use sendmail, since we're not installing mailhog.
-# See http://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
+# See https://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
 php_sendmail_path: "/usr/sbin/sendmail -t -i"
 
 # Install drush globally to prevent need for project-specific drush.
@@ -57,3 +57,9 @@ php_sendmail_path: "/usr/sbin/sendmail -t -i"
 drush_launcher_install: false
 drush_composer_global_install: false
 drush_install_from_source: true
+
+# Currently required due to
+# https://github.com/geerlingguy/ansible-role-mysql/issues/344
+# Use path that's also available locally, for prepare / cleanup.
+# Currently requires creating symlink inside container in `prepare.yml`.
+ansible_python_interpreter: "/usr/local/bin/python3"
