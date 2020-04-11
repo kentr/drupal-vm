@@ -7,10 +7,12 @@ provisioner:
   name: ansible
   config_options:
     defaults:
-      stdout_callback: "null"
+      stdout_callback: "minimal"
       display_skipped_hosts: false
       display_ok_hosts: false
+      command_warnings: false
       deprecation_warnings: false
+      system_warnings: false
   inventory:
     group_vars:
       all:
