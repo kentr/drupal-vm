@@ -1,6 +1,6 @@
 ---
-driver:
-  name: docker
+scenario:
+  name: default
 platforms:
   # Platforms cannot be defined in `--base-config` file.
   # See https://github.com/ansible/molecule/issues/1328
@@ -12,25 +12,3 @@ platforms:
       - ${MOLECULE_PROJECT_DIRECTORY}/:/var/www/drupalvm/:rw,delegated
     privileged: true
     pre_build_image: true
-provisioner:
-  name: ansible
-scenario:
-  name: default
-  test_sequence:
-    - lint
-    - destroy
-    - dependency
-    - syntax
-    - create
-    - prepare
-    - converge
-    # Temporarily disable due to apache installation error.
-    # - idempotence
-    - side_effect
-    - verify
-    - cleanup
-    - destroy
-verifier:
-  name: testinfra
-  options:
-    pythonwarnings: ignore

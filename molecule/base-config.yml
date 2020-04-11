@@ -1,4 +1,6 @@
 ---
+driver:
+  name: docker
 dependency:
   name: galaxy
 provisioner:
@@ -41,3 +43,23 @@ provisioner:
     converge: "../resources/converge.yml"
     # `cleanup` requires molecule >= 2.20.
     cleanup: "../resources/cleanup.yml"
+verifier:
+  name: testinfra
+  options:
+    pythonwarnings: ignore
+scenario:
+  # Default sequence for all scenarios.
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    # Temporarily disable due to apache installation error.
+    # - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
