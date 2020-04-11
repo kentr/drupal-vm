@@ -27,5 +27,15 @@ before_install:
 install:
   - python3 -m pip install molecule flake8 docker testinfra
 
+# Ugly hack to allow me to run `molecule` locally, corresponding to
+# `93829f6`.
+# Create symlink for `ansible_python_interpreter` in Travis
+# container.
+# Might be better to wrap these `localhost` cleanup tasks in
+# a guard for the Travis environment.
+# Or just upgrade to an OS that has native `python3`...
+before_script:
+  - sudo ln -s `which python3` /usr/local/bin/python3
+
 script:
   - "travis_wait 25 molecule -c molecule/base-config.yml test -s $SCENARIO"
