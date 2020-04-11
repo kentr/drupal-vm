@@ -21,8 +21,11 @@ env:
   - SCENARIO=wordpress-deploy PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
   - SCENARIO=drupal-deploy-7 PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
 
+before_install:
+  - sudo apt-get -qq update
+
 install:
-  - pip install molecule flake8 docker
+  - python3 -m pip install molecule flake8 docker testinfra
 
 script:
   - "travis_wait 25 molecule -c molecule/base-config.yml test -s $SCENARIO"
