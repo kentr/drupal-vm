@@ -48,7 +48,7 @@
               --result-file={{ database_dump_file | regex_replace('\\.gz$', '') }}
               --structure-tables-list={{ db_dump_exclude_tables }}
               sql-dump
-          when: _db_do_sync and project_type == 'drupal' and drush_version | version_compare('9', '<')
+          when: _db_do_sync and project_type == 'drupal' and drush_version is version('9', '<')
 
         - name: Set SQL dump command -- Drupal, Drush >= 9.
           set_fact:
@@ -63,7 +63,7 @@
               --result-file={{ database_dump_file | regex_replace('\\.gz$', '') }}
               --structure-tables-list={{ db_dump_exclude_tables }}
               sql-dump
-          when: _db_do_sync and project_type == 'drupal' and drush_version | version_compare('9', '>=')
+          when: _db_do_sync and project_type == 'drupal' and drush_version is version('9', '>=')
 
         # Database dump command to be run on PROD server.
         # This command should be executable via SSH from the dev machine, as a standard user.

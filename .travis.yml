@@ -1,8 +1,7 @@
 ---
 sudo: required
 language: python
-# Currently failing with Python3.
-python: 2.7
+python: 3.7
 
 cache: pip
 
@@ -13,16 +12,30 @@ branches:
   only:
   - dev
   - customized
+  - fix-molecule
 
 # Manual build matrix.
 # See https://github.com/travis-ci/travis-ci/issues/1519
 env:
-  - SCENARIO=default PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
-  - SCENARIO=wordpress-deploy PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
-  - SCENARIO=drupal-deploy-7 PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1604
+  - SCENARIO=default PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
+  - SCENARIO=wordpress-deploy PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
+  - SCENARIO=drupal-deploy-7 PYTHONWARNINGS='ignore::DeprecationWarning' MOLECULE_DISTRO=ubuntu1804
+
+before_install:
+  - sudo apt-get -qq update
 
 install:
-  - pip install molecule flake8 docker
+  - python3 -m pip install molecule flake8 docker testinfra
+
+# Ugly hack to allow me to run `molecule` locally, corresponding to
+# `93829f6`.
+# Create symlink for `ansible_python_interpreter` in Travis
+# container.
+# Might be better to wrap these `localhost` cleanup tasks in
+# a guard for the Travis environment.
+# Or just upgrade to an OS that has native `python3`...
+before_script:
+  - sudo ln -s `which python3` /usr/local/bin/python3
 
 script:
   - "travis_wait 25 molecule -c molecule/base-config.yml test -s $SCENARIO"

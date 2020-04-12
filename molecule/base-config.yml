@@ -1,14 +1,19 @@
 ---
+driver:
+  name: docker
 dependency:
   name: galaxy
 provisioner:
   name: ansible
   config_options:
     defaults:
-      stdout_callback: "null"
+      stdout_callback: "yaml"
+      verbosity: 0
       display_skipped_hosts: false
       display_ok_hosts: false
+      command_warnings: false
       deprecation_warnings: false
+      system_warnings: false
   inventory:
     group_vars:
       all:
@@ -32,13 +37,32 @@ provisioner:
           - "../../config.yml"
           - "../resources/prepare-vars.yml"
           - "../../local.config.yml"
-  lint:
-    name: ansible-lint
   playbooks:
     # Paths should be relative to scenario directories
     # (or) so it seems.
     # Makes sense, since documentation says values will be
     # "deep merged" with those in scenario `molecule.yml`.
     prepare: "../resources/prepare.yml"
+    converge: "../resources/converge.yml"
     # `cleanup` requires molecule >= 2.20.
     cleanup: "../resources/cleanup.yml"
+verifier:
+  name: testinfra
+  options:
+    pythonwarnings: ignore
+scenario:
+  # Default sequence for all scenarios.
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - syntax
+    - create
+    - prepare
+    - converge
+    # Temporarily disable due to apache installation error.
+    # - idempotence
+    - side_effect
+    - verify
+    - cleanup
+    - destroy
