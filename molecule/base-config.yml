@@ -7,7 +7,8 @@ provisioner:
   name: ansible
   config_options:
     defaults:
-      stdout_callback: "minimal"
+      stdout_callback: "yaml"
+      verbosity: 0
       display_skipped_hosts: false
       display_ok_hosts: false
       command_warnings: false
