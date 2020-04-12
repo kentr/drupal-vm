@@ -6,14 +6,15 @@
 project_type: drupal
 project_repo: "https://github.com/kentr/drupal-deploy-test.git"
 
-domain_name: "drupal.test"
-local_domain: "drupal.test"
-vagrant_hostname: "drupal.test"
+domain_name: "drupalvm.test"
+prod_domain: "{{ domain_name }}"
+local_domain: "{{ domain_name }}"
+vagrant_hostname: "{{ domain_name }}"
 
 do_db_import: True
 database_import_filename: "{{ playbook_dir }}/../{{ web_app_project_dir }}/resources/drupal-{{ drupal_major_version }}-test.sql.gz"
 
-client_server_username: "drupal"
+client_server_username: "drupalvm"
 
 drupal_major_version: 7
 drupal_site_name: "Drupal 7 Deploy Test"
@@ -24,11 +25,11 @@ drupal_deploy_version: "{{ drupal_major_version }}.x"
 web_app_web_dir: "web"
 
 instances:
-  - name: "drupal.test"
+  - name: "{{ local_domain }}"
     env: local
-    uri: "http://drupal.test"
+    uri: "http://{{ local_domain }}"
     type: "drupal"
-    root: "/home/drupal/LOCAL_drupal/web"
+    root: "{{ web_app_web_root }}"
     drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
     repo: "{{ project_repo }}"
     ssh_host: "{{ local_domain }}"
@@ -36,14 +37,14 @@ instances:
     drush_ssh_options: "-o PasswordAuthentication=no -i {{ lookup('env','HOME') }}/.vagrant.d/insecure_private_key -o LogLevel=quiet"
     drush_alias_is_local_on_remote_node: True
 
-  - name: "drupal.test"
+  - name: "{{ prod_domain }}"
     env: prod
-    uri: "http://drupal.test"
+    uri: "http://{{ prod_domain }}"
     type: "drupal"
-    root: "/home/drupal/public_html"
+    root: "{{ web_app_web_root }}"
     drush_alias_file_prefix: "{{ cli_alias_file_prefix }}"
     repo: "{{ project_repo }}"
-    ssh_host: halifax.dreamhost.com
+    ssh_host: "{{ domain_name }}"
     ssh_user: "{{ client_server_username }}"
 
 apache_redirect_missing_files: true
@@ -52,7 +53,7 @@ installed_extras:
   - drush
 
 # Use sendmail, since we're not installing mailhog.
-# See http://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
+# See https://docs.drupalvm.com/en/latest/extras/mailhog/#disable-mailhog
 php_sendmail_path: "/usr/sbin/sendmail -t -i"
 
 # Install drush globally to prevent need for project-specific drush.
@@ -60,3 +61,14 @@ php_sendmail_path: "/usr/sbin/sendmail -t -i"
 drush_launcher_install: false
 drush_composer_global_install: false
 drush_install_from_source: true
+
+# Currently required due to
+# https://github.com/geerlingguy/ansible-role-mysql/issues/344
+# Use path that's also available locally, for prepare / cleanup.
+# Currently requires creating symlink inside container in `prepare.yml`.
+ansible_python_interpreter: "/usr/local/bin/python3"
+
+# Firewall isn't necessary for CI, and it's breaking the build.
+# Doesn't work to simply disable `ipv6`.
+# See https://github.com/geerlingguy/ansible-role-firewall/blob/2.5.0/molecule/default/converge.yml#L8
+firewall_enabled: false

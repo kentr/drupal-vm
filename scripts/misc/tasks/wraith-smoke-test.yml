@@ -6,7 +6,7 @@
     state: present
     insertafter: \s*\$config\['system.logging'\]\['error_level'\] = '.*?';
     line: $config['system.logging']['error_level'] = 'hide'; // ANSIBLE TEMP run-updates.yml
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')
 
 - name: Disable development services.
   lineinfile:
@@ -15,7 +15,7 @@
     backrefs: true
     regexp: (\s*\$settings\['container_yamls'\]\[\] = DRUPAL_ROOT . '/sites/development.services.yml';)
     line: // \1 // ANSIBLE TEMP run-updates.yml
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')
 
 - name: Disable render cache override.
   lineinfile:
@@ -24,7 +24,7 @@
     backrefs: true
     regexp: (\s*\$settings\['cache'\]\['bins'\]\['render'\] = 'cache.backend.null';)
     line: // \1 // ANSIBLE TEMP run-updates.yml
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')
 
 - name: Disable dynamic_page_cache override.
   lineinfile:
@@ -33,7 +33,7 @@
     backrefs: true
     regexp: (\s*\$settings\['cache'\]\['bins'\]\['dynamic_page_cache'\] = 'cache.backend.null';)
     line: // \1 // ANSIBLE TEMP run-updates.yml
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')
 
 - name: Check gems path.
   command: ruby -rubygems -e 'puts Gem.user_dir'
@@ -68,7 +68,7 @@
     backrefs: true
     regexp: // (\s*\$settings\['container_yamls'\]\[\] = DRUPAL_ROOT . '/sites/development.services.yml';)
     line: \1
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')
 
 - name: Restore render cache override.
   lineinfile:
@@ -77,7 +77,7 @@
     backrefs: true
     regexp: // (\s*\$settings\['cache'\]\['bins'\]\['render'\] = 'cache.backend.null';)
     line: \1
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')
 
 - name: Restore dynamic_page_cache override.
   lineinfile:
@@ -86,4 +86,4 @@
     backrefs: true
     regexp: // (\s*\$settings\['cache'\]\['bins'\]\['dynamic_page_cache'\] = 'cache.backend.null';)
     line: \1
-  when: project_type == 'drupal' and drupal_major_version | version_compare('8', '>=')
+  when: project_type == 'drupal' and drupal_major_version is version('8', '>=')

@@ -1,4 +1,7 @@
 ---
+# Shared playbook for `converge` action of tests.
+# Requires molecule >= 2.20.
+
 - name: Converge
   hosts: all
 

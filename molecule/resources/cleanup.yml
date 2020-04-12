@@ -48,9 +48,16 @@
     # Delete artifact web app files from deploy tests that are on the host machine
     # due to shared folders.
     # Helps with running molecule locally.
-    - name: Delete local artifact web app files from deploy tests.
-      file:
-        path: >-
-          {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/{{ web_app_project_dir }}
-        state: absent
-        force: true
+    - block:
+        - name: Change permissions of local artifact web app files.
+          file:
+            path: >-
+              {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/{{ web_app_project_dir }}
+            mode: 'u+w'
+            recurse: True
+        - name: Delete local artifact web app files from deploy tests.
+          file:
+            path: >-
+              {{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/{{ web_app_project_dir }}
+            state: absent
+            force: true
