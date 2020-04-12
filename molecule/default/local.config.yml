@@ -62,3 +62,8 @@ drush_install_from_source: true
 # Use path that's also available locally, for prepare / cleanup.
 # Currently requires creating symlink inside container in `prepare.yml`.
 ansible_python_interpreter: "/usr/local/bin/python3"
+
+# Firewall isn't necessary for CI, and it's breaking the build.
+# Doesn't work to simply disable `ipv6`.
+# See https://github.com/geerlingguy/ansible-role-firewall/blob/2.5.0/molecule/default/converge.yml#L8
+firewall_enabled: false
