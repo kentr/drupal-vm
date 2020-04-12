@@ -68,7 +68,7 @@
 
 - name: Define `drush_9_or_higher`.
   set_fact:
-    drush_9_or_higher: "{{ drush_version | version_compare('9', '>=') }}"
+    drush_9_or_higher: "{{ drush_version is version('9', '>=') }}"
 
 - name: Ensure `~/.drush/sites` directory exists.
   become: No

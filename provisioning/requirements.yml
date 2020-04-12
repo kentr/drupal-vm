@@ -93,7 +93,7 @@
   name: kentr.drupal
 - src: https://github.com/kentr/ansible-role-setup-drush.git
   scm: git
-  version: 0.1.1
+  version: 0.1.2
   name: kentr.setup-drush
 - src: ssh://git@bitbucket.org/kentr/ansible-role-setup-hosting-account.git
   scm: git
