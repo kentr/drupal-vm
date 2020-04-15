@@ -34,7 +34,7 @@
         set_fact:
           drupal_core_group: "{{ web_app_deploy_dir_parent_check.stat.gr_name }}"
 
-      when: web_app_deploy_dir_parent_check.stat.exists and (web_app_deploy_dir_parent_check.stat.gr_name == 'vagrant_group' or web_app_deploy_dir_parent_check.stat.gr_name == 'dialout' or web_app_deploy_dir_parent_check.stat.gr_name is undefined)
+      when: project_type == "drupal" and web_app_deploy_dir_parent_check.stat.exists and (web_app_deploy_dir_parent_check.stat.gr_name == 'vagrant_group' or web_app_deploy_dir_parent_check.stat.gr_name == 'dialout' or web_app_deploy_dir_parent_check.stat.gr_name is undefined)
 
 - name: Custom core - Ensure web_app_project_root directory exists.
   file:

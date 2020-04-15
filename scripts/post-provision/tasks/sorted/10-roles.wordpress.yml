@@ -27,7 +27,7 @@
           - set_fact:
               wp_core_group: "{{ wp_deploy_dir_parent_check.stat.gr_name }}"
 
-          when: wp_deploy_dir_parent_check.stat.exists and wp_deploy_dir_parent_check.stat.gr_name == 'vagrant_group'
+          when: wp_deploy_dir_parent_check.stat.exists and wp_deploy_dir_parent_check.stat.gr_name is defined and wp_deploy_dir_parent_check.stat.gr_name == 'vagrant_group'
 
     # Call the existing `kentr.wordpress` role with pre-existing values
     # for `wp_install` or `wp_deploy`.

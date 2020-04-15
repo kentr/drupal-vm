@@ -1,17 +1,6 @@
 ---
 # Shared playbook for `prepare` action of tests.
 
-# Ugly hack to allow local tasks to run w/o native python3.
-- name: Symlink `python3` in container.
-  hosts: all
-
-  tasks:
-    - name: Symlink `python3` in container.
-      file:
-        state: link
-        src: "/usr/bin/python3"
-        path: "/usr/local/bin/python3"
-
 - name: Prepare local environment.
   hosts: localhost
   connection: local
