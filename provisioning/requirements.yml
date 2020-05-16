@@ -62,12 +62,8 @@ roles:
     version: 2.2.0
   - name: geerlingguy.php-versions
     version: 4.0.3
-#  - name: geerlingguy.php-xdebug
-#    version: 3.0.0
-  - src: git@github.com:kentr/ansible-role-php-xdebug.git
-    scm: git
-    version: dev-vagrant-cachier
-    name: kentr.php-xdebug
+  - name: geerlingguy.php-xdebug
+    version: 3.0.0
   - name: geerlingguy.php-xhprof
     version: 3.0.0
   - name: geerlingguy.pimpmylog

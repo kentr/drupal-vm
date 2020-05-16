@@ -60,7 +60,7 @@
       when: '"tideways" in installed_extras'
       tags: ['php']
 
-    - role: kentr.php-xdebug
+    - role: geerlingguy.php-xdebug
       workspace: "/root/php{{ php_version }}"
       when: '"xdebug" in installed_extras'
       tags: ['php', 'xdebug']
